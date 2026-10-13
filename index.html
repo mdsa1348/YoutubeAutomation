@@ -86,6 +86,58 @@
   </div>
 </div>
 
+<!-- API VAULT MODAL (REAL API CREDENTIALS) -->
+<div id="apiVaultModal" class="modal-overlay" onclick="closeModalOnBg(event, 'apiVaultModal')">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="modal-badge-icon">&#128273;</span>
+        <div>
+          <h2>Real API Credentials &amp; Live Connectors</h2>
+          <p class="modal-sub">Connect your official YouTube Data API v3 and Groq AI keys for real live data</p>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal('apiVaultModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <!-- YouTube Data API v3 -->
+      <div class="card p-3 mb-3">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <h3 style="display:flex;align-items:center;gap:8px;">&#128250; YouTube Data API v3 Key</h3>
+          <span id="ytApiStatusBadge" class="card-badge">Public RSS Mode</span>
+        </div>
+        <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:10px;">Used to query live channel stats, subscribers, uploads, views, and analytics directly from Google.</p>
+        <div style="display:flex;gap:10px;">
+          <input type="password" id="vaultYtApiKey" placeholder="AIzaSy..." class="input-field" style="flex:1;" />
+          <button class="btn-primary" onclick="testAndSaveYtApiKey()">Test &amp; Save</button>
+        </div>
+        <div style="font-size:0.75rem;color:#64748b;margin-top:6px;">
+          Get free key: <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" class="link">Google Cloud Console</a> &rarr; Enable YouTube Data API v3.
+        </div>
+      </div>
+
+      <!-- Groq AI Key -->
+      <div class="card p-3 mb-3">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <h3 style="display:flex;align-items:center;gap:8px;">&#9889; Groq Ultra-Fast AI Key (LPU)</h3>
+          <span id="groqApiStatusBadge" class="card-badge">Offline Demo</span>
+        </div>
+        <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:10px;">Enables sub-second (&lt;300ms) Llama 3.3 70B viral ideation and script generation.</p>
+        <div style="display:flex;gap:10px;">
+          <input type="password" id="vaultGroqApiKey" placeholder="gsk_..." class="input-field" style="flex:1;" />
+          <button class="btn-primary" style="background:linear-gradient(135deg, #d946ef 0%, #ec4899 100%);" onclick="testAndSaveGroqApiKey()">Test &amp; Save</button>
+        </div>
+        <div style="font-size:0.75rem;color:#64748b;margin-top:6px;">
+          Get free key: <a href="https://console.groq.com/keys" target="_blank" class="link">console.groq.com/keys</a> (Completely free with high speed limits).
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModal('apiVaultModal')">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- SIDEBAR -->
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-header">
@@ -157,6 +209,7 @@
         <span class="search-icon">&#128269;</span>
         <input type="text" id="globalSearch" placeholder="Search any channel, handle, or video..." class="search-input" onkeyup="handleGlobalSearch(event)" />
       </div>
+      <button class="btn-outline btn-sm" onclick="openApiVaultModal()" title="Configure Live YouTube and Groq API Credentials">&#128273; Connect Real APIs</button>
       <button class="btn-groq-quick" onclick="switchTab('groq-ai-studio', document.querySelector('[data-tab=groq-ai-studio]'))">&#9889; Groq AI</button>
       <button class="btn-primary" onclick="quickAnalyzeActiveChannel()">&#129302; Audit Channel</button>
       <div class="notif-btn" onclick="showNotificationCenter()"><span>&#128276;</span><span class="notif-dot"></span></div>
