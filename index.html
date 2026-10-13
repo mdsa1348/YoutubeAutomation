@@ -1179,6 +1179,71 @@ Click "Run Groq Inference" above or select a preset recipe to begin generating.
       </div>
     </div>
 
+    <!-- LOCALLY IMPORTED REPOSITORIES (VENDOR HUB) -->
+    <div class="card mb-4" style="border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.04);">
+      <div class="card-header">
+        <div>
+          <h2 style="display:flex;align-items:center;gap:8px;">
+            <span>&#128194;</span> Locally Imported Repositories (Ready to Run)
+          </h2>
+          <p class="card-desc">The 5 top YouTube Automation &amp; MCP repositories have been cloned and integrated directly into your local workspace at <code>d:/xampp/htdocs/YoutubeAutomatio/repos/</code></p>
+        </div>
+        <span class="card-badge badge-green">&#10003; 5 Repos Cloned &amp; Vendored</span>
+      </div>
+
+      <div class="grid-3">
+        <div class="card p-3" style="background: rgba(255, 255, 255, 0.03);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <strong style="color:#fff;">&#129302; youtube-automation-agent</strong>
+            <span class="card-badge badge-cyan">Tubegent</span>
+          </div>
+          <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:12px;">24/7 multi-agent autonomous team: Trend analysis, scriptwriting, thumbnail generation &amp; publishing.</p>
+          <div style="font-size:0.75rem;color:#64748b;font-family:'JetBrains Mono',monospace;margin-bottom:10px;">/repos/youtube-automation-agent/</div>
+          <button class="btn-xs btn-primary w-100" onclick="showToast('Run command: python run_local_agents.py --run tubegent', 'info')">&#9654; CLI: python main.py</button>
+        </div>
+
+        <div class="card p-3" style="background: rgba(255, 255, 255, 0.03);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <strong style="color:#fff;">&#128250; youtube-mcp-server</strong>
+            <span class="card-badge badge-green">Claude MCP</span>
+          </div>
+          <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:12px;">Full Claude Model Context Protocol server exposing YouTube Data API v3 tools directly to Claude Desktop.</p>
+          <div style="font-size:0.75rem;color:#64748b;font-family:'JetBrains Mono',monospace;margin-bottom:10px;">/repos/youtube-mcp-server/</div>
+          <button class="btn-xs btn-outline w-100" onclick="showToast('Config in mcp_config/claude_desktop_config.json', 'info')">&#128279; View MCP Config</button>
+        </div>
+
+        <div class="card p-3" style="background: rgba(255, 255, 255, 0.03);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <strong style="color:#fff;">&#128221; mcp-youtube</strong>
+            <span class="card-badge badge-cyan">Transcripts</span>
+          </div>
+          <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:12px;">Direct Python server pulling closed captions and time-coded transcripts for competitor hook analysis.</p>
+          <div style="font-size:0.75rem;color:#64748b;font-family:'JetBrains Mono',monospace;margin-bottom:10px;">/repos/mcp-youtube/</div>
+          <button class="btn-xs btn-outline w-100" onclick="showToast('Run: python -m repos.mcp_youtube.server', 'info')">&#9654; Test Transcript Tool</button>
+        </div>
+
+        <div class="card p-3" style="background: rgba(255, 255, 255, 0.03);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <strong style="color:#fff;">&#127916; youtube-autopilot</strong>
+            <span class="card-badge badge-green">Pipeline</span>
+          </div>
+          <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:12px;">End-to-end editorial pipeline: trend detection, multi-agent scripting, and automated video compilation.</p>
+          <div style="font-size:0.75rem;color:#64748b;font-family:'JetBrains Mono',monospace;margin-bottom:10px;">/repos/youtube-autopilot/</div>
+          <button class="btn-xs btn-outline w-100" onclick="showToast('Run: cd repos/youtube-autopilot && python app.py', 'info')">&#9654; Launch Pipeline</button>
+        </div>
+
+        <div class="card p-3" style="background: rgba(255, 255, 255, 0.03);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <strong style="color:#fff;">&#128228; youtube-uploader-mcp</strong>
+            <span class="card-badge badge-cyan">Publisher</span>
+          </div>
+          <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:12px;">Model Context Protocol tool allowing Claude to programmatically upload and schedule video files.</p>
+          <div style="font-size:0.75rem;color:#64748b;font-family:'JetBrains Mono',monospace;margin-bottom:10px;">/repos/youtube-uploader-mcp/</div>
+          <button class="btn-xs btn-outline w-100" onclick="showToast('Node MCP server in repos/youtube-uploader-mcp/', 'info')">&#9654; Setup OAuth</button>
+        </div>
+      </div>
+    </div>
+
     <div class="repos-grid" id="reposGridContainer">
       <!-- Injected by JavaScript -->
     </div>

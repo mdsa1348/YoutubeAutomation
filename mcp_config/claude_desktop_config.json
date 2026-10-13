@@ -1,0 +1,31 @@
+{
+  "mcpServers": {
+    "youtube-data-mcp": {
+      "command": "python",
+      "args": ["-m", "repos.youtube_mcp_server.server"],
+      "env": {
+        "YOUTUBE_API_KEY": ""
+      }
+    },
+    "youtube-transcript-mcp": {
+      "command": "python",
+      "args": ["-m", "repos.mcp_youtube.server"]
+    },
+    "youtube-uploader-mcp": {
+      "command": "node",
+      "args": ["repos/youtube-uploader-mcp/dist/index.js"],
+      "env": {
+        "CLIENT_ID": "",
+        "CLIENT_SECRET": ""
+      }
+    },
+    "youtube-automation-agent": {
+      "command": "python",
+      "args": ["repos/youtube-automation-agent/main.py"],
+      "env": {
+        "GROQ_API_KEY": "",
+        "OPENAI_API_KEY": ""
+      }
+    }
+  }
+}

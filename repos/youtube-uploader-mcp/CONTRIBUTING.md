@@ -1,0 +1,156 @@
+# Contributing to YouTube Uploader MCP
+
+Thank you for your interest in contributing! This project is an open-source Go MCP server licensed under the [MIT License](LICENSE). For user-facing documentation (installation, OAuth setup, tool usage), see the [README](README.md).
+
+## Ways to Contribute
+
+- **Bug reports** — Open a GitHub issue with steps to reproduce, expected vs. actual behavior, and your environment (OS, Go version).
+- **Features** — For larger changes, open an issue first to discuss the approach before investing in a PR.
+- **Documentation** — Fix typos, clarify setup steps, or improve tool descriptions.
+- **Tests** — Add or extend tests, especially for new API interactions.
+- **New MCP tools** — Follow the guide below to add tools that wrap YouTube Data API functionality.
+
+There are no issue or PR templates yet. Please include enough context in your issue or PR description for maintainers to review efficiently.
+
+## Development Setup
+
+### Prerequisites
+
+- [Go 1.24+](https://go.dev/dl/) (matches `go.mod` and CI)
+
+### Clone and build
+
+```bash
+git clone https://github.com/anwerj/youtube-uploader-mcp.git
+cd youtube-uploader-mcp
+go mod download
+go build -o youtube-uploader-mcp .
+```
+
+Or build for a specific platform using the [Makefile](Makefile):
+
+```bash
+make dev            # current OS/arch only (fastest for local MCP testing)
+make darwin-arm64   # macOS Apple Silicon
+make linux-amd64    # Linux x86_64
+```
+
+After rebuilding the binary, **restart the MCP server in Cursor** (Settings → MCP → disable/enable or Restart). Cursor keeps a long-lived stdio process keyed by the **server name** in `mcp.json`; rebuilding the binary does not replace that process. Changing the server entry name forces a fresh connection (same trick as a full restart).
+
+`make dev` stamps each build into `initialize` → `serverInfo.version` (e.g. `0.1.3+20250919133000`). Compare that to what Cursor shows for the server, or run `./youtube-uploader-mcp-darwin-arm64 -version`. A mismatch means Cursor is still on an old process.
+
+The server advertises `tools.listChanged` and sends `notifications/tools/list_changed` after `initialize` so clients that honor the MCP spec can refresh `tools/list` without a manual toggle. Cursor may still cache tools per server name until you restart or rename the entry—there is no API to force that from the server alone.
+
+### Manual testing (optional)
+
+To run the server locally against real YouTube APIs, you need a Google OAuth `client_secret.json`. Follow [youtube_oauth2_setup.md](youtube_oauth2_setup.md), then:
+
+```bash
+./youtube-uploader-mcp -client_secret_file /path/to/client_secret.json
+```
+
+**Never commit** real `client_secret.json` files, OAuth tokens, channel cache files, or personal logs.
+
+### MCP UAT (agent runbook)
+
+For a repeatable agent-driven end-to-end **user acceptance** run against real YouTube (OAuth, uploads, `list_videos`, `update_video`, `check_job_status`), see **[uat/MCP_UAT.md](uat/MCP_UAT.md)**. Fixtures live in `uat/` (`uat_*.mp4` gitignored; runbook and `.srt` tracked).
+
+## Project Layout
+
+```mermaid
+flowchart TB
+  main[main.go] --> yum[yum/server.go]
+  yum --> tools[yum/tool/*]
+  tools --> core[core/*]
+  tests[tests/*] --> yum
+  tests --> httpmatter[httpmatter mocks]
+```
+
+| Path | Role |
+|------|------|
+| [main.go](main.go) | CLI flags, starts stdio MCP server |
+| [yum/server.go](yum/server.go) | Builds server, registers tools |
+| [yum/tool/](yum/tool/) | MCP tool handlers (`Define` + `Handle`) |
+| [yum/tool.go](yum/tool.go) | `Tool` interface definition |
+| [core/](core/) | YouTube API / OAuth business logic |
+| [hook/](hook/) | MCP server hooks |
+| [logn/](logn/) | Logging |
+| [tests/](tests/) | Integration tests via `testify/suite` + `httpmatter` |
+
+## Adding or Changing an MCP Tool
+
+1. **Service logic** — Add or extend functions in [core/](core/) (e.g. [core/video.go](core/video.go)).
+2. **Tool handler** — Create a file in [yum/tool/](yum/tool/) implementing the `Tool` interface:
+
+```go
+type Tool interface {
+    Name() string
+    Define(ctx context.Context) mcp.Tool
+    Handle(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error)
+}
+```
+
+   - **Define**: Use `mcp.NewTool` with `mcp.WithString`, `mcp.WithDescription`, etc.
+   - **Handle**: Extract arguments, validate inputs, call `core/` functions, return results via `mcp.NewToolResultText` or `mcp.NewToolResultError`.
+
+3. **Registration** — Add the tool to the `tools` slice in [yum/server.go](yum/server.go).
+4. **Tests** — Add tests in [tests/](tests/) using the `YumSuite` pattern ([tests/suite_test.go](tests/suite_test.go)). Do **not** add `_test.go` files inside [yum/tool/](yum/tool/) — tool behavior is verified through full integration tests in `tests/`, not unit tests colocated with the handler:
+   - Add paired request/response fixtures under [tests/data/outgoing/](tests/data/outgoing/) (`*_request.http` / `*_response.http`).
+   - Assert outgoing HTTP in test callbacks (see [tests/video_test.go](tests/video_test.go)).
+   - Update [tests/mcp_test.go](tests/mcp_test.go) if the tool count or names change.
+5. **Documentation** — Update the tool list in [README.md](README.md) if user-facing behavior changes.
+
+## Code Conventions
+
+- **Separation of concerns** — Business logic lives in `core/`, not in tool handlers.
+- **`core/` = domains** — `core/` contents are resources and can be considered domains; each file represents a domain.
+- **`yum/tool/` = tools only** — `yum/tool/` is only for tools; each file represents a tool.
+- **Addon requirements** — Must sit in their own separate module (e.g. `logn`, `tracker`, `hook`), not mixed into `core/` or `yum/tool/`.
+- **Testing philosophy** — Unit testing is verbose and largely avoided in this project; rely on full integration tests in `tests/` (`YumSuite` + `httpmatter`) instead. `yum/tool/` stays tools-only, including test files — no `_test.go` files there. Package-internal unit tests are acceptable for standalone modules bounded to their own package (e.g. `tracker/key_test.go`), since they don't compete with the tools-only rule.
+- **Errors** — Return user-facing errors via `mcp.NewToolResultError`. Wrap internal errors with `fmt.Errorf("...: %w", err)`.
+- **Logging** — Use the `logn` package; keep tool output clean for LLM consumers.
+- **Tool schemas** — Write clear `mcp.WithDescription` text so AI agents understand when and how to call each tool (see [yum/tool/upload_video.go](yum/tool/upload_video.go)).
+- **Style** — Follow standard Go idioms and match existing naming patterns in the codebase.
+
+## Testing
+
+Run all tests:
+
+```bash
+go test -v ./...
+```
+
+CI runs the same command on pull requests to `main` and `master` (see [.github/workflows/tests.yaml](.github/workflows/tests.yaml)).
+
+Test fixtures use [httpmatter](https://github.com/therewardstore/httpmatter) to mock outgoing HTTP without hitting the real YouTube API. When adding a tool that makes API calls, add corresponding fixture files and assertions.
+
+Do not commit secrets, personal logs, or built binaries (`youtube-uploader-mcp*` is listed in `.gitignore`).
+
+## Pull Request Checklist
+
+Before submitting a PR, confirm:
+
+- [ ] `go test -v ./...` passes locally
+- [ ] New or changed tools have tests and fixture files
+- [ ] [README.md](README.md) is updated if tools or setup instructions change
+- [ ] No credentials, tokens, or personal data in the diff
+- [ ] Scope is focused (one feature or fix per PR when possible)
+
+## Releases (maintainers)
+
+Pushing a tag matching `v*` triggers a multi-platform binary release via [.github/workflows/release.yaml](.github/workflows/release.yaml).
+
+## For AI Agents
+
+If you are an AI agent contributing to this repository:
+
+1. **Read [CONSTITUTION.md](CONSTITUTION.md) first.** It contains non-negotiable product principles. If a requested change conflicts with any item there, stop and flag it — do not implement a workaround or silently violate it.
+2. **Read this file next.** Do not use outdated path names (`tool/` → `yum/tool/`, `youtube/` → `core/`).
+3. **Key files:** [yum/server.go](yum/server.go), [yum/tool.go](yum/tool.go), [core/](core/), [tests/suite_test.go](tests/suite_test.go).
+4. **Checklist:**
+   - Match existing patterns in neighboring tools and tests
+   - Add `httpmatter` tests for any new API calls
+   - Run `go test -v ./...` before finishing
+   - Never commit secrets or credentials
+   - Update [README.md](README.md) for user-visible tool changes
+   - Keep diffs minimal; do not refactor unrelated code

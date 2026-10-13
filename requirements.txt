@@ -1,0 +1,29 @@
+# YT AutoPilot & Integrated Repositories Master Requirements
+# Install with: pip install -r requirements.txt
+
+# Core YouTube & Media Extraction
+google-api-python-client>=2.100.0
+google-auth-oauthlib>=1.1.0
+google-auth-httplib2>=0.1.1
+youtube-transcript-api>=0.6.2
+yt-dlp>=2024.3.10
+
+# AI Models & Fast Inference
+groq>=0.11.0
+anthropic>=0.34.0
+openai>=1.50.0
+
+# Model Context Protocol (MCP) SDK
+mcp>=1.0.0
+fastapi>=0.110.0
+uvicorn>=0.28.0
+pydantic>=2.6.0
+
+# Audio & Voice Processing
+elevenlabs>=1.0.0
+
+# Automation, Webhooks & Scheduling
+requests>=2.31.0
+python-dotenv>=1.0.0
+schedule>=1.2.0
+aiohttp>=3.9.0

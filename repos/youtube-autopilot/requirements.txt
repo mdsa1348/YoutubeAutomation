@@ -1,0 +1,59 @@
+# Core dependencies
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+
+# HTTP requests
+requests>=2.31.0
+
+# YouTube API
+google-api-python-client>=2.100.0
+google-auth-oauthlib>=1.1.0
+google-auth-httplib2>=0.1.1
+
+# Video processing
+# Note: ffmpeg-python is a Python wrapper, but requires ffmpeg binary installed on system
+# Install ffmpeg: brew install ffmpeg (macOS) or apt-get install ffmpeg (Linux)
+ffmpeg-python>=0.2.0
+
+# Image generation (Step 07.2: Thumbnail fallback)
+Pillow>=10.0.0
+
+# Video generation (Step 06-pre: Veo/Vertex AI integration)
+google-cloud-aiplatform>=1.38.0  # For Google Vertex AI / Veo video generation
+
+# Scheduling (using APScheduler for simplicity - no external dependencies like Redis)
+# APScheduler chosen over Celery because:
+# - Simpler setup (no broker/backend required)
+# - Good enough for single-machine automated workflows
+# - Built-in persistent job stores (SQLite)
+APScheduler>=3.10.0
+
+# LLM clients (Step 06-pre: Provider Integration)
+openai>=1.0.0              # For OpenAI GPT models
+anthropic>=0.5.0           # For Anthropic Claude models
+
+# Optional: TTS services
+# elevenlabs>=0.2.0          # ElevenLabs TTS
+# google-cloud-texttospeech  # Google Cloud TTS
+
+# Language detection (Step 10: Verify TTS language)
+langdetect>=1.0.9
+
+# Trend data sources (Step 08 Phase 2)
+praw>=7.7.0                # Reddit API wrapper (official-unofficial)
+scrapetube>=2.5.0          # YouTube scraping fallback (no API quota)
+
+# Optional: Trend data sources
+# pytrends>=4.9.0            # Google Trends (unofficial, ARCHIVED as of April 2025)
+
+# PR Outreach dependencies
+newspaper3k>=0.2.8         # Article extraction/scraping
+trafilatura>=1.6.0         # Article content extraction (alternative)
+beautifulsoup4>=4.12.0     # HTML parsing
+lxml>=4.9.0                # XML/HTML parsing
+
+# Development dependencies (optional)
+# pytest>=7.4.0
+# black>=23.0.0
+# mypy>=1.5.0
+# ruff>=0.1.0

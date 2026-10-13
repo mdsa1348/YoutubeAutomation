@@ -1,87 +1,105 @@
-# 🚀 YT AutoPilot — Complete YouTube Automation & Analytics Command Center
+# 🚀 YT AutoPilot 2.0 — Complete YouTube Automation & Intelligence Command Center
 
-An all-in-one AI-powered command center and analytics dashboard for automated YouTube channels, creators, and agency pipelines. Built with Claude MCP integrations, YouTube Data API v3 live inspection, AI script & metadata generators, Kanban production boards, SEO optimization, and workflow automation.
+An all-in-one AI-powered command center, multi-channel analytics dashboard, and multi-agent execution suite for YouTube automation channels, creators, and agency pipelines. Built with **5 integrated open-source GitHub automation repositories**, Claude MCP servers, Groq ultra-fast LPU inference (<300ms), YouTube Data API v3 inspection, and VidIQ-style keyword opportunity meters.
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/mdsa1348/YoutubeAutomation)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Status](https://img.shields.io/badge/status-active-success.svg)
+![Claude MCP](https://img.shields.io/badge/MCP-Claude%20Ready-purple.svg)
+![Groq](https://img.shields.io/badge/AI-Groq%20Llama%203.3-orange.svg)
 
 ---
 
-## 🌟 Key Features
+## 📂 5 Integrated & Vendored GitHub Repositories (in `/repos/`)
+
+The repository directly vendors and integrates the following 5 complete open-source codebases:
+
+| Repository | Path | Core Functionality |
+|---|---|---|
+| **`youtube-automation-agent`** (Tubegent) | [`/repos/youtube-automation-agent/`](repos/youtube-automation-agent/) | 24/7 autonomous multi-agent channel management team (Strategy, Scripting, Thumbnails, SEO, Production). |
+| **`youtube-mcp-server`** | [`/repos/youtube-mcp-server/`](repos/youtube-mcp-server/) | Claude Model Context Protocol server exposing 40+ YouTube Data API v3 tools directly to Claude Desktop. |
+| **`mcp-youtube`** | [`/repos/mcp-youtube/`](repos/mcp-youtube/) | Python MCP server fetching closed captions & word-for-word transcripts for viral hook extraction. |
+| **`youtube-autopilot`** | [`/repos/youtube-autopilot/`](repos/youtube-autopilot/) | End-to-end editorial pipeline for trend detection, AI scripting, and programmatic video rendering. |
+| **`youtube-uploader-mcp`** | [`/repos/youtube-uploader-mcp/`](repos/youtube-uploader-mcp/) | MCP uploader daemon enabling Claude to directly upload, schedule, and update YouTube video metadata. |
+
+---
+
+## 🌟 Key Dashboard Features
 
 | Tab | Feature | Description |
 |---|---|---|
 | ⚡ **Overview** | Channel KPI Command Center | Real-time views, subscriber velocity, estimated revenue benchmarks, and quick audit. |
-| 📊 **Channel Analyzer** | Deep YouTube API Inspection | Live channel breakdown with subscriber-to-view ratios, upload pacing, and top video performance. |
-| 🤖 **Claude MCP Hub** | 6 Model Context Protocol Servers | Ready-to-use configurations for YouTube Data MCP, ElevenLabs TTS MCP, Whisper Transcription, Canva/Thumbnail MCP, and more. |
-| ✍️ **AI Creator** | Multi-Format Content Studio | One-click generation for hooks, viral titles, video outlines, full scripts, and YouTube Shorts pacing. |
-| ⚙️ **Automation Hub** | End-to-End Workflow Connectors | Webhook triggers and pipeline blueprints for n8n, Make.com, Zapier, ElevenLabs voice cloning, and auto-uploaders. |
+| 🔥 **Viral & Outlier Radar** | ViewStats / 1of10 Engine | Detect 3x to 15x breakout videos across any channel. Deconstruct curiosity hooks & steal concepts to Groq. |
+| ⚔️ **Competitor Benchmark** | VidIQ Competitor Tracker | Side-by-side normalized performance matrix across 4 channels + Blue Ocean topic gap discovery. |
+| ⚡ **Groq AI Studio** | Ultra-Fast Llama 3.3 Engine | Sub-second (<300ms) viral ideation, 60-second Shorts scripts, and high-CTR title packaging. |
+| 📊 **Channel Forensic** | Deep YouTube API Inspection | Live channel breakdown with subscriber-to-view ratios, upload pacing, and top video performance. |
+| 🤖 **Claude MCP Hub** | Model Context Protocol Tools | Ready-to-use configurations for YouTube Data MCP, ElevenLabs TTS, Whisper, Canva, and n8n daemons. |
+| 🎯 **SEO & Keywords** | VidIQ Opportunity Meter | Search Volume vs Competition matrix, real-time Title Clickability Scorer (0-100), and 1-click Studio tags. |
 | 🎬 **Pipeline Kanban** | Visual Video Production Board | Drag-and-drop production workflow across *Idea*, *Scripting*, *Voiceover & Edit*, and *Published*. |
-| 🎯 **SEO Optimizer** | Click-Through & Search Enhancer | Real-time Title Power Scorer (0-100), Tag generator, hashtag clusters, and description formatter. |
-| ✅ **Verify Center** | Channel Health & Audit Engine | Automated audit checklist checking monetization eligibility, upload frequency, thumbnail CTR health, and copyright risks. |
-| 📚 **GitHub Hub** | Curated Repository Directory | Curated list of 12+ top open-source YouTube automation tools, scrapers, and bot repos. |
-| ⚙️ **Settings** | API Keys & Profile Vault | Local persistent storage for YouTube API keys, ElevenLabs tokens, OpenAI/Claude keys, and webhook endpoints.
+| ⚙️ **Automation Hub** | End-to-End Workflow Connectors | Webhook triggers and pipeline blueprints for n8n, Make.com, Zapier, ElevenLabs voice cloning, and auto-uploaders. |
+| 📚 **GitHub Resources** | Local Execution & Repo Hub | Interactive catalog linking directly to local `/repos/` tools and top open-source automation libraries. |
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start Guide
 
-### 1. Run Locally
-This dashboard is completely self-contained with no external build step required!
+### 1. Run the Web Dashboard
+This dashboard runs out of the box with zero compilation:
 
-- **Option A (Direct File)**:
-  Double click [`index.html`](index.html) to open in any modern browser.
-
-- **Option B (XAMPP / Localhost)**:
-  Place this directory in your XAMPP `htdocs` folder:
+- **Option A (XAMPP / Localhost)**:
+  Access in your browser:
   ```bash
-  # URL:
   http://localhost/YoutubeAutomatio/
   ```
 
-- **Option C (Python HTTP Server)**:
+- **Option B (Python Local Server)**:
   ```bash
   python -m http.server 8000
   # Visit: http://localhost:8000
   ```
 
+- **Option C (Direct File)**:
+  Double click [`index.html`](index.html).
+
 ---
 
-## 🔑 YouTube Data API v3 Setup
+### 2. Run Local Multi-Agent Tools
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/).
-2. Create a new project or select an existing one.
-3. Enable **YouTube Data API v3** under APIs & Services.
-4. Go to **Credentials** → **Create Credentials** → **API Key**.
-5. Paste your API key into the **Overview** or **Settings** tab in the dashboard.
-6. Enter your Channel ID (e.g. `UCxxxxxxxxxxxxxxxxxxxx`) to fetch live channel stats!
+Install dependencies for all integrated tools:
+```bash
+pip install -r requirements.txt
+```
+
+Inspect and run local agents:
+```bash
+# List all 5 imported repositories:
+python run_local_agents.py --list
+
+# Run Tubegent Multi-Agent Channel System:
+python run_local_agents.py --run tubegent
+
+# Launch YouTube MCP Server:
+python run_local_agents.py --run mcp
+```
+
+---
+
+### 3. Claude Desktop MCP Configuration
+
+To connect the local YouTube tools directly into **Claude Desktop**:
+Copy the configuration in [`mcp_config/claude_desktop_config.json`](mcp_config/claude_desktop_config.json) into your Claude Desktop configuration file:
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 
 ---
 
 ## 🔄 Auto-Push to GitHub
 
-To automatically commit and push any changes you make to your GitHub repository:
-
-### Using the Batch Script (`auto_push.bat`):
-Double-click `auto_push.bat` or run:
-```cmd
-auto_push.bat
-```
-
-### Using the PowerShell Auto-Watcher (`auto_watch_push.ps1`):
-Runs in the background and pushes whenever files are modified:
-```powershell
-powershell -ExecutionPolicy Bypass -File .\auto_watch_push.ps1
-```
-
----
-
-## 🛠️ Tech Stack
-- **Frontend**: Modern Vanilla HTML5, CSS3 Glassmorphism UI, Vanilla ES6+
-- **Icons**: FontAwesome 6 Free CDN
-- **Fonts**: Google Fonts (`Outfit`, `Inter`, `Fira Code`)
-- **APIs Supported**: YouTube Data API v3, Anthropic Claude MCP, OpenAI, ElevenLabs, n8n/Make Webhooks
+- **One-Click Manual Push**: Double-click [`auto_push.bat`](auto_push.bat).
+- **Continuous Background Watcher**:
+  ```powershell
+  powershell -ExecutionPolicy Bypass -File .\auto_watch_push.ps1
+  ```
 
 ---
 

@@ -1,0 +1,72 @@
+# Serie: Tutorial
+# Step 07.5: Format template for educational tutorial videos
+#
+# Structure: intro → hook → problem → solution → cta → outro
+# Target: 20-30 second engaging educational content
+# Cross-vertical: Works for tech, finance, fitness, cooking, any topic
+
+serie_id: tutorial
+name: "Tutorial"
+description: "Educational content teaching a specific skill or concept"
+
+# Intro video configuration (Sora 2 generated, cached per serie)
+intro_duration_seconds: 2
+intro_veo_prompt: |
+  Modern educational intro animation, vertical 9:16 format.
+  CRITICAL TEXT POSITIONING: Bold animated text appears in UPPER THIRD of frame.
+  Text is horizontally centered, positioned 20% from top edge (title-safe area).
+  Text must be FULLY VISIBLE within frame boundaries, NOT cut off at edges.
+  Text size is proportional to frame, never exceeding 70% of frame width.
+  Clean professional background with dynamic gradient.
+  Fast-paced, high-quality production.
+  Optimized for YouTube Shorts vertical mobile viewing.
+
+  SAFE AREA ENFORCEMENT: All text elements remain within title-safe zones.
+  Vertical margins: Minimum 10% from top/bottom edges.
+  Horizontal margins: Minimum 5% from left/right edges.
+
+# Outro video configuration (Sora 2 generated, cached per serie)
+outro_duration_seconds: 3
+outro_veo_prompt: |
+  Educational tutorial outro with call-to-action overlay, vertical 9:16 format.
+  CRITICAL TEXT POSITIONING: Animated text appears in CENTER of frame.
+  Text is horizontally and vertically centered within title-safe area.
+  Text must be FULLY VISIBLE within frame boundaries, NOT cut off at edges.
+  Text size is proportional to frame, never exceeding 70% of frame width.
+  Professional closing sequence with inviting aesthetic.
+  Warm colors, bold readable text.
+  High-quality production optimized for mobile viewing.
+
+  SAFE AREA ENFORCEMENT: All text and UI elements remain within title-safe zones.
+  Vertical margins: Minimum 10% from top/bottom edges.
+  Horizontal margins: Minimum 5% from left/right edges.
+
+# Segment structure (ordered list defining video flow)
+segments:
+  - type: hook
+    name: "Opening Hook"
+    target_duration_min: 3
+    target_duration_max: 5
+    description: "Cattura attenzione con problema/curiosità. Usa domanda diretta o statement sorprendente."
+
+  - type: problem
+    name: "Problem Statement"
+    target_duration_min: 5
+    target_duration_max: 7
+    description: "Spiega il problema che il tutorial risolve. Crea empatia con il pubblico."
+
+  - type: solution
+    name: "Solution Delivery"
+    target_duration_min: 8
+    target_duration_max: 12
+    description: "Fornisce la soluzione/spiegazione principale. Focus su valore pratico immediato."
+
+  - type: cta
+    name: "Call to Action"
+    target_duration_min: 3
+    target_duration_max: 5
+    description: "Invita all'azione (like, subscribe, commenta). CTA chiara e diretta."
+
+# Overall target metrics
+total_target_duration_min: 20
+total_target_duration_max: 30
