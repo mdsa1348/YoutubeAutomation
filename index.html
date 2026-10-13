@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>YT AutoPilot - YouTube Automation Command Center</title>
-  <meta name="description" content="All-in-one YouTube Automation Dashboard: Channel analysis, MCP integrations, AI content creation, analytics verification, GitHub resource hub." />
+  <title>YT AutoPilot 2.0 - Next-Gen YouTube Automation & Intelligence Engine</title>
+  <meta name="description" content="All-in-one YouTube Automation Command Center: Outlier & Viral Radar, Competitor Benchmark, Groq AI Studio, Claude MCP, Channel Analysis, SEO Intelligence." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -20,6 +20,72 @@
 </div>
 <canvas id="particleCanvas"></canvas>
 
+<!-- TOAST NOTIFICATION -->
+<div id="toast" class="toast"></div>
+
+<!-- VIRAL DNA MODAL -->
+<div id="viralDnaModal" class="modal-overlay" onclick="closeModalOnBg(event, 'viralDnaModal')">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="modal-badge-icon">&#128300;</span>
+        <div>
+          <h2 id="modalVideoTitle">Deconstructing Viral DNA</h2>
+          <p class="modal-sub" id="modalVideoSub">Algorithmic Breakdown & Retention Factors</p>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal('viralDnaModal')">&times;</button>
+    </div>
+    <div class="modal-body" id="modalDnaBody">
+      <!-- Injected dynamically -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModal('viralDnaModal')">Close</button>
+      <button class="btn-primary" onclick="stealToGroqStudio()">&#9889; Steal Concept to Groq AI Studio</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHANNEL VAULT MODAL -->
+<div id="channelVaultModal" class="modal-overlay" onclick="closeModalOnBg(event, 'channelVaultModal')">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="modal-badge-icon">&#128194;</span>
+        <div>
+          <h2>Manage Channel Vault</h2>
+          <p class="modal-sub">Save and switch between your channels &amp; niche competitors</p>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal('channelVaultModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="card p-3 mb-3">
+        <h3 class="mb-2">&#10010; Add Channel to Vault</h3>
+        <div class="form-grid-3">
+          <input type="text" id="vaultNewName" placeholder="Channel Name (e.g. Ali Abdaal)" class="input-field" />
+          <input type="text" id="vaultNewId" placeholder="Handle (@handle) or ID (UCxxx)" class="input-field" />
+          <select id="vaultNewRole" class="input-field">
+            <option value="my_channel">&#128100; My Channel</option>
+            <option value="top_competitor">&#9876;&#65039; Top Competitor</option>
+            <option value="niche_leader">&#127942; Niche Leader / Benchmark</option>
+          </select>
+        </div>
+        <button class="btn-primary mt-2" onclick="addChannelToVault()">Save to Vault</button>
+      </div>
+      <div class="vault-list-wrap">
+        <h3>Saved Channels in Vault</h3>
+        <div id="vaultListContainer" class="vault-list mt-2">
+          <!-- Injected dynamically -->
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModal('channelVaultModal')">Done</button>
+    </div>
+  </div>
+</div>
+
 <!-- SIDEBAR -->
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-header">
@@ -27,439 +93,1097 @@
       <div class="logo-icon">
         <svg width="28" height="28" viewBox="0 0 28 28"><rect width="28" height="28" rx="8" fill="url(#lg)"/><path d="M10 8.5L21 14L10 19.5Z" fill="white"/><defs><linearGradient id="lg" x1="0" y1="0" x2="28" y2="28"><stop offset="0%" stop-color="#ff4444"/><stop offset="100%" stop-color="#cc0000"/></linearGradient></defs></svg>
       </div>
-      <span class="logo-text">YT <span class="accent">AutoPilot</span></span>
+      <span class="logo-text">YT <span class="accent">AutoPilot 2.0</span></span>
     </div>
-    <div class="ai-status"><span class="status-dot pulse"></span><span class="status-text">AI Active</span></div>
+    <div class="ai-status"><span class="status-dot pulse"></span><span class="status-text">Groq &amp; MCP Active</span></div>
   </div>
-  <div class="sidebar-section-label">MAIN</div>
+
+  <div class="sidebar-section-label">COMMAND &amp; RADAR</div>
   <ul class="nav-links">
     <li class="nav-item active" data-tab="overview" onclick="switchTab('overview',this)"><span class="nav-icon">&#9889;</span><span>Overview</span><span class="nav-badge">Live</span></li>
-    <li class="nav-item" data-tab="channel-analyzer" onclick="switchTab('channel-analyzer',this)"><span class="nav-icon">&#128202;</span><span>Channel Analyzer</span></li>
+    <li class="nav-item" data-tab="outlier-radar" onclick="switchTab('outlier-radar',this)"><span class="nav-icon">&#128293;</span><span>Viral &amp; Outlier Radar</span><span class="nav-badge hot">ViewStats</span></li>
+    <li class="nav-item" data-tab="competitor-compare" onclick="switchTab('competitor-compare',this)"><span class="nav-icon">&#9876;&#65039;</span><span>Competitor Benchmark</span><span class="nav-badge new">VidIQ</span></li>
+    <li class="nav-item" data-tab="channel-analyzer" onclick="switchTab('channel-analyzer',this)"><span class="nav-icon">&#128202;</span><span>Channel Forensic</span></li>
+  </ul>
+
+  <div class="sidebar-section-label">AI &amp; MCP STUDIO</div>
+  <ul class="nav-links">
+    <li class="nav-item" data-tab="groq-ai-studio" onclick="switchTab('groq-ai-studio',this)"><span class="nav-icon">&#9889;</span><span>Groq AI Studio</span><span class="nav-badge super">Ultra-Fast</span></li>
     <li class="nav-item" data-tab="content-creator" onclick="switchTab('content-creator',this)"><span class="nav-icon">&#10024;</span><span>Content Creator</span><span class="nav-badge new">AI</span></li>
-    <li class="nav-item" data-tab="automation-hub" onclick="switchTab('automation-hub',this)"><span class="nav-icon">&#129302;</span><span>Automation Hub</span></li>
-  </ul>
-  <div class="sidebar-section-label">INTELLIGENCE</div>
-  <ul class="nav-links">
     <li class="nav-item" data-tab="mcp-integrations" onclick="switchTab('mcp-integrations',this)"><span class="nav-icon">&#128279;</span><span>MCP Integrations</span><span class="nav-badge">Claude</span></li>
-    <li class="nav-item" data-tab="github-repos" onclick="switchTab('github-repos',this)"><span class="nav-icon">&#11088;</span><span>GitHub Resources</span></li>
-    <li class="nav-item" data-tab="agent-center" onclick="switchTab('agent-center',this)"><span class="nav-icon">&#129504;</span><span>Agent Center</span><span class="nav-badge new">New</span></li>
+    <li class="nav-item" data-tab="agent-center" onclick="switchTab('agent-center',this)"><span class="nav-icon">&#129504;</span><span>Agent Center</span></li>
   </ul>
-  <div class="sidebar-section-label">TOOLS</div>
+
+  <div class="sidebar-section-label">PRODUCTION &amp; TOOLS</div>
   <ul class="nav-links">
-    <li class="nav-item" data-tab="seo-optimizer" onclick="switchTab('seo-optimizer',this)"><span class="nav-icon">&#127919;</span><span>SEO Optimizer</span></li>
+    <li class="nav-item" data-tab="seo-optimizer" onclick="switchTab('seo-optimizer',this)"><span class="nav-icon">&#127919;</span><span>SEO &amp; Keywords</span><span class="nav-badge">Radar</span></li>
     <li class="nav-item" data-tab="video-pipeline" onclick="switchTab('video-pipeline',this)"><span class="nav-icon">&#127916;</span><span>Video Pipeline</span></li>
+    <li class="nav-item" data-tab="automation-hub" onclick="switchTab('automation-hub',this)"><span class="nav-icon">&#129302;</span><span>Automation Hub</span></li>
     <li class="nav-item" data-tab="verify-center" onclick="switchTab('verify-center',this)"><span class="nav-icon">&#9989;</span><span>Verify Center</span></li>
+    <li class="nav-item" data-tab="github-repos" onclick="switchTab('github-repos',this)"><span class="nav-icon">&#11088;</span><span>GitHub Resources</span></li>
   </ul>
+
   <div class="sidebar-footer">
-    <div class="sidebar-user">
-      <div class="user-avatar">YT</div>
-      <div class="user-info"><div class="user-name">Channel Owner</div><div class="user-plan">Pro Plan &#128640;</div></div>
+    <div class="sidebar-user" onclick="openChannelVaultModal()" title="Manage Channel Vault">
+      <div class="user-avatar" id="sidebarAvatar">YT</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarActiveChannelName">My Tech Channel</div>
+        <div class="user-plan">&#128194; Vault: <span id="sidebarVaultCount">3 channels</span></div>
+      </div>
     </div>
   </div>
 </nav>
 
-<!-- MAIN -->
+<!-- MAIN CONTENT -->
 <main class="main-content">
+  <!-- TOPBAR -->
   <header class="topbar">
     <div class="topbar-left">
-      <button class="menu-btn" onclick="toggleSidebar()">&#9776;</button>
+      <button class="menu-btn" onclick="toggleSidebar()" title="Toggle Sidebar">&#9776;</button>
       <div class="breadcrumb" id="breadcrumb">Overview</div>
+
+      <!-- ACTIVE CHANNEL VAULT SELECTOR IN TOPBAR -->
+      <div class="channel-vault-selector">
+        <span class="vault-icon">&#128194;</span>
+        <select id="topbarChannelSelect" onchange="onChannelVaultChange(this.value)" class="vault-dropdown">
+          <!-- Dynamically populated from Vault -->
+        </select>
+        <button class="btn-icon-subtle" onclick="openChannelVaultModal()" title="Add / Manage Channels in Vault">&#10010;</button>
+      </div>
     </div>
+
     <div class="topbar-right">
       <div class="search-wrap">
         <span class="search-icon">&#128269;</span>
-        <input type="text" id="globalSearch" placeholder="Search channels, videos, keywords..." class="search-input" />
+        <input type="text" id="globalSearch" placeholder="Search any channel, handle, or video..." class="search-input" onkeyup="handleGlobalSearch(event)" />
       </div>
-      <button class="btn-primary" onclick="runAIAnalysis()">&#129302; Run AI Analysis</button>
-      <div class="notif-btn"><span>&#128276;</span><span class="notif-dot"></span></div>
+      <button class="btn-groq-quick" onclick="switchTab('groq-ai-studio', document.querySelector('[data-tab=groq-ai-studio]'))">&#9889; Groq AI</button>
+      <button class="btn-primary" onclick="quickAnalyzeActiveChannel()">&#129302; Audit Channel</button>
+      <div class="notif-btn" onclick="showNotificationCenter()"><span>&#128276;</span><span class="notif-dot"></span></div>
     </div>
   </header>
 
-  <!-- TAB: OVERVIEW -->
+  <!-- ========================================== -->
+  <!-- TAB 1: OVERVIEW -->
+  <!-- ========================================== -->
   <section class="tab-content active" id="tab-overview">
     <div class="page-header">
       <div>
         <h1 class="page-title">Command Center <span class="gradient-text">Overview</span></h1>
-        <p class="page-sub">Your complete YouTube automation intelligence hub &mdash; live metrics, AI insights &amp; controls</p>
+        <p class="page-sub">Next-generation YouTube automation intelligence &mdash; live metrics, AI insights &amp; multi-channel controls</p>
       </div>
       <div class="header-actions">
-        <span class="live-indicator"><span class="pulse-dot"></span> Live Updates</span>
-        <button class="btn-outline" onclick="refreshAll()">&#8635; Refresh All</button>
+        <span class="live-indicator"><span class="pulse-dot"></span> Live Intelligence</span>
+        <button class="btn-outline" onclick="refreshActiveChannelData()">&#8635; Refresh Metrics</button>
       </div>
     </div>
 
+    <!-- METRIC STATS GRID -->
     <div class="stats-grid">
-      <div class="stat-card"><div class="stat-icon sub-icon">&#128101;</div><div class="stat-body"><div class="stat-value" id="statSubCount">--</div><div class="stat-label">Subscribers</div><div class="stat-trend positive" id="statSubTrend">Enter channel ID below</div></div><div class="stat-glow sub-glow"></div></div>
-      <div class="stat-card"><div class="stat-icon view-icon">&#128065;</div><div class="stat-body"><div class="stat-value" id="statViewCount">--</div><div class="stat-label">Total Views</div><div class="stat-trend positive" id="statViewTrend">Enter channel ID below</div></div><div class="stat-glow view-glow"></div></div>
-      <div class="stat-card"><div class="stat-icon vid-icon">&#127916;</div><div class="stat-body"><div class="stat-value" id="statVideoCount">--</div><div class="stat-label">Total Videos</div><div class="stat-trend neutral" id="statVideoTrend">Enter channel ID below</div></div><div class="stat-glow vid-glow"></div></div>
-      <div class="stat-card"><div class="stat-icon eng-icon">&#10084;&#65039;</div><div class="stat-body"><div class="stat-value" id="statEngRate">--</div><div class="stat-label">Engagement Rate</div><div class="stat-trend positive" id="statEngTrend">Enter channel ID below</div></div><div class="stat-glow eng-glow"></div></div>
+      <div class="stat-card">
+        <div class="stat-icon sub-icon">&#128101;</div>
+        <div class="stat-body">
+          <div class="stat-value" id="statSubCount">1.24M</div>
+          <div class="stat-label">Subscribers</div>
+          <div class="stat-trend positive" id="statSubTrend">&#9650; +14.2K this month</div>
+        </div>
+        <div class="stat-glow sub-glow"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon view-icon">&#128065;</div>
+        <div class="stat-body">
+          <div class="stat-value" id="statViewCount">84.6M</div>
+          <div class="stat-label">Total Channel Views</div>
+          <div class="stat-trend positive" id="statViewTrend">&#9650; +1.8M past 28d</div>
+        </div>
+        <div class="stat-glow view-glow"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon vid-icon">&#127916;</div>
+        <div class="stat-body">
+          <div class="stat-value" id="statVideoCount">142</div>
+          <div class="stat-label">Videos Published</div>
+          <div class="stat-trend neutral" id="statVideoTrend">2.4 videos / week</div>
+        </div>
+        <div class="stat-glow vid-glow"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon eng-icon">&#128293;</div>
+        <div class="stat-body">
+          <div class="stat-value" id="statEngRate">4.82%</div>
+          <div class="stat-label">Avg Engagement (Likes+Com)</div>
+          <div class="stat-trend positive" id="statEngTrend">&#127942; Top 10% in Niche</div>
+        </div>
+        <div class="stat-glow eng-glow"></div>
+      </div>
     </div>
 
+    <!-- QUICK ANY-CHANNEL AUDIT BAR -->
     <div class="quick-channel-input card">
-      <div class="card-header"><h2>&#128269; Quick Channel Analysis</h2><span class="card-badge">YouTube Data API v3</span></div>
+      <div class="card-header">
+        <div>
+          <h2>&#128269; Forensic Channel Audit</h2>
+          <p class="card-desc">Enter any YouTube Channel ID (UCxxx), handle (@handle), or video URL to inspect</p>
+        </div>
+        <div class="tag-row">
+          <span class="card-badge">YouTube Data API v3</span>
+          <span class="card-badge badge-cyan">Auto-Cache</span>
+        </div>
+      </div>
       <div class="channel-input-row">
-        <input type="text" id="quickChannelId" placeholder="Channel ID (UCxxxxxx) or @handle" class="input-field" />
-        <input type="text" id="quickApiKey" placeholder="YouTube Data API Key (AIzaSy...)" class="input-field" />
-        <button class="btn-primary btn-analyze" onclick="analyzeChannel()"><span id="analyzeBtnText">&#9889; Analyze Now</span></button>
+        <input type="text" id="quickChannelId" placeholder="Enter Channel ID (UCxxxxxx) or @handle (e.g. @MrBeast, @MKBHD)" class="input-field" value="@AutomationEmpire" />
+        <input type="text" id="quickApiKey" placeholder="YouTube Data API Key (optional - simulated demo if empty)" class="input-field" />
+        <button class="btn-primary btn-analyze" onclick="analyzeChannel()"><span id="analyzeBtnText">&#9889; Run Forensic Audit</span></button>
       </div>
-      <div class="api-hint">&#128273; Get free API key: <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" class="link">Google Cloud Console</a> &rarr; Enable YouTube Data API v3</div>
+      <div class="api-hint-row">
+        <span>&#128273; <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" class="link">Get Free YouTube Data API Key</a> (Optional: works seamlessly with demo data if blank)</span>
+        <span class="vault-quick-add-link" onclick="saveQuickInputToVault()">&#10010; Save this channel to Vault</span>
+      </div>
     </div>
 
+    <!-- TWO COL GRID: OUTLIER RADAR HIGHLIGHT & AI ENGINE -->
     <div class="two-col-grid">
+      <!-- OUTLIER PREVIEW CARD -->
       <div class="card">
-        <div class="card-header"><h2>&#129302; Automation Pipeline</h2><span class="status-badge running">&#9679; Running</span></div>
-        <div class="pipeline-stages">
-          <div class="pipeline-stage done"><div class="stage-icon">&#128161;</div><div class="stage-info"><div class="stage-name">Ideation Agent</div><div class="stage-status">Trend scanning active</div></div><div class="stage-check">&#10003;</div></div>
-          <div class="pipeline-connector"></div>
-          <div class="pipeline-stage done"><div class="stage-icon">&#128221;</div><div class="stage-info"><div class="stage-name">Script Writer</div><div class="stage-status">Claude AI ready</div></div><div class="stage-check">&#10003;</div></div>
-          <div class="pipeline-connector"></div>
-          <div class="pipeline-stage active"><div class="stage-icon">&#127897;</div><div class="stage-info"><div class="stage-name">Voice Generator</div><div class="stage-status">ElevenLabs connected</div></div><div class="stage-spinner spinning">&#8635;</div></div>
-          <div class="pipeline-connector"></div>
-          <div class="pipeline-stage pending"><div class="stage-icon">&#127916;</div><div class="stage-info"><div class="stage-name">Video Assembler</div><div class="stage-status">Awaiting audio</div></div><div class="stage-dot">&#9675;</div></div>
-          <div class="pipeline-connector"></div>
-          <div class="pipeline-stage pending"><div class="stage-icon">&#128228;</div><div class="stage-info"><div class="stage-name">Auto Publisher</div><div class="stage-status">Scheduled: 6:00 PM</div></div><div class="stage-dot">&#9675;</div></div>
+        <div class="card-header">
+          <div>
+            <h2>&#128293; Outlier Viral Highlights</h2>
+            <p class="card-desc">Videos performing 3x to 15x higher than channel median</p>
+          </div>
+          <button class="btn-sm btn-outline" onclick="switchTab('outlier-radar', document.querySelector('[data-tab=outlier-radar]'))">View All Outliers &rarr;</button>
+        </div>
+        <div class="outlier-preview-list" id="overviewOutlierList">
+          <!-- Populated dynamically -->
         </div>
       </div>
+
+      <!-- AI INTELLIGENCE FEED -->
       <div class="card">
-        <div class="card-header"><h2>&#129504; AI Insights</h2><span class="card-badge">Claude Powered</span></div>
+        <div class="card-header">
+          <div>
+            <h2>&#129504; Algorithmic Growth Playbook</h2>
+            <p class="card-desc">Real-time signals extracted from top 100 niche videos</p>
+          </div>
+          <span class="card-badge badge-green">VidIQ + Groq Insights</span>
+        </div>
         <div class="insights-list">
-          <div class="insight-item insight-tip"><span class="insight-icon">&#128161;</span><div class="insight-text"><strong>Upload Timing:</strong> Best performing window is Tue&ndash;Thu 2&ndash;4 PM EST based on industry data.</div></div>
-          <div class="insight-item insight-warn"><span class="insight-icon">&#9888;&#65039;</span><div class="insight-text"><strong>Title Length:</strong> Keep titles under 60 characters for full display in search results.</div></div>
-          <div class="insight-item insight-success"><span class="insight-icon">&#9989;</span><div class="insight-text"><strong>Engagement Rate:</strong> Target 2&ndash;4% for channels under 100K subscribers. Above 4% is excellent.</div></div>
-          <div class="insight-item insight-tip"><span class="insight-icon">&#127919;</span><div class="insight-text"><strong>Thumbnail CTR:</strong> High-contrast faces + bold text achieves 6&ndash;10% CTR vs 2&ndash;5% average.</div></div>
-          <div class="insight-item insight-success"><span class="insight-icon">&#128202;</span><div class="insight-text"><strong>Shorts Strategy:</strong> Channels posting 3+ Shorts/week see 40% faster subscriber growth.</div></div>
+          <div class="insight-item insight-tip">
+            <span class="insight-icon">&#128161;</span>
+            <div class="insight-text"><strong>Curiosity-Gap Titles Win:</strong> Titles with specific stakes ("I Built a $10k/mo Bot In 48 Hours") drive <strong>3.4x higher CTR</strong> than descriptive how-to titles.</div>
+          </div>
+          <div class="insight-item insight-warn">
+            <span class="insight-icon">&#9888;&#65039;</span>
+            <div class="insight-text"><strong>Retention Drop at 0:25:</strong> 42% of viewers drop off during generic channel intros. Eliminate logos &amp; jump straight into the promise.</div>
+          </div>
+          <div class="insight-item insight-success">
+            <span class="insight-icon">&#127942;</span>
+            <div class="insight-text"><strong>Shorts Funnel Synergy:</strong> Publishing 1 Short highlighting the climax 2 hours after your long-form video boosts browse impressions by <strong>68%</strong>.</div>
+          </div>
+          <div class="insight-item insight-tip">
+            <span class="insight-icon">&#127919;</span>
+            <div class="insight-text"><strong>Thumbnail Contrast Index:</strong> Thumbnails with 3 or fewer elements + vibrant accent border achieve 8.6% CTR vs 3.2% niche average.</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="three-col-grid">
-      <div class="card">
-        <div class="card-header"><h2>&#128295; Top Automation Tools</h2></div>
-        <div class="tools-list">
-          <div class="tool-item"><span class="tool-logo t-blue">n8</span><div><div class="tool-name">n8n</div><div class="tool-desc">Workflow orchestration</div></div><span class="tool-tag">Free</span></div>
-          <div class="tool-item"><span class="tool-logo t-purple">MK</span><div><div class="tool-name">Make.com</div><div class="tool-desc">No-code automation</div></div><span class="tool-tag">Free</span></div>
-          <div class="tool-item"><span class="tool-logo t-red">11</span><div><div class="tool-name">ElevenLabs</div><div class="tool-desc">AI voice generation</div></div><span class="tool-tag paid">Paid</span></div>
-          <div class="tool-item"><span class="tool-logo t-orange">IV</span><div><div class="tool-name">InVideo AI</div><div class="tool-desc">Text-to-video</div></div><span class="tool-tag paid">Paid</span></div>
-          <div class="tool-item"><span class="tool-logo t-yellow">VQ</span><div><div class="tool-name">VidIQ</div><div class="tool-desc">SEO &amp; analytics</div></div><span class="tool-tag free">Freemium</span></div>
-          <div class="tool-item"><span class="tool-logo t-teal">TB</span><div><div class="tool-name">TubeBuddy</div><div class="tool-desc">Channel management</div></div><span class="tool-tag free">Freemium</span></div>
+    <!-- AUTOMATION PIPELINE RUNNER -->
+    <div class="card mt-4">
+      <div class="card-header">
+        <div>
+          <h2>&#129302; Automated Multi-Agent Pipeline</h2>
+          <p class="card-desc">Full autonomous flow: Niche scanning &rarr; Claude scripting &rarr; ElevenLabs voice &rarr; Auto-publish</p>
+        </div>
+        <div class="btn-group">
+          <button class="btn-sm btn-primary" onclick="triggerPipelineRun()">&#9654; Run Pipeline Now</button>
+          <span class="status-badge running">&#9679; Autonomous Mode: Ready</span>
         </div>
       </div>
-      <div class="card">
-        <div class="card-header"><h2>&#128279; MCP Server Status</h2></div>
-        <div class="mcp-status-list">
-          <div class="mcp-status-item"><div class="mcp-dot active"></div><div class="mcp-info"><div class="mcp-name">YouTube Data MCP</div><div class="mcp-desc">wynandw87/claude-code-youtube-mcp</div></div><span class="mcp-badge">Active</span></div>
-          <div class="mcp-status-item"><div class="mcp-dot active"></div><div class="mcp-info"><div class="mcp-name">YouTube Uploader</div><div class="mcp-desc">anwerj/youtube-uploader-mcp</div></div><span class="mcp-badge">Active</span></div>
-          <div class="mcp-status-item"><div class="mcp-dot warn"></div><div class="mcp-info"><div class="mcp-name">Growth Toolkit</div><div class="mcp-desc">adityaarsharma/youtube-marketing</div></div><span class="mcp-badge warn">Configure</span></div>
-          <div class="mcp-status-item"><div class="mcp-dot inactive"></div><div class="mcp-info"><div class="mcp-name">Channel Metrics</div><div class="mcp-desc">NastyRunner13/yt-content-mgmt</div></div><span class="mcp-badge inactive">Offline</span></div>
-          <div class="mcp-status-item"><div class="mcp-dot inactive"></div><div class="mcp-info"><div class="mcp-name">Transcript MCP</div><div class="mcp-desc">sparfenyuk/mcp-youtube</div></div><span class="mcp-badge inactive">Offline</span></div>
+      <div class="pipeline-stages">
+        <div class="pipeline-stage done">
+          <div class="stage-icon">&#128161;</div>
+          <div class="stage-info"><div class="stage-name">Trend Radar</div><div class="stage-status">Outliers identified</div></div>
+          <div class="stage-check">&#10003;</div>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-stage done">
+          <div class="stage-info"><div class="stage-name">Claude / Groq Script</div><div class="stage-status">High-retention draft ready</div></div>
+          <div class="stage-icon">&#128221;</div>
+          <div class="stage-check">&#10003;</div>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-stage active">
+          <div class="stage-icon">&#127897;</div>
+          <div class="stage-info"><div class="stage-name">Voice Generator</div><div class="stage-status">ElevenLabs Ultra-Realistic</div></div>
+          <div class="stage-spinner spinning">&#8635;</div>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-stage pending">
+          <div class="stage-icon">&#127916;</div>
+          <div class="stage-info"><div class="stage-name">Video Assembler</div><div class="stage-status">Auto-captions &amp; B-roll</div></div>
+          <div class="stage-dot">&#9675;</div>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-stage pending">
+          <div class="stage-icon">&#128228;</div>
+          <div class="stage-info"><div class="stage-name">YouTube Publisher</div><div class="stage-status">Optimized metadata queued</div></div>
+          <div class="stage-dot">&#9675;</div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-header"><h2>&#9889; Quick Actions</h2></div>
-        <div class="quick-actions-grid">
-          <button class="qa-btn" onclick="switchTab('content-creator',document.querySelector('[data-tab=content-creator]'))"><span class="qa-icon">&#9997;&#65039;</span><span>Write Script</span></button>
-          <button class="qa-btn" onclick="switchTab('seo-optimizer',document.querySelector('[data-tab=seo-optimizer]'))"><span class="qa-icon">&#127919;</span><span>Optimize SEO</span></button>
-          <button class="qa-btn" onclick="switchTab('channel-analyzer',document.querySelector('[data-tab=channel-analyzer]'))"><span class="qa-icon">&#128202;</span><span>Analyze Channel</span></button>
-          <button class="qa-btn" onclick="switchTab('verify-center',document.querySelector('[data-tab=verify-center]'))"><span class="qa-icon">&#9989;</span><span>Verify Stats</span></button>
-          <button class="qa-btn" onclick="switchTab('github-repos',document.querySelector('[data-tab=github-repos]'))"><span class="qa-icon">&#11088;</span><span>GitHub Repos</span></button>
-          <button class="qa-btn" onclick="switchTab('video-pipeline',document.querySelector('[data-tab=video-pipeline]'))"><span class="qa-icon">&#127916;</span><span>New Video</span></button>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" id="channelResultsCard" style="display:none;">
-      <div class="card-header"><h2>&#128225; Channel Analysis Results</h2><button class="btn-outline btn-sm" onclick="document.getElementById('channelResultsCard').style.display='none'">&#10005; Close</button></div>
-      <div id="channelResultsBody"></div>
     </div>
   </section>
 
-  <!-- TAB: CHANNEL ANALYZER -->
-  <section class="tab-content" id="tab-channel-analyzer">
-    <div class="page-header"><div><h1 class="page-title">Channel <span class="gradient-text">Analyzer</span></h1><p class="page-sub">Deep-dive analysis of any YouTube channel with live API data</p></div></div>
-    <div class="card">
-      <div class="card-header"><h2>&#128300; Deep Channel Analysis</h2><span class="card-badge">YouTube Data API v3</span></div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Channel ID or Handle</label><input type="text" id="analyzerChannelId" placeholder="UCxxxxxx or @channelname" class="input-field" /></div>
-        <div class="form-group"><label class="form-label">YouTube Data API Key</label><input type="text" id="analyzerApiKey" placeholder="AIzaSy..." class="input-field" /></div>
+  <!-- ========================================== -->
+  <!-- TAB 2: VIRAL & OUTLIER RADAR (ViewStats Style) -->
+  <!-- ========================================== -->
+  <section class="tab-content" id="tab-outlier-radar">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">&#128293; Viral &amp; Outlier <span class="gradient-text">Radar</span></h1>
+        <p class="page-sub">Detect 3x &ndash; 20x breakout videos across any channel. Deconstruct why they went viral and steal the winning formula.</p>
       </div>
-      <button class="btn-primary mt-16" onclick="deepAnalyzeChannel()">&#128300; Run Deep Analysis</button>
-    </div>
-    <div id="deepAnalysisResults"></div>
-    <div class="card">
-      <div class="card-header"><h2>&#128207; Engagement Rate Benchmarks</h2></div>
-      <div class="benchmark-grid">
-        <div class="benchmark-item"><div class="bench-range">1K &ndash; 10K</div><div class="bench-label">Nano Channel</div><div class="bench-rate good">2.5% &ndash; 4.5%</div><div class="bench-bar"><div class="bench-fill" style="width:80%"></div></div></div>
-        <div class="benchmark-item"><div class="bench-range">10K &ndash; 100K</div><div class="bench-label">Micro Channel</div><div class="bench-rate ok">1.5% &ndash; 3.0%</div><div class="bench-bar"><div class="bench-fill" style="width:60%"></div></div></div>
-        <div class="benchmark-item"><div class="bench-range">100K &ndash; 1M</div><div class="bench-label">Mid-Tier</div><div class="bench-rate avg">0.8% &ndash; 2.0%</div><div class="bench-bar"><div class="bench-fill" style="width:40%"></div></div></div>
-        <div class="benchmark-item"><div class="bench-range">1M+</div><div class="bench-label">Mega Channel</div><div class="bench-rate low">0.3% &ndash; 1.0%</div><div class="bench-bar"><div class="bench-fill" style="width:20%"></div></div></div>
+      <div class="header-actions">
+        <button class="btn-outline" onclick="loadSampleOutliers()">&#8635; Reload Outlier Feed</button>
+        <button class="btn-primary" onclick="openChannelVaultModal()">&#128194; Switch Channel</button>
       </div>
     </div>
-    <div class="card">
-      <div class="card-header"><h2>&#127942; Competitor Tracker</h2><button class="btn-outline btn-sm" onclick="addCompetitorPrompt()">+ Add Channel</button></div>
-      <div id="competitorList"><div class="empty-state">&#128202; No competitors tracked yet. Click "+ Add Channel" to begin.</div></div>
+
+    <!-- OUTLIER FORMULA BANNER -->
+    <div class="outlier-kpi-banner">
+      <div class="outlier-kpi-item">
+        <div class="kpi-label">Channel Median Views</div>
+        <div class="kpi-value" id="radarMedianViews">38,500</div>
+        <div class="kpi-sub">Baseline for current channel</div>
+      </div>
+      <div class="outlier-kpi-item">
+        <div class="kpi-label">Highest Outlier Multiplier</div>
+        <div class="kpi-value text-unicorn" id="radarMaxMultiplier">14.8x</div>
+        <div class="kpi-sub">&#129412; Unicorn breakout detected</div>
+      </div>
+      <div class="outlier-kpi-item">
+        <div class="kpi-label">Viral Breakout Threshold</div>
+        <div class="kpi-value text-viral" id="radarViralThreshold">115,500+</div>
+        <div class="kpi-sub">3.0x median benchmark</div>
+      </div>
+      <div class="outlier-kpi-item">
+        <div class="kpi-label">Average Views Per Hour (VPH)</div>
+        <div class="kpi-value text-cyan" id="radarAvgVph">1,420 VPH</div>
+        <div class="kpi-sub">Current momentum rate</div>
+      </div>
+    </div>
+
+    <!-- FILTER & SEARCH CONTROLS -->
+    <div class="filter-controls-card card mb-4">
+      <div class="filter-pills-row">
+        <span class="filter-label">Filter Outlier Level:</span>
+        <button class="pill active" onclick="filterOutliers('all', this)">All Videos</button>
+        <button class="pill pill-unicorn" onclick="filterOutliers('unicorn', this)">&#129412; Unicorn (&gt;10x)</button>
+        <button class="pill pill-viral" onclick="filterOutliers('viral', this)">&#128293; Viral Breakout (5x - 10x)</button>
+        <button class="pill pill-high" onclick="filterOutliers('high', this)">&#9889; Strong Outlier (2x - 5x)</button>
+        <button class="pill pill-normal" onclick="filterOutliers('normal', this)">&#128065; Normal (0.8x - 2x)</button>
+        <button class="pill pill-under" onclick="filterOutliers('under', this)">&#9888;&#65039; Flop / Low (&lt;0.8x)</button>
+      </div>
+      <div class="filter-search-row mt-3">
+        <input type="text" id="outlierSearchInput" placeholder="Filter by keyword (e.g. 'Claude', 'AI', 'Shorts', 'Money')..." class="input-field" onkeyup="filterOutliersByText(this.value)" />
+        <select id="outlierSortSelect" class="input-field" onchange="sortOutliers(this.value)">
+          <option value="multiplier_desc">Sort by: Highest Outlier Multiplier</option>
+          <option value="views_desc">Sort by: Total Views</option>
+          <option value="vph_desc">Sort by: Views Per Hour (VPH)</option>
+          <option value="date_desc">Sort by: Newest Release</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- OUTLIER GRID CARDS -->
+    <div class="outlier-grid" id="outlierGridContainer">
+      <!-- Injected dynamically by JavaScript -->
     </div>
   </section>
 
-  <!-- TAB: CONTENT CREATOR -->
-  <section class="tab-content" id="tab-content-creator">
-    <div class="page-header"><div><h1 class="page-title">AI Content <span class="gradient-text">Creator</span></h1><p class="page-sub">Generate scripts, titles, descriptions, and tags with AI</p></div></div>
+  <!-- ========================================== -->
+  <!-- TAB 3: COMPETITOR BENCHMARK (VidIQ Style) -->
+  <!-- ========================================== -->
+  <section class="tab-content" id="tab-competitor-compare">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">&#9876;&#65039; Competitor <span class="gradient-text">Benchmark</span></h1>
+        <p class="page-sub">Side-by-side forensic analysis of multiple channels. Identify upload gaps, content velocity, and winning topics.</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-primary" onclick="openChannelVaultModal()">&#10010; Add Competitor</button>
+      </div>
+    </div>
+
+    <!-- COMPARISON SELECTOR CARD -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <div>
+          <h2>Select Channels to Compare (Head-to-Head)</h2>
+          <p class="card-desc">Compare up to 4 channels from your vault or add a new channel URL</p>
+        </div>
+        <button class="btn-sm btn-outline" onclick="runCompetitorComparison()">&#8635; Recalculate Matrix</button>
+      </div>
+      <div class="competitor-select-grid" id="competitorSelectorBoxes">
+        <!-- Dynamically rendered checkboxes of vault channels -->
+      </div>
+    </div>
+
+    <!-- SIDE-BY-SIDE MATRIX TABLE -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h2>Cross-Channel Performance Matrix</h2>
+        <span class="card-badge">Normalized Benchmark</span>
+      </div>
+      <div class="table-responsive">
+        <table class="benchmark-table" id="competitorBenchmarkTable">
+          <thead>
+            <tr>
+              <th>Metric / Dimension</th>
+              <th id="compColHeader0">My Tech Channel</th>
+              <th id="compColHeader1">Competitor Alpha</th>
+              <th id="compColHeader2">Competitor Beta</th>
+              <th id="compColHeader3">Niche Benchmark</th>
+            </tr>
+          </thead>
+          <tbody id="competitorTableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- WINNING PATTERNS & GAPS -->
     <div class="two-col-grid">
       <div class="card">
-        <div class="card-header"><h2>&#128221; Script Generator</h2><span class="card-badge">Claude AI</span></div>
-        <div class="form-group"><label class="form-label">Video Topic / Idea</label><input type="text" id="scriptTopic" placeholder="e.g. How to grow YouTube from 0 to 10K subscribers" class="input-field" /></div>
-        <div class="form-group"><label class="form-label">Target Duration</label><select class="input-field" id="scriptDuration"><option value="short">YouTube Short (60s)</option><option value="5min" selected>5 Minute Video</option><option value="10min">10 Minute Video</option><option value="20min">20 Minute Tutorial</option></select></div>
-        <div class="form-group"><label class="form-label">Tone / Style</label><select class="input-field" id="scriptTone"><option>Educational</option><option>Entertaining</option><option>Motivational</option><option>News Style</option><option>Step-by-Step Tutorial</option></select></div>
-        <button class="btn-primary" onclick="generateScript()">&#10024; Generate Script</button>
-        <div id="scriptOutput" class="output-box" style="display:none;"></div>
+        <div class="card-header">
+          <h2>&#129504; Cross-Channel Winning Patterns</h2>
+          <span class="card-badge badge-green">Pattern Discovery</span>
+        </div>
+        <div class="pattern-list" id="discoveredPatternsList">
+          <div class="pattern-box">
+            <div class="pattern-header"><span class="badge-tag">Duration Sweet Spot</span><strong>11 to 14 Minutes</strong></div>
+            <p>Videos between 11-14 mins have a <strong>42% higher retention completion rate</strong> across all 3 competitors than 20+ min videos.</p>
+          </div>
+          <div class="pattern-box">
+            <div class="pattern-header"><span class="badge-tag">Winning Title Angle</span><strong>Challenge / Extreme Stakes</strong></div>
+            <p>Titles starting with "I Automated..." or "We Tested 50..." out-viewed tutorials by <strong>5.8x</strong> on average.</p>
+          </div>
+          <div class="pattern-box">
+            <div class="pattern-header"><span class="badge-tag">Best Release Time</span><strong>Thursday 3:00 PM EST</strong></div>
+            <p>Generates the highest initial 2-hour velocity (VPH) spike among your niche competitors.</p>
+          </div>
+        </div>
       </div>
+
       <div class="card">
-        <div class="card-header"><h2>&#127991; Title &amp; Description</h2><span class="card-badge">SEO Optimized</span></div>
-        <div class="form-group"><label class="form-label">Video Topic</label><input type="text" id="titleTopic" placeholder="e.g. YouTube automation with Claude AI" class="input-field" /></div>
-        <div class="form-group"><label class="form-label">Primary Keyword</label><input type="text" id="primaryKeyword" placeholder="e.g. YouTube automation" class="input-field" /></div>
-        <button class="btn-primary" onclick="generateTitleDesc()">&#127919; Generate Titles &amp; Description</button>
-        <div id="titleOutput" class="output-box" style="display:none;"></div>
+        <div class="card-header">
+          <h2>&#127919; Underserved Topic Gaps (Opportunity Radar)</h2>
+          <span class="card-badge badge-cyan">Blue Ocean Topics</span>
+        </div>
+        <div class="gap-list" id="topicGapsList">
+          <div class="gap-item">
+            <div class="gap-info">
+              <h4>"Claude MCP Deep Dive for Complete Beginners"</h4>
+              <p>High search demand, zero competitor videos over 50k views in last 30 days.</p>
+            </div>
+            <button class="btn-sm btn-groq" onclick="sendTopicToGroq('Claude MCP Deep Dive for Complete Beginners')">&#9889; Draft Script</button>
+          </div>
+          <div class="gap-item">
+            <div class="gap-info">
+              <h4>"Automate YouTube with Local Open-Source LLMs"</h4>
+              <p>Ollama + YouTube API interest surging +180% this month; 0 high-production videos.</p>
+            </div>
+            <button class="btn-sm btn-groq" onclick="sendTopicToGroq('Automate YouTube with Local Open-Source LLMs')">&#9889; Draft Script</button>
+          </div>
+          <div class="gap-item">
+            <div class="gap-info">
+              <h4>"n8n vs Make.com: Full Automated Channel Teardown"</h4>
+              <p>High buyer intent, extremely high affiliate CPM ($18-$24).</p>
+            </div>
+            <button class="btn-sm btn-groq" onclick="sendTopicToGroq('n8n vs Make.com: Full Automated Channel Teardown')">&#9889; Draft Script</button>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="card">
-      <div class="card-header"><h2>&#127991; Smart Tags Generator</h2><span class="card-badge">SEO Intelligence</span></div>
-      <div class="form-group"><label class="form-label">Topic / Keywords (comma separated)</label><input type="text" id="tagsTopic" placeholder="YouTube automation, AI video, content creation" class="input-field" /></div>
-      <button class="btn-primary" onclick="generateTags()">&#127991; Generate Tags</button>
-      <div id="tagsOutput" style="display:none;" class="tags-output-area"></div>
-    </div>
-    <div class="card">
-      <div class="card-header"><h2>&#128197; Content Calendar Generator</h2><span class="card-badge">30-Day Plan</span></div>
-      <div class="two-col-grid">
-        <div class="form-group"><label class="form-label">Channel Niche</label><input type="text" id="calendarNiche" placeholder="e.g. Tech tutorials, Finance, Gaming" class="input-field" /></div>
-        <div class="form-group"><label class="form-label">Upload Frequency</label><select class="input-field" id="uploadFreq"><option value="daily">Daily</option><option value="3x" selected>3x Per Week</option><option value="2x">2x Per Week</option><option value="weekly">Weekly</option></select></div>
-      </div>
-      <button class="btn-primary" onclick="generateCalendar()">&#128197; Generate Calendar</button>
-      <div id="calendarOutput" style="display:none;" class="mt-16"></div>
     </div>
   </section>
 
-  <!-- TAB: AUTOMATION HUB -->
-  <section class="tab-content" id="tab-automation-hub">
-    <div class="page-header"><div><h1 class="page-title">Automation <span class="gradient-text">Hub</span></h1><p class="page-sub">Complete automation stack, workflow management &amp; scheduling</p></div></div>
-    <div class="automation-stacks-grid">
-      <div class="stack-card stack-solo"><div class="stack-header"><span class="stack-icon">&#129489;</span><div><div class="stack-name">Solo Creator Stack</div><div class="stack-sub">Low Cost / High Control</div></div><span class="stack-cost">~$30/mo</span></div><div class="stack-tools"><div class="stack-tool"><span>&#128221;</span> ChatGPT/Claude &rarr; Script</div><div class="stack-tool"><span>&#127897;</span> ElevenLabs &rarr; Voice</div><div class="stack-tool"><span>&#127916;</span> InVideo AI &rarr; Video</div><div class="stack-tool"><span>&#127919;</span> VidIQ &rarr; SEO</div><div class="stack-tool"><span>&#128228;</span> Metricool &rarr; Schedule</div></div></div>
-      <div class="stack-card stack-auto"><div class="stack-header"><span class="stack-icon">&#129302;</span><div><div class="stack-name">Full Auto Stack</div><div class="stack-sub">Hands-Off / Scale</div></div><span class="stack-cost">~$100/mo</span></div><div class="stack-tools"><div class="stack-tool"><span>&#128269;</span> n8n Trend Scraper &rarr; Ideas</div><div class="stack-tool"><span>&#129302;</span> Claude API &rarr; Scripts + SEO</div><div class="stack-tool"><span>&#127916;</span> AutoShorts.ai &rarr; Video</div><div class="stack-tool"><span>&#128228;</span> YouTube API &rarr; Auto Upload</div><div class="stack-tool"><span>&#128202;</span> Analytics API &rarr; Feedback Loop</div></div></div>
-      <div class="stack-card stack-enterprise"><div class="stack-header"><span class="stack-icon">&#127970;</span><div><div class="stack-name">Enterprise Stack</div><div class="stack-sub">Multi-Channel / Agency</div></div><span class="stack-cost">Custom</span></div><div class="stack-tools"><div class="stack-tool"><span>&#9729;</span> Cloud Infrastructure</div><div class="stack-tool"><span>&#129504;</span> Fine-tuned LLMs</div><div class="stack-tool"><span>&#128202;</span> BigQuery Analytics</div><div class="stack-tool"><span>&#128279;</span> MCP Orchestration</div><div class="stack-tool"><span>&#128260;</span> Full CI/CD Pipeline</div></div></div>
-    </div>
-    <div class="card">
-      <div class="card-header"><h2>&#9881; Workflow Builder</h2><span class="card-badge">Visual Automation</span></div>
-      <div class="workflow-builder">
-        <div class="wf-node wf-trigger"><div class="wf-node-icon">&#9200;</div><div class="wf-node-label">Trigger</div><select class="wf-select"><option>Schedule: Daily 9AM</option><option>New Trend Detected</option><option>Manual Start</option><option>API Webhook</option></select></div>
-        <div class="wf-arrow">&rarr;</div>
-        <div class="wf-node wf-action"><div class="wf-node-icon">&#128269;</div><div class="wf-node-label">Find Trends</div><select class="wf-select"><option>Google Trends</option><option>YouTube Search</option><option>Reddit Scanner</option><option>Competitor Analysis</option></select></div>
-        <div class="wf-arrow">&rarr;</div>
-        <div class="wf-node wf-action"><div class="wf-node-icon">&#9997;</div><div class="wf-node-label">Generate Script</div><select class="wf-select"><option>Claude AI</option><option>GPT-4o</option><option>Gemini Pro</option></select></div>
-        <div class="wf-arrow">&rarr;</div>
-        <div class="wf-node wf-action"><div class="wf-node-icon">&#127897;</div><div class="wf-node-label">Voice Over</div><select class="wf-select"><option>ElevenLabs</option><option>Murf.ai</option><option>AWS Polly</option></select></div>
-        <div class="wf-arrow">&rarr;</div>
-        <div class="wf-node wf-action"><div class="wf-node-icon">&#127916;</div><div class="wf-node-label">Create Video</div><select class="wf-select"><option>InVideo AI</option><option>Pictory</option><option>AutoShorts</option></select></div>
-        <div class="wf-arrow">&rarr;</div>
-        <div class="wf-node wf-publish"><div class="wf-node-icon">&#128228;</div><div class="wf-node-label">Publish</div><select class="wf-select"><option>YouTube API</option><option>Metricool</option><option>Buffer</option></select></div>
+  <!-- ========================================== -->
+  <!-- TAB 4: GROQ AI ULTRA-FAST STUDIO -->
+  <!-- ========================================== -->
+  <section class="tab-content" id="tab-groq-ai-studio">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">&#9889; Groq Ultra-AI <span class="gradient-text">Studio</span></h1>
+        <p class="page-sub">Sub-second AI inference powered by Groq Llama 3.3 70B &amp; Llama 3.1 8B. Generate viral scripts, steal competitor hooks, and optimize retention.</p>
       </div>
-      <div class="wf-actions-row">
-        <button class="btn-primary" onclick="saveWorkflow()">&#128190; Save Workflow</button>
-        <button class="btn-outline" onclick="testWorkflow()">&#9654; Test Run</button>
-        <button class="btn-outline" onclick="exportWorkflow()">&#128228; Export n8n JSON</button>
+      <div class="header-actions">
+        <span class="badge-groq"><span class="pulse-dot"></span> &lt;300ms Inference</span>
       </div>
     </div>
+
+    <!-- GROQ SETTINGS & MODEL CONFIG -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <div>
+          <h2>Groq API Configuration &amp; Model Engine</h2>
+          <p class="card-desc">Enter your free Groq API key (`gsk_...`) from <a href="https://console.groq.com/keys" target="_blank" class="link">console.groq.com</a> or use the instant offline smart engine.</p>
+        </div>
+        <span class="card-badge badge-cyan">Zero Latency</span>
+      </div>
+      <div class="form-grid-3">
+        <div>
+          <label class="form-label">Groq API Key</label>
+          <input type="password" id="groqApiKey" placeholder="gsk_xxxxxxxxxxxxxxxxxxxx (Optional)" class="input-field" onchange="saveGroqKey(this.value)" />
+        </div>
+        <div>
+          <label class="form-label">Model Selection</label>
+          <select id="groqModelSelect" class="input-field">
+            <option value="llama-3.3-70b-versatile">Llama 3.3 70B Versatile (Highest Quality)</option>
+            <option value="llama-3.1-8b-instant" selected>Llama 3.1 8B Instant (Ultra-Fast 500 T/s)</option>
+            <option value="mixtral-8x7b-32768">Mixtral 8x7B (Long Context 32K)</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Creativity &amp; Temperature</label>
+          <div class="range-wrap">
+            <input type="range" id="groqTempRange" min="0.2" max="1.0" step="0.1" value="0.7" oninput="document.getElementById('tempVal').textContent=this.value" />
+            <span id="tempVal">0.7</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SPLIT PANE: PRESET RECIPES & WORKSPACE -->
+    <div class="groq-workspace-grid">
+      <!-- LEFT: PRESET PROMPT RECIPES -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Viral Prompt Recipes</h2>
+          <span class="card-badge">1-Click</span>
+        </div>
+        <div class="prompt-preset-list">
+          <button class="preset-btn active" onclick="loadGroqPreset('steal_concept')">
+            <div class="preset-icon">&#128293;</div>
+            <div class="preset-text">
+              <div class="preset-title">Reverse-Engineer Outlier</div>
+              <div class="preset-sub">Deconstruct competitor viral video &amp; generate 5 concepts</div>
+            </div>
+          </button>
+          <button class="preset-btn" onclick="loadGroqPreset('viral_titles')">
+            <div class="preset-icon">&#127919;</div>
+            <div class="preset-text">
+              <div class="preset-title">10 High-CTR Title Angles</div>
+              <div class="preset-sub">Curiosity-gap, high-stakes, &amp; negativity bias formats</div>
+            </div>
+          </button>
+          <button class="preset-btn" onclick="loadGroqPreset('shorts_script')">
+            <div class="preset-icon">&#128241;</div>
+            <div class="preset-text">
+              <div class="preset-title">60-Sec Viral Shorts Script</div>
+              <div class="preset-sub">0:03 hook, micro-cliffhangers &amp; seamless loop</div>
+            </div>
+          </button>
+          <button class="preset-btn" onclick="loadGroqPreset('long_outline')">
+            <div class="preset-icon">&#128221;</div>
+            <div class="preset-text">
+              <div class="preset-title">Full 10-Min Video Blueprint</div>
+              <div class="preset-sub">Hook, tension curve, payoff &amp; end-screen funnel</div>
+            </div>
+          </button>
+          <button class="preset-btn" onclick="loadGroqPreset('vidiq_audit')">
+            <div class="preset-icon">&#128270;</div>
+            <div class="preset-text">
+              <div class="preset-title">VidIQ Channel Teardown</div>
+              <div class="preset-sub">Find why videos underperform and how to fix CTR</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- RIGHT: PROMPT COMPOSER & TERMINAL OUTPUT -->
+      <div class="card">
+        <div class="card-header">
+          <h2>AI Studio Workspace</h2>
+          <div class="btn-group">
+            <button class="btn-sm btn-outline" onclick="clearGroqWorkspace()">Clear</button>
+            <button class="btn-sm btn-primary btn-groq-run" onclick="executeGroqGeneration()"><span id="groqRunBtnText">&#9889; Run Groq Inference</span></button>
+          </div>
+        </div>
+
+        <div class="prompt-input-area mb-3">
+          <label class="form-label">System Context &amp; Channel Target</label>
+          <input type="text" id="groqTargetNiche" class="input-field mb-2" value="YouTube Automation, AI Tools, Faceless Content" placeholder="Target Niche or Channel Focus..." />
+          <label class="form-label">Prompt Instruction</label>
+          <textarea id="groqPromptInput" class="textarea-field" rows="4" placeholder="Enter your instructions or click a preset recipe on the left..."></textarea>
+        </div>
+
+        <!-- GENERATED AI OUTPUT CONSOLE -->
+        <div class="ai-console-wrap">
+          <div class="console-header">
+            <div class="console-title">&#128421; Output Stream <span id="groqStreamStatus" class="console-status">Idle</span></div>
+            <div class="console-actions">
+              <button class="btn-xs btn-outline" onclick="copyConsoleOutput()">&#128203; Copy</button>
+              <button class="btn-xs btn-outline" onclick="exportConsoleToPipeline()">&#127916; Send to Pipeline</button>
+            </div>
+          </div>
+          <div class="console-body" id="groqConsoleOutput">
+Click "Run Groq Inference" above or select a preset recipe to begin generating.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- TAB 5: CHANNEL FORENSIC ANALYZER -->
+  <!-- ========================================== -->
+  <section class="tab-content" id="tab-channel-analyzer">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">&#128202; Deep Channel <span class="gradient-text">Forensic</span></h1>
+        <p class="page-sub">Analyze any YouTube channel: audience retention health, upload cadence, engagement ratios, and video performance catalog.</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-outline" onclick="exportChannelReport()">&#128229; Export PDF/JSON</button>
+      </div>
+    </div>
+
+    <!-- PROFILE HERO BANNER -->
+    <div class="channel-profile-hero card mb-4">
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar-large" id="profileLargeAvatar">&#128640;</div>
+        <span class="verified-badge">&#10003;</span>
+      </div>
+      <div class="profile-meta">
+        <div class="profile-name-row">
+          <h2 id="profileTitle">Automation Empire</h2>
+          <span class="handle-tag" id="profileHandle">@AutomationEmpire</span>
+          <span class="niche-badge" id="profileNicheBadge">AI &amp; Tech</span>
+        </div>
+        <p class="profile-desc" id="profileDescription">Scaling faceless automated channels with Claude, Python, ElevenLabs, and n8n workflows.</p>
+        <div class="profile-stats-inline">
+          <div class="inline-stat"><strong>1.24M</strong> Subscribers</div>
+          <div class="inline-stat"><strong>84.6M</strong> Views</div>
+          <div class="inline-stat"><strong>142</strong> Videos</div>
+          <div class="inline-stat"><strong>2022-04-18</strong> Joined</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RATIO BENCHMARKS -->
+    <div class="grid-3 mb-4">
+      <div class="card metric-box">
+        <div class="metric-title">Sub-to-View Velocity</div>
+        <div class="metric-val text-green" id="metricSubToView">68.2 Views/Sub</div>
+        <p class="metric-desc">Industry average is 30&ndash;50. Higher indicates viral browse reach.</p>
+      </div>
+      <div class="card metric-box">
+        <div class="metric-title">Upload Cadence</div>
+        <div class="metric-val text-cyan" id="metricCadence">2.4 Videos/Wk</div>
+        <p class="metric-desc">Optimal consistency for the YouTube algorithm recommendation loop.</p>
+      </div>
+      <div class="card metric-box">
+        <div class="metric-title">Estimated Monthly Revenue</div>
+        <div class="metric-val text-amber" id="metricEstRevenue">$14,200 &ndash; $28,500</div>
+        <p class="metric-desc">Based on $8.50 tech CPM benchmark and 2.1M monthly views.</p>
+      </div>
+    </div>
+
+    <!-- RECENT VIDEOS TABLE -->
     <div class="card">
-      <div class="card-header"><h2>&#128197; Publishing Schedule</h2><button class="btn-outline btn-sm" onclick="addScheduleItem()">+ Add</button></div>
-      <div class="schedule-table-wrap">
-        <table class="schedule-table">
-          <thead><tr><th>Video Title</th><th>Status</th><th>Scheduled</th><th>Privacy</th><th>Action</th></tr></thead>
-          <tbody id="scheduleTableBody">
-            <tr><td>AI Automation Deep Dive</td><td><span class="badge-status ready">Ready</span></td><td>Today 6:00 PM</td><td>Public</td><td><button class="btn-outline btn-xs">Publish</button></td></tr>
-            <tr><td>Claude MCP Tutorial</td><td><span class="badge-status draft">Draft</span></td><td>Tomorrow 10:00 AM</td><td>Unlisted</td><td><button class="btn-outline btn-xs">Edit</button></td></tr>
-            <tr><td>YouTube Analytics Guide</td><td><span class="badge-status producing">Producing</span></td><td>Thu 3:00 PM</td><td>Public</td><td><button class="btn-outline btn-xs">View</button></td></tr>
+      <div class="card-header">
+        <h2>Channel Video Catalog &amp; Outlier Multipliers</h2>
+        <span class="card-badge">Last 20 Uploads</span>
+      </div>
+      <div class="table-responsive">
+        <table class="video-catalog-table">
+          <thead>
+            <tr>
+              <th>Video Title &amp; Details</th>
+              <th>Views</th>
+              <th>Outlier Multiplier</th>
+              <th>Likes / Comments</th>
+              <th>Published</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="catalogTableBody">
+            <!-- Dynamically populated -->
           </tbody>
         </table>
       </div>
     </div>
   </section>
 
-  <!-- TAB: MCP INTEGRATIONS -->
-  <section class="tab-content" id="tab-mcp-integrations">
-    <div class="page-header"><div><h1 class="page-title">Claude MCP <span class="gradient-text">Integrations</span></h1><p class="page-sub">Model Context Protocol servers for YouTube automation with Claude AI</p></div></div>
-    <div class="card">
-      <div class="card-header"><h2>&#9881; Claude Desktop Config Generator</h2><span class="card-badge">claude_desktop_config.json</span></div>
-      <p class="card-desc">Select MCP servers to include:</p>
-      <div class="mcp-config-checkboxes">
-        <label class="mcp-check-item"><input type="checkbox" id="mcpYtData" checked onchange="updateMCPConfig()" /><div class="mcp-check-info"><div class="mcp-check-name">YouTube Data MCP</div><div class="mcp-check-src">wynandw87/claude-code-youtube-mcp</div></div></label>
-        <label class="mcp-check-item"><input type="checkbox" id="mcpTranscript" onchange="updateMCPConfig()" /><div class="mcp-check-info"><div class="mcp-check-name">YouTube Transcripts</div><div class="mcp-check-src">sparfenyuk/mcp-youtube</div></div></label>
-        <label class="mcp-check-item"><input type="checkbox" id="mcpUploader" onchange="updateMCPConfig()" /><div class="mcp-check-info"><div class="mcp-check-name">YouTube Uploader</div><div class="mcp-check-src">anwerj/youtube-uploader-mcp</div></div></label>
-        <label class="mcp-check-item"><input type="checkbox" id="mcpMetrics" onchange="updateMCPConfig()" /><div class="mcp-check-info"><div class="mcp-check-name">Channel Metrics</div><div class="mcp-check-src">NastyRunner13/youtube-content-management-mcp</div></div></label>
-        <label class="mcp-check-item"><input type="checkbox" id="mcpGrowth" onchange="updateMCPConfig()" /><div class="mcp-check-info"><div class="mcp-check-name">Growth Toolkit</div><div class="mcp-check-src">adityaarsharma/youtube-marketing-skills</div></div></label>
+  <!-- ========================================== -->
+  <!-- TAB 6: CONTENT CREATOR -->
+  <!-- ========================================== -->
+  <section class="tab-content" id="tab-content-creator">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">&#10024; AI Content <span class="gradient-text">Creator</span></h1>
+        <p class="page-sub">Generate viral hooks, high-CTR titles, full scripts, and YouTube Shorts pacing algorithms.</p>
       </div>
-      <div class="form-group mt-16"><label class="form-label">Your YouTube API Key</label><input type="text" id="mcpApiKeyInput" placeholder="AIzaSy..." class="input-field" oninput="updateMCPConfig()" /></div>
-      <pre class="code-block" id="mcpConfigOutput">{
-  "mcpServers": {
-    "youtube-data": {
-      "command": "node",
-      "args": ["/path/to/claude-code-youtube-mcp/dist/index.js"],
-      "env": { "YOUTUBE_API_KEY": "YOUR_API_KEY_HERE" }
-    }
-  }
-}</pre>
-      <div class="wf-actions-row"><button class="btn-primary" onclick="copyMCPConfig()">&#128203; Copy Config</button></div>
-      <div class="api-hint mt-8">&#128193; Config file on Windows: <code>%APPDATA%\Claude\claude_desktop_config.json</code></div>
+      <div class="header-actions">
+        <button class="btn-primary" onclick="generateAllContent()">&#9889; Generate Full Package</button>
+      </div>
     </div>
 
-    <h2 class="section-title">Available YouTube MCP Servers</h2>
-    <div class="mcp-cards-grid">
-      <div class="mcp-card"><div class="mcp-card-header"><div class="mcp-card-icon">&#128225;</div><div><div class="mcp-card-name">YouTube Data &amp; Analytics MCP</div><div class="mcp-card-repo">wynandw87/claude-code-youtube-mcp</div></div></div><div class="mcp-card-desc">Built for Claude Code. YouTube Data API v3, transcript tools, SponsorBlock, engagement heatmaps.</div><div class="mcp-card-features"><span class="mcp-feature">Transcripts</span><span class="mcp-feature">Full Search</span><span class="mcp-feature">Channel Info</span><span class="mcp-feature">Comment Analysis</span><span class="mcp-feature">Heatmaps</span></div><div class="mcp-card-actions"><a href="https://github.com/wynandw87/claude-code-youtube-mcp" target="_blank" class="btn-outline btn-sm">View on GitHub &#8599;</a></div></div>
-      <div class="mcp-card"><div class="mcp-card-header"><div class="mcp-card-icon">&#128228;</div><div><div class="mcp-card-name">YouTube Uploader MCP</div><div class="mcp-card-repo">anwerj/youtube-uploader-mcp</div></div></div><div class="mcp-card-desc">Upload, update, or schedule videos from Claude. OAuth2 auth, AI-generated titles/tags/descriptions.</div><div class="mcp-card-features"><span class="mcp-feature">Upload Videos</span><span class="mcp-feature">OAuth2</span><span class="mcp-feature">AI Titles</span><span class="mcp-feature">Scheduling</span><span class="mcp-feature">Privacy Control</span></div><div class="mcp-card-actions"><a href="https://github.com/anwerj/youtube-uploader-mcp" target="_blank" class="btn-outline btn-sm">View on GitHub &#8599;</a></div></div>
-      <div class="mcp-card"><div class="mcp-card-header"><div class="mcp-card-icon">&#128221;</div><div><div class="mcp-card-name">Transcript MCP</div><div class="mcp-card-repo">sparfenyuk/mcp-youtube</div></div></div><div class="mcp-card-desc">Lightweight Python MCP bridging YouTube captions to Claude Desktop for summarization and context retrieval.</div><div class="mcp-card-features"><span class="mcp-feature">Captions/CC</span><span class="mcp-feature">Summarization</span><span class="mcp-feature">Python/uv</span><span class="mcp-feature">Context Retrieval</span></div><div class="mcp-card-actions"><a href="https://github.com/sparfenyuk/mcp-youtube" target="_blank" class="btn-outline btn-sm">View on GitHub &#8599;</a></div></div>
-      <div class="mcp-card"><div class="mcp-card-header"><div class="mcp-card-icon">&#128202;</div><div><div class="mcp-card-name">Channel Management MCP</div><div class="mcp-card-repo">NastyRunner13/youtube-content-management-mcp</div></div></div><div class="mcp-card-desc">Focuses on channel growth and metrics: view counts, subscriber growth, comparative channel tracking.</div><div class="mcp-card-features"><span class="mcp-feature">View Counts</span><span class="mcp-feature">Sub Growth</span><span class="mcp-feature">Comparative Tracking</span><span class="mcp-feature">API v3</span></div><div class="mcp-card-actions"><a href="https://github.com/NastyRunner13/youtube-content-management-mcp" target="_blank" class="btn-outline btn-sm">View on GitHub &#8599;</a></div></div>
-      <div class="mcp-card"><div class="mcp-card-header"><div class="mcp-card-icon">&#128640;</div><div><div class="mcp-card-name">YouTube Marketing Skills</div><div class="mcp-card-repo">adityaarsharma/youtube-marketing-skills</div></div></div><div class="mcp-card-desc">Agent-agnostic growth toolkit with AI commands. Works with Claude Code, Desktop, and Cursor.</div><div class="mcp-card-features"><span class="mcp-feature">SEO Optimization</span><span class="mcp-feature">Shorts Planning</span><span class="mcp-feature">Thumbnails</span><span class="mcp-feature">Analytics Tracking</span></div><div class="mcp-card-actions"><a href="https://github.com/adityaarsharma/youtube-marketing-skills" target="_blank" class="btn-outline btn-sm">View on GitHub &#8599;</a></div></div>
-      <div class="mcp-card"><div class="mcp-card-header"><div class="mcp-card-icon">&#128269;</div><div><div class="mcp-card-name">YouTube Semantic Search</div><div class="mcp-card-repo">IA-Programming/Youtube-MCP</div></div></div><div class="mcp-card-desc">AI-powered semantic search over video transcripts. Connects Claude to YouTube without strict API quota limits.</div><div class="mcp-card-features"><span class="mcp-feature">Semantic Search</span><span class="mcp-feature">No Quota Limit</span><span class="mcp-feature">Context Aware</span></div><div class="mcp-card-actions"><a href="https://github.com/IA-Programming/Youtube-MCP" target="_blank" class="btn-outline btn-sm">View on GitHub &#8599;</a></div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-header"><h2>&#128230; Installation Guide</h2></div>
-      <div class="install-tabs">
-        <button class="install-tab active" onclick="switchInstallTab('node',this)">Node.js MCP</button>
-        <button class="install-tab" onclick="switchInstallTab('python',this)">Python MCP</button>
-        <button class="install-tab" onclick="switchInstallTab('smithery',this)">Smithery Install</button>
+    <div class="creator-grid">
+      <div class="card">
+        <div class="card-header"><h2>Video Concept Generator</h2><span class="card-badge">Step 1</span></div>
+        <div class="form-group mb-3">
+          <label class="form-label">Core Topic / Niche Keyword</label>
+          <input type="text" id="creatorTopic" class="input-field" placeholder="e.g., Build an AI Agent in 10 Minutes" value="Claude MCP YouTube Automation" />
+        </div>
+        <div class="form-group mb-3">
+          <label class="form-label">Format Style</label>
+          <select id="creatorFormat" class="input-field">
+            <option value="long">Long-Form Documentary / Case Study (8-12 min)</option>
+            <option value="shorts">YouTube Shorts / TikTok (30-60 sec)</option>
+            <option value="tutorial">Step-by-Step Hands-On Tutorial (10-15 min)</option>
+            <option value="listicle">Top 7 Ranked Countdown</option>
+          </select>
+        </div>
+        <button class="btn-primary w-100" onclick="generateTitlesAndHooks()">&#128161; Generate 5 Viral Angles</button>
+        <div class="angles-output mt-3" id="anglesOutput">
+          <!-- Populated -->
+        </div>
       </div>
-      <div id="installContent-node" class="install-content active"><pre class="code-block"># Clone and build
-git clone https://github.com/wynandw87/claude-code-youtube-mcp
-cd claude-code-youtube-mcp
-npm install &amp;&amp; npm run build
 
-# claude_desktop_config.json
-{
-  "mcpServers": {
-    "youtube": {
-      "command": "node",
-      "args": ["C:/path/to/dist/index.js"],
-      "env": { "YOUTUBE_API_KEY": "YOUR_KEY" }
-    }
-  }
-}</pre></div>
-      <div id="installContent-python" class="install-content"><pre class="code-block"># Install via uv tool
-uv tool install mcp-youtube
-
-# claude_desktop_config.json
-{
-  "mcpServers": {
-    "youtube": {
-      "command": "uv",
-      "args": ["tool", "run", "mcp-youtube"]
-    }
-  }
-}
-
-# Config file (Windows):
-# %APPDATA%\Claude\claude_desktop_config.json</pre></div>
-      <div id="installContent-smithery" class="install-content"><pre class="code-block"># Install via Smithery (auto-configures Claude Desktop)
-npx -y @smithery/cli install @ZubeidHendricks/youtube-mcp --client claude
-
-# Restart Claude Desktop after installation</pre></div>
+      <div class="card">
+        <div class="card-header"><h2>Script &amp; Pacing Studio</h2><span class="card-badge">Step 2</span></div>
+        <div class="script-tabs mb-2">
+          <button class="tab-btn active" onclick="switchScriptView('hook')">0:00 Hook (Crucial)</button>
+          <button class="tab-btn" onclick="switchScriptView('body')">Body &amp; Retention Traps</button>
+          <button class="tab-btn" onclick="switchScriptView('cta')">Climax &amp; End-Screen CTA</button>
+        </div>
+        <textarea id="scriptEditor" class="textarea-field" rows="12" placeholder="Your AI-generated high-retention script will appear here..."></textarea>
+        <div class="script-footer mt-2">
+          <span id="scriptWordCount">Words: 0 | Est. Duration: 0:00</span>
+          <div class="btn-group">
+            <button class="btn-outline btn-sm" onclick="copyScript()">&#128203; Copy</button>
+            <button class="btn-primary btn-sm" onclick="sendScriptToPipeline()">&#127916; Push to Pipeline</button>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- TAB: GITHUB REPOS -->
+  <!-- ========================================== -->
+  <!-- TAB 7: MCP INTEGRATIONS -->
+  <!-- ========================================== -->
+  <section class="tab-content" id="tab-mcp-integrations">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">&#128279; Claude Model Context <span class="gradient-text">Protocol (MCP)</span></h1>
+        <p class="page-sub">Connect Claude AI directly to local tools, YouTube APIs, ElevenLabs voice cloning, and video automation daemons.</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-primary" onclick="testAllMcpServers()">&#9889; Test All MCP Connections</button>
+      </div>
+    </div>
+
+    <div class="mcp-grid">
+      <!-- 6 MCP CARDS -->
+      <div class="card mcp-card">
+        <div class="mcp-header">
+          <div class="mcp-icon">&#128250;</div>
+          <div><h3>YouTube Data MCP</h3><span class="mcp-status connected">&#9679; Connected</span></div>
+        </div>
+        <p class="mcp-desc">Enables Claude to search videos, retrieve real-time analytics, inspect comments, and check competitor metadata via YouTube Data API v3.</p>
+        <div class="mcp-tools-list">
+          <span class="tool-tag">yt_search</span>
+          <span class="tool-tag">yt_get_channel</span>
+          <span class="tool-tag">yt_video_stats</span>
+          <span class="tool-tag">yt_get_comments</span>
+        </div>
+        <button class="btn-outline btn-sm w-100 mt-3" onclick="testMcpServer('YouTube Data')">Verify Connection</button>
+      </div>
+
+      <div class="card mcp-card">
+        <div class="mcp-header">
+          <div class="mcp-icon">&#127897;</div>
+          <div><h3>ElevenLabs Voice MCP</h3><span class="mcp-status connected">&#9679; Connected</span></div>
+        </div>
+        <p class="mcp-desc">Generates human-like voiceovers directly from Claude prompts using professional voice clones and dynamic emotional modulation.</p>
+        <div class="mcp-tools-list">
+          <span class="tool-tag">eleven_text_to_speech</span>
+          <span class="tool-tag">eleven_clone_voice</span>
+          <span class="tool-tag">eleven_get_history</span>
+        </div>
+        <button class="btn-outline btn-sm w-100 mt-3" onclick="testMcpServer('ElevenLabs')">Verify Connection</button>
+      </div>
+
+      <div class="card mcp-card">
+        <div class="mcp-header">
+          <div class="mcp-icon">&#127916;</div>
+          <div><h3>Whisper Transcript MCP</h3><span class="mcp-status connected">&#9679; Connected</span></div>
+        </div>
+        <p class="mcp-desc">Transcribes top competitor YouTube videos with timestamps for word-for-word retention and structure analysis.</p>
+        <div class="mcp-tools-list">
+          <span class="tool-tag">whisper_transcribe</span>
+          <span class="tool-tag">whisper_timestamp_map</span>
+          <span class="tool-tag">whisper_extract_hooks</span>
+        </div>
+        <button class="btn-outline btn-sm w-100 mt-3" onclick="testMcpServer('Whisper')">Verify Connection</button>
+      </div>
+
+      <div class="card mcp-card">
+        <div class="mcp-header">
+          <div class="mcp-icon">&#128444;&#65039;</div>
+          <div><h3>Canva / Thumbnail MCP</h3><span class="mcp-status connected">&#9679; Connected</span></div>
+        </div>
+        <p class="mcp-desc">Automates thumbnail generation, text placement, color grading, and A/B variant rendering using Canva and DALL-E/Midjourney pipelines.</p>
+        <div class="mcp-tools-list">
+          <span class="tool-tag">render_thumbnail</span>
+          <span class="tool-tag">ab_thumbnail_variant</span>
+          <span class="tool-tag">check_contrast_score</span>
+        </div>
+        <button class="btn-outline btn-sm w-100 mt-3" onclick="testMcpServer('Thumbnail')">Verify Connection</button>
+      </div>
+
+      <div class="card mcp-card">
+        <div class="mcp-header">
+          <div class="mcp-icon">&#9881;&#65039;</div>
+          <div><h3>n8n Automation MCP</h3><span class="mcp-status connected">&#9679; Connected</span></div>
+        </div>
+        <p class="mcp-desc">Triggers autonomous webhook workflows in local or self-hosted n8n instances for end-to-end video assembly and multi-platform publishing.</p>
+        <div class="mcp-tools-list">
+          <span class="tool-tag">trigger_workflow</span>
+          <span class="tool-tag">get_pipeline_status</span>
+          <span class="tool-tag">retry_job</span>
+        </div>
+        <button class="btn-outline btn-sm w-100 mt-3" onclick="testMcpServer('n8n')">Verify Connection</button>
+      </div>
+
+      <div class="card mcp-card">
+        <div class="mcp-header">
+          <div class="mcp-icon">&#128190;</div>
+          <div><h3>Local File &amp; Video MCP</h3><span class="mcp-status connected">&#9679; Connected</span></div>
+        </div>
+        <p class="mcp-desc">Inspects local project renders in `d:/xampp/htdocs/YoutubeAutomatio`, checks video file sizes, and parses subtitle `.srt` files.</p>
+        <div class="mcp-tools-list">
+          <span class="tool-tag">read_render_file</span>
+          <span class="tool-tag">export_final_cut</span>
+          <span class="tool-tag">backup_assets</span>
+        </div>
+        <button class="btn-outline btn-sm w-100 mt-3" onclick="testMcpServer('Local Filesystem')">Verify Connection</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- TAB 8: AGENT CENTER -->
+  <!-- ========================================== -->
+  <section class="tab-content" id="tab-agent-center">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">&#129504; Multi-Agent <span class="gradient-text">Command Center</span></h1>
+        <p class="page-sub">Autonomous AI workers operating 24/7 to research topics, write scripts, audit competitors, and publish content.</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-primary" onclick="launchAllAgents()">&#9654; Start All Agents</button>
+      </div>
+    </div>
+
+    <div class="agent-grid">
+      <div class="card agent-card">
+        <div class="agent-header">
+          <div class="agent-avatar">&#128065;</div>
+          <div><h3>TrendScout Agent</h3><span class="status-badge running">&#9679; Scanning YouTube</span></div>
+        </div>
+        <p class="agent-desc">Monitors 25 niche competitor channels hourly. Detects videos with &gt;3x average view velocity within 4 hours of upload.</p>
+        <div class="agent-metric"><span>Tasks Done:</span> <strong>342 Scans</strong></div>
+        <div class="agent-metric"><span>Last Alert:</span> <strong>14 mins ago</strong></div>
+      </div>
+
+      <div class="agent-card card">
+        <div class="agent-header">
+          <div class="agent-avatar">&#9997;&#65039;</div>
+          <div><h3>ScriptArchitect Agent</h3><span class="status-badge running">&#9679; Claude 3.5 Sonnet</span></div>
+        </div>
+        <p class="agent-desc">Converts raw trend signals into structured retention-engineered scripts following MrBeast, Veritasium, and Magnates Media blueprints.</p>
+        <div class="agent-metric"><span>Scripts Written:</span> <strong>48 Scripts</strong></div>
+        <div class="agent-metric"><span>Avg Retention:</span> <strong>64.2%</strong></div>
+      </div>
+
+      <div class="agent-card card">
+        <div class="agent-header">
+          <div class="agent-avatar">&#127912;</div>
+          <div><h3>ThumbnailLab Agent</h3><span class="status-badge running">&#9679; Generating Variants</span></div>
+        </div>
+        <p class="agent-desc">Creates 3 A/B thumbnail variations per video, tests contrast ratios, face emotion intensities, and simulates mobile CTR.</p>
+        <div class="agent-metric"><span>Rendered:</span> <strong>144 Thumbnails</strong></div>
+        <div class="agent-metric"><span>Best Variant CTR:</span> <strong>9.8%</strong></div>
+      </div>
+
+      <div class="agent-card card">
+        <div class="agent-header">
+          <div class="agent-avatar">&#128640;</div>
+          <div><h3>GrowthPilot Agent</h3><span class="status-badge running">&#9679; Active</span></div>
+        </div>
+        <p class="agent-desc">Audits published videos at 24h, 48h, and 7d. Automatically tweaks titles if CTR is under 4% to revive algorithm distribution.</p>
+        <div class="agent-metric"><span>Titles A/B Tested:</span> <strong>82 Tweaks</strong></div>
+        <div class="agent-metric"><span>Views Revived:</span> <strong>+240K</strong></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- TAB 9: SEO & KEYWORDS (VidIQ Style) -->
+  <!-- ========================================== -->
+  <section class="tab-content" id="tab-seo-optimizer">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">&#127919; SEO &amp; Keyword <span class="gradient-text">Radar</span></h1>
+        <p class="page-sub">VidIQ-grade search volume vs competition scores, Title Power Scorer, and 1-click YouTube Studio tag copy.</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-primary" onclick="analyzeSeoPackage()">&#9889; Score My Title &amp; SEO</button>
+      </div>
+    </div>
+
+    <!-- VIDIQ KEYWORD RADAR CARD -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <div>
+          <h2>Keyword Opportunity Explorer (VidIQ Formula)</h2>
+          <p class="card-desc">Calculates: Opportunity Score = Search Volume &times; (100 &minus; Competition) / 100</p>
+        </div>
+        <span class="card-badge badge-green">High Opportunity Finder</span>
+      </div>
+      <div class="keyword-search-row">
+        <input type="text" id="seoKeywordInput" placeholder="Enter target search keyword (e.g. 'Claude MCP YouTube', 'AI Automation', 'n8n bot')..." class="input-field" value="Claude MCP Automation" />
+        <button class="btn-primary" onclick="searchKeywordOpportunity()">&#128269; Explore Keyword</button>
+      </div>
+
+      <!-- KEYWORD GAUGES -->
+      <div class="keyword-gauges-grid mt-4">
+        <div class="gauge-card">
+          <div class="gauge-label">Search Volume</div>
+          <div class="gauge-val text-green" id="gaugeSearchVol">84 / 100</div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill fill-green" id="gaugeBarVol" style="width: 84%"></div></div>
+          <div class="gauge-sub">High Search Demand (~45k/mo)</div>
+        </div>
+
+        <div class="gauge-card">
+          <div class="gauge-label">Competition Level</div>
+          <div class="gauge-val text-cyan" id="gaugeCompetition">28 / 100</div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill fill-cyan" id="gaugeBarComp" style="width: 28%"></div></div>
+          <div class="gauge-sub">Very Low (Few authoritative videos)</div>
+        </div>
+
+        <div class="gauge-card highlight">
+          <div class="gauge-label">Overall Opportunity Score</div>
+          <div class="gauge-val text-unicorn" id="gaugeOpportunity">88 / 100</div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill fill-unicorn" id="gaugeBarOpp" style="width: 88%"></div></div>
+          <div class="gauge-sub">&#127942; GOLDMINE: High demand, weak competition!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TITLE SCORER & TAG GENERATOR -->
+    <div class="two-col-grid">
+      <div class="card">
+        <div class="card-header"><h2>Title Clickability Scorer</h2><span class="card-badge" id="titleScoreBadge">Score: 88/100</span></div>
+        <div class="form-group mb-3">
+          <label class="form-label">Video Title to Test</label>
+          <input type="text" id="seoTitleInput" class="input-field" value="How I Built a $10,000/mo YouTube Channel Using Claude MCP" onkeyup="evaluateTitleRealtime(this.value)" />
+        </div>
+        <div class="score-breakdown" id="titleScoreFactors">
+          <div class="factor-item pass">&#10003; Length optimal (56 chars &mdash; displays fully on mobile)</div>
+          <div class="factor-item pass">&#10003; High-Stakes Power Word ($10,000/mo)</div>
+          <div class="factor-item pass">&#10003; Cutting-Edge Tech Keyword (Claude MCP)</div>
+          <div class="factor-item pass">&#10003; First-Person Narrative ("How I Built")</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>High-Ranking Tag Clusters</h2>
+          <button class="btn-sm btn-outline" onclick="copyAllTags()">&#128203; Copy All for Studio</button>
+        </div>
+        <p class="card-desc mb-2">Generated semantic tag clusters ready to paste into YouTube Studio:</p>
+        <div class="tags-cloud" id="tagCloudContainer">
+          <span class="tag-pill">claude mcp</span>
+          <span class="tag-pill">youtube automation</span>
+          <span class="tag-pill">ai agent tutorial</span>
+          <span class="tag-pill">faceless youtube</span>
+          <span class="tag-pill">n8n automation</span>
+          <span class="tag-pill">elevenlabs tts</span>
+          <span class="tag-pill">make money with ai</span>
+          <span class="tag-pill">python automation</span>
+          <span class="tag-pill">claude 3.5 sonnet</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- TAB 10: VIDEO PIPELINE (Kanban) -->
+  <!-- ========================================== -->
+  <section class="tab-content" id="tab-video-pipeline">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">&#127916; Video Production <span class="gradient-text">Pipeline</span></h1>
+        <p class="page-sub">Visual Kanban workflow: Ideas &rarr; Scripting &rarr; Voiceover &amp; Editing &rarr; Published</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-primary" onclick="addNewKanbanCard()">&#10010; New Video Project</button>
+      </div>
+    </div>
+
+    <div class="kanban-board">
+      <div class="kanban-col">
+        <div class="col-header"><span class="col-title">&#128161; Ideas &amp; Outliers</span><span class="col-count" id="countIdeas">3</span></div>
+        <div class="col-cards" id="colIdeas">
+          <div class="kanban-card"><div class="card-tag tag-high">Outlier 8.2x</div><h4>I Tested 50 Claude MCP Tools</h4><p>Target: 10 mins | CPM: $14</p></div>
+          <div class="kanban-card"><div class="card-tag tag-trend">Trending</div><h4>Zero to 100k Subs with n8n</h4><p>Case study format</p></div>
+          <div class="kanban-card"><div class="card-tag tag-green">SEO 92</div><h4>ElevenLabs vs OpenAI Voice</h4><p>Audio comparison shootout</p></div>
+        </div>
+      </div>
+
+      <div class="kanban-col">
+        <div class="col-header"><span class="col-title">&#128221; Scripting</span><span class="col-count" id="countScripting">2</span></div>
+        <div class="col-cards" id="colScripting">
+          <div class="kanban-card"><div class="card-tag tag-claude">Claude AI Draft</div><h4>Automate YouTube Shorts in Python</h4><p>Draft 2: 780 words</p></div>
+          <div class="kanban-card"><div class="card-tag tag-high">Priority</div><h4>The Death of Manual Editing</h4><p>Hook written | Body 40%</p></div>
+        </div>
+      </div>
+
+      <div class="kanban-col">
+        <div class="col-header"><span class="col-title">&#127897; Production &amp; Edit</span><span class="col-count" id="countProduction">1</span></div>
+        <div class="col-cards" id="colProduction">
+          <div class="kanban-card"><div class="card-tag tag-voice">ElevenLabs Rendered</div><h4>How Top Channels Make $50k/mo</h4><p>Audio synced | Adding B-roll</p></div>
+        </div>
+      </div>
+
+      <div class="kanban-col">
+        <div class="col-header"><span class="col-title">&#9989; Published &amp; Live</span><span class="col-count" id="countPublished">4</span></div>
+        <div class="col-cards" id="colPublished">
+          <div class="kanban-card"><div class="card-tag tag-live">142K Views</div><h4>Claude MCP Complete Guide</h4><p>VPH: 340 | CTR: 8.4%</p></div>
+          <div class="kanban-card"><div class="card-tag tag-live">89K Views</div><h4>Build an AI Video Factory</h4><p>VPH: 120 | CTR: 6.9%</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- TAB 11: AUTOMATION HUB -->
+  <!-- ========================================== -->
+  <section class="tab-content" id="tab-automation-hub">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">&#129302; Automation <span class="gradient-text">Hub</span></h1>
+        <p class="page-sub">Connect webhooks, configure n8n &amp; Make workflows, schedule uploads, and manage cloud credentials.</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-primary" onclick="showToast('Webhooks verified &amp; ready!', 'success')">&#9889; Test Webhooks</button>
+      </div>
+    </div>
+
+    <div class="automation-grid">
+      <div class="card">
+        <div class="card-header"><h2>Active Workflow Daemons</h2><span class="status-badge running">&#9679; 4 Daemons Live</span></div>
+        <div class="daemon-list">
+          <div class="daemon-item">
+            <div class="daemon-info"><h4>n8n Autonomous Channel Pipeline</h4><p>Scrapes trends &rarr; Claude draft &rarr; ElevenLabs &rarr; Render</p></div>
+            <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
+          </div>
+          <div class="daemon-item">
+            <div class="daemon-info"><h4>Hourly Outlier &amp; Competitor Radar</h4><p>Polls top 10 niche channels for viral breakouts</p></div>
+            <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
+          </div>
+          <div class="daemon-item">
+            <div class="daemon-info"><h4>Auto-Thumbnail A/B CTR Optimizer</h4><p>Swaps thumbnail after 24h if CTR is below 4.5%</p></div>
+            <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
+          </div>
+          <div class="daemon-item">
+            <div class="daemon-info"><h4>Automated Git Auto-Push Watcher</h4><p>Pushes project changes to GitHub repository</p></div>
+            <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2>Webhook Endpoints</h2><span class="card-badge">REST / Webhooks</span></div>
+        <div class="form-group mb-3">
+          <label class="form-label">n8n Inbound Webhook</label>
+          <input type="text" class="input-field" value="http://localhost:5678/webhook/yt-generate-video" />
+        </div>
+        <div class="form-group mb-3">
+          <label class="form-label">Make.com Inbound Webhook</label>
+          <input type="text" class="input-field" value="https://hook.eu1.make.com/xxxxxxxxx-yt-trigger" />
+        </div>
+        <button class="btn-primary" onclick="showToast('Webhook payload sent successfully!', 'success')">&#128640; Dispatch Test Event</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- TAB 12: VERIFY CENTER -->
+  <!-- ========================================== -->
+  <section class="tab-content" id="tab-verify-center">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">&#9989; Verify <span class="gradient-text">Center</span></h1>
+        <p class="page-sub">Comprehensive channel audit checklist, monetization criteria check, and engagement calculator.</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-primary" onclick="runCompleteAudit()">&#9889; Run Full Health Audit</button>
+      </div>
+    </div>
+
+    <div class="audit-grid">
+      <div class="card">
+        <div class="card-header"><h2>Algorithmic Health Audit</h2><span class="card-badge badge-green">Score: 94/100 (Pass)</span></div>
+        <div class="audit-list">
+          <div class="audit-item pass"><span class="audit-icon">&#9989;</span><div><h4>Channel Banner &amp; Branding</h4><p>High-res banner, customized avatar, clear niche proposition</p></div></div>
+          <div class="audit-item pass"><span class="audit-icon">&#9989;</span><div><h4>Consistent Upload Cadence</h4><p>2+ uploads per week consistently for 90 days</p></div></div>
+          <div class="audit-item pass"><span class="audit-icon">&#9989;</span><div><h4>Community Tab Activity</h4><p>Polls &amp; teasers maintain audience engagement between uploads</p></div></div>
+          <div class="audit-item warn"><span class="audit-icon">&#9888;&#65039;</span><div><h4>Shorts-to-Long Form Ratio</h4><p>Recommend 2 Shorts per 1 Long-form for maximum browse reach</p></div></div>
+          <div class="audit-item pass"><span class="audit-icon">&#9989;</span><div><h4>Copyright &amp; Community Guidelines</h4><p>0 strikes detected &mdash; 100% clean account standing</p></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2>Engagement &amp; Revenue Calculator</h2><span class="card-badge">Calculator</span></div>
+        <div class="form-group mb-2"><label class="form-label">Monthly Views</label><input type="number" id="calcViews" class="input-field" value="1500000" oninput="calculateProjections()" /></div>
+        <div class="form-group mb-2"><label class="form-label">Estimated CPM ($)</label><input type="number" id="calcCpm" class="input-field" value="9.50" oninput="calculateProjections()" /></div>
+        <div class="calc-results mt-3">
+          <div class="calc-box"><div class="calc-label">Monthly AdSense (55% Creator Share)</div><div class="calc-val text-green" id="resMonthlyRev">$7,837.50</div></div>
+          <div class="calc-box"><div class="calc-label">Est. Sponsorship &amp; Affiliate</div><div class="calc-val text-cyan" id="resSponsorRev">$4,500.00</div></div>
+          <div class="calc-box"><div class="calc-label">Total Projected Monthly Gross</div><div class="calc-val text-unicorn" id="resTotalRev">$12,337.50</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- TAB 13: GITHUB RESOURCES -->
+  <!-- ========================================== -->
   <section class="tab-content" id="tab-github-repos">
     <div class="page-header">
-      <div><h1 class="page-title">GitHub <span class="gradient-text">Resources</span></h1><p class="page-sub">Curated collection of best YouTube automation repositories</p></div>
-      <div class="filter-btns"><button class="filter-btn active" onclick="filterRepos('all',this)">All</button><button class="filter-btn" onclick="filterRepos('mcp',this)">MCP</button><button class="filter-btn" onclick="filterRepos('automation',this)">Automation</button><button class="filter-btn" onclick="filterRepos('analytics',this)">Analytics</button><button class="filter-btn" onclick="filterRepos('tools',this)">Tools</button></div>
-    </div>
-    <div class="repos-grid" id="reposGrid"></div>
-  </section>
-
-  <!-- TAB: AGENT CENTER -->
-  <section class="tab-content" id="tab-agent-center">
-    <div class="page-header"><div><h1 class="page-title">AI Agent <span class="gradient-text">Center</span></h1><p class="page-sub">Configure and run specialized YouTube automation AI agents</p></div></div>
-    <div class="agents-grid">
-      <div class="agent-card"><div class="agent-header"><div class="agent-avatar">&#128161;</div><div><div class="agent-name">Trend Scout Agent</div><div class="agent-model">Claude 3.5 Sonnet</div></div><label class="toggle-label"><input type="checkbox" class="toggle-inp" checked /><span class="toggle-slider"></span></label></div><div class="agent-desc">Scans YouTube trends, Google Trends, Reddit &amp; competitors. Outputs ranked video ideas with viral potential scores.</div><div class="agent-config"><div class="config-row"><span>Frequency:</span><select class="config-select"><option>Every 6 hours</option><option>Daily</option><option>Weekly</option></select></div></div><button class="btn-primary btn-sm mt-16" onclick="runAgent('trend')">&#9654; Run Now</button><div id="agentTrendOutput" class="agent-output"></div></div>
-      <div class="agent-card"><div class="agent-header"><div class="agent-avatar">&#128221;</div><div><div class="agent-name">Script Writer Agent</div><div class="agent-model">Claude 3.5 Sonnet</div></div><label class="toggle-label"><input type="checkbox" class="toggle-inp" checked /><span class="toggle-slider"></span></label></div><div class="agent-desc">Takes approved ideas and generates complete scripts with hooks, body, and CTAs optimized for viewer retention.</div><div class="agent-config"><div class="config-row"><span>Style:</span><select class="config-select"><option>Educational</option><option>Entertainment</option><option>News</option></select></div></div><button class="btn-primary btn-sm mt-16" onclick="runAgent('script')">&#9654; Run Now</button><div id="agentScriptOutput" class="agent-output"></div></div>
-      <div class="agent-card"><div class="agent-header"><div class="agent-avatar">&#127919;</div><div><div class="agent-name">SEO Optimizer Agent</div><div class="agent-model">Claude + VidIQ</div></div><label class="toggle-label"><input type="checkbox" class="toggle-inp" /><span class="toggle-slider"></span></label></div><div class="agent-desc">Analyzes top-ranking videos and generates optimized titles, descriptions, and tags. Runs A/B tests automatically.</div><div class="agent-config"><div class="config-row"><span>Region:</span><select class="config-select"><option>Global</option><option>US</option><option>IN</option><option>BD</option></select></div></div><button class="btn-primary btn-sm mt-16" onclick="runAgent('seo')">&#9654; Run Now</button><div id="agentSEOOutput" class="agent-output"></div></div>
-      <div class="agent-card"><div class="agent-header"><div class="agent-avatar">&#128202;</div><div><div class="agent-name">Analytics Agent</div><div class="agent-model">Claude + YT Analytics API</div></div><label class="toggle-label"><input type="checkbox" class="toggle-inp" /><span class="toggle-slider"></span></label></div><div class="agent-desc">Pulls channel analytics, identifies performance trends, detects anomalies, and generates actionable growth recommendations.</div><div class="agent-config"><div class="config-row"><span>Period:</span><select class="config-select"><option>Last 7 days</option><option>Last 30 days</option><option>Last 90 days</option></select></div></div><button class="btn-primary btn-sm mt-16" onclick="runAgent('analytics')">&#9654; Run Now</button><div id="agentAnalyticsOutput" class="agent-output"></div></div>
-    </div>
-  </section>
-
-  <!-- TAB: SEO OPTIMIZER -->
-  <section class="tab-content" id="tab-seo-optimizer">
-    <div class="page-header"><div><h1 class="page-title">SEO <span class="gradient-text">Optimizer</span></h1><p class="page-sub">Analyze and optimize videos for maximum YouTube search visibility</p></div></div>
-    <div class="two-col-grid">
-      <div class="card"><div class="card-header"><h2>&#128269; Keyword Analyzer</h2></div><div class="form-group"><label class="form-label">Keyword or Topic</label><input type="text" id="seoKeyword" placeholder="e.g. YouTube automation 2025" class="input-field" /></div><button class="btn-primary" onclick="analyzeSEO()">&#128269; Analyze Keywords</button><div id="seoKeywordResults" class="mt-16"></div></div>
-      <div class="card"><div class="card-header"><h2>&#128202; Title Score Checker</h2></div><div class="form-group"><label class="form-label">Your Video Title</label><input type="text" id="titleScoreInput" placeholder="Enter your video title here..." class="input-field" oninput="scoreTitle(this.value)" /></div><div id="titleScoreDisplay" class="score-display"></div><div id="titleSuggestions"></div></div>
-    </div>
-    <div class="card">
-      <div class="card-header"><h2>&#128203; Description Template Generator</h2></div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Video Title</label><input type="text" id="descTitle" placeholder="Your video title" class="input-field" /></div>
-        <div class="form-group"><label class="form-label">Main Keywords (comma separated)</label><input type="text" id="descKeywords" placeholder="YouTube automation, AI tools, growth" class="input-field" /></div>
-        <div class="form-group"><label class="form-label">Social Links</label><input type="text" id="descSocial" placeholder="Instagram: @handle | Twitter: @handle" class="input-field" /></div>
+      <div>
+        <h1 class="page-title">&#11088; GitHub <span class="gradient-text">Resources Hub</span></h1>
+        <p class="page-sub">Curated open-source automation repositories, MCP servers, scrapers, and video pipelines.</p>
       </div>
-      <button class="btn-primary" onclick="generateDescription()">&#128203; Generate SEO Description</button>
-      <div id="descOutput" style="display:none;" class="output-box mt-16"></div>
+      <div class="header-actions">
+        <div class="repo-filter-row">
+          <button class="pill active" onclick="renderRepos('all', this)">All (12)</button>
+          <button class="pill" onclick="renderRepos('mcp', this)">MCP Servers</button>
+          <button class="pill" onclick="renderRepos('automation', this)">Automation &amp; Bots</button>
+          <button class="pill" onclick="renderRepos('ai', this)">AI &amp; Video</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="repos-grid" id="reposGridContainer">
+      <!-- Injected by JavaScript -->
     </div>
   </section>
-
-  <!-- TAB: VIDEO PIPELINE -->
-  <section class="tab-content" id="tab-video-pipeline">
-    <div class="page-header"><div><h1 class="page-title">Video <span class="gradient-text">Pipeline</span></h1><p class="page-sub">Track videos from idea to published</p></div><button class="btn-primary" onclick="showAddVideoModal()">+ New Video</button></div>
-    <div class="kanban-board">
-      <div class="kanban-col"><div class="kanban-header ideas-header"><span>&#128161; Ideas</span><span class="kanban-count" id="count-ideas">2</span></div><div class="kanban-cards" id="kanban-ideas" ondragover="allowDrop(event)" ondrop="dropCard(event,'ideas')"><div class="kanban-card" draggable="true" ondragstart="dragStart(event)"><div class="kcard-title">10 AI Tools for YouTube 2025</div><div class="kcard-meta">SEO Score: 82/100</div><div class="kcard-tags"><span class="ktag">AI</span><span class="ktag">Tools</span></div></div><div class="kanban-card" draggable="true" ondragstart="dragStart(event)"><div class="kcard-title">Claude MCP Complete Setup Guide</div><div class="kcard-meta">SEO Score: 91/100</div><div class="kcard-tags"><span class="ktag">Claude</span><span class="ktag">MCP</span></div></div></div></div>
-      <div class="kanban-col"><div class="kanban-header scripting-header"><span>&#128221; Scripting</span><span class="kanban-count" id="count-scripting">1</span></div><div class="kanban-cards" id="kanban-scripting" ondragover="allowDrop(event)" ondrop="dropCard(event,'scripting')"><div class="kanban-card" draggable="true" ondragstart="dragStart(event)"><div class="kcard-title">YouTube Automation 2025</div><div class="kcard-meta">Script: 80% done</div><div class="kcard-tags"><span class="ktag">Automation</span></div></div></div></div>
-      <div class="kanban-col"><div class="kanban-header production-header"><span>&#127916; Production</span><span class="kanban-count" id="count-production">1</span></div><div class="kanban-cards" id="kanban-production" ondragover="allowDrop(event)" ondrop="dropCard(event,'production')"><div class="kanban-card" draggable="true" ondragstart="dragStart(event)"><div class="kcard-title">AI Voice Over Tutorial</div><div class="kcard-meta">Voice: Recording</div><div class="kcard-tags"><span class="ktag">Voice</span></div></div></div></div>
-      <div class="kanban-col"><div class="kanban-header review-header"><span>&#128269; Review</span><span class="kanban-count" id="count-review">0</span></div><div class="kanban-cards" id="kanban-review" ondragover="allowDrop(event)" ondrop="dropCard(event,'review')"></div></div>
-      <div class="kanban-col"><div class="kanban-header published-header"><span>&#9989; Published</span><span class="kanban-count" id="count-published">2</span></div><div class="kanban-cards" id="kanban-published" ondragover="allowDrop(event)" ondrop="dropCard(event,'published')"><div class="kanban-card published-card" draggable="true" ondragstart="dragStart(event)"><div class="kcard-title">Getting Started With MCP</div><div class="kcard-meta">Views: 1,243</div><div class="kcard-tags"><span class="ktag green">Published</span></div></div><div class="kanban-card published-card" draggable="true" ondragstart="dragStart(event)"><div class="kcard-title">n8n YouTube Automation</div><div class="kcard-meta">Views: 4,521</div><div class="kcard-tags"><span class="ktag green">Published</span></div></div></div></div>
-    </div>
-  </section>
-
-  <!-- TAB: VERIFY CENTER -->
-  <section class="tab-content" id="tab-verify-center">
-    <div class="page-header"><div><h1 class="page-title">Channel <span class="gradient-text">Verify Center</span></h1><p class="page-sub">Verify and audit your channel health, authenticity &amp; growth metrics</p></div></div>
-    <div class="card">
-      <div class="card-header"><h2>&#9989; Full Channel Audit</h2><span class="card-badge">API-Powered</span></div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Channel ID</label><input type="text" id="verifyChannelId" placeholder="UCxxxxxx" class="input-field" /></div>
-        <div class="form-group"><label class="form-label">YouTube API Key</label><input type="text" id="verifyApiKey" placeholder="AIzaSy..." class="input-field" /></div>
-      </div>
-      <div class="audit-checks">
-        <div class="audit-check-item"><span>&#128202;</span> Subscriber Count Verification</div>
-        <div class="audit-check-item"><span>&#128065;</span> Total Views Validation</div>
-        <div class="audit-check-item"><span>&#10084;</span> Engagement Rate Calculation</div>
-        <div class="audit-check-item"><span>&#128197;</span> Upload Consistency Score</div>
-        <div class="audit-check-item"><span>&#128269;</span> SEO Health Check</div>
-        <div class="audit-check-item"><span>&#127991;</span> Channel Description Analysis</div>
-      </div>
-      <button class="btn-primary mt-16" onclick="runFullAudit()">&#128300; Run Full Audit</button>
-    </div>
-    <div id="auditResults" style="display:none;" class="card"><div class="card-header"><h2>&#128203; Audit Results</h2></div><div id="auditResultsBody"></div></div>
-    <div class="card">
-      <div class="card-header"><h2>&#128208; Engagement Rate Calculator</h2></div>
-      <div class="calc-grid">
-        <div class="form-group"><label class="form-label">Avg Likes per Video</label><input type="number" id="calcLikes" placeholder="1000" class="input-field" oninput="calcEngagementRate()" /></div>
-        <div class="form-group"><label class="form-label">Avg Comments per Video</label><input type="number" id="calcComments" placeholder="50" class="input-field" oninput="calcEngagementRate()" /></div>
-        <div class="form-group"><label class="form-label">Avg Views per Video</label><input type="number" id="calcViews" placeholder="10000" class="input-field" oninput="calcEngagementRate()" /></div>
-        <div class="form-group"><label class="form-label">Total Subscribers</label><input type="number" id="calcSubs" placeholder="5000" class="input-field" oninput="calcEngagementRate()" /></div>
-      </div>
-      <div id="engRateResult" class="eng-rate-result"></div>
-    </div>
-  </section>
-
 </main>
-
-<!-- Toast -->
-<div class="toast" id="toast"></div>
-
-<!-- Add Video Modal -->
-<div class="modal-overlay" id="addVideoModal" style="display:none;" onclick="if(event.target===this)closeModal('addVideoModal')">
-  <div class="modal">
-    <div class="modal-header"><h2>&#127916; Add New Video</h2><button class="modal-close" onclick="closeModal('addVideoModal')">&#10005;</button></div>
-    <div class="form-group"><label class="form-label">Video Title</label><input type="text" id="newVideoTitle" placeholder="Enter video title" class="input-field" /></div>
-    <div class="form-group"><label class="form-label">Stage</label><select id="newVideoStage" class="input-field"><option value="ideas">Ideas</option><option value="scripting">Scripting</option><option value="production">Production</option><option value="review">Review</option></select></div>
-    <div class="form-group"><label class="form-label">Tags (comma separated)</label><input type="text" id="newVideoTags" placeholder="AI, Tutorial, 2025" class="input-field" /></div>
-    <div class="modal-actions"><button class="btn-primary" onclick="createNewVideo()">&#9989; Add to Pipeline</button><button class="btn-outline" onclick="closeModal('addVideoModal')">Cancel</button></div>
-  </div>
-</div>
 
 <script src="app.js"></script>
 </body>
