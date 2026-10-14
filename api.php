@@ -1,17 +1,22 @@
 <?php
-// YT AutoPilot 2.0 - Real Data API Bridge
-// Supports live YouTube Data API v3, YouTube RSS feeds, and Groq AI proxy
+// YT AutoPilot 3.0 — Real Data API Bridge & Database Backend
+// Supports MySQL / SQLite Database CRUD, Live YouTube API v3, RSS Feeds, and Groq Proxy
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
     exit(0);
 }
 
-$action = $_GET['action'] ?? '';
+require_once __DIR__ . '/db.php';
+$pdo = Database::getConnection();
+$driver = Database::getDriver();
+
+$action = $_GET['action'] ?? $_POST['action'] ?? '';
+$inputData = json_decode(file_get_contents('php://input'), true) ?? $_POST;
 
 // Helper: curl GET
 function httpGet($url, $headers = []) {
@@ -30,9 +35,209 @@ function httpGet($url, $headers = []) {
     return ['code' => $code, 'body' => $res];
 }
 
-// 1. ACTION: Test Groq API Key
+// ── 1. DB STATUS ──
+if ($action === 'db_status') {
+    if (!$pdo) {
+        echo json_encode(['success' => false, 'status' => 'disconnected', 'driver' => 'none', 'error' => 'Database connection failed']);
+        exit;
+    }
+    $chCount = (int)$pdo->query("SELECT COUNT(*) FROM channels")->fetchColumn();
+    $pipeCount = (int)$pdo->query("SELECT COUNT(*) FROM pipeline_videos")->fetchColumn();
+    $libCount = (int)$pdo->query("SELECT COUNT(*) FROM content_library")->fetchColumn();
+    $calCount = (int)$pdo->query("SELECT COUNT(*) FROM calendar_events")->fetchColumn();
+
+    echo json_encode([
+        'success' => true,
+        'status' => 'connected',
+        'driver' => $driver,
+        'stats' => [
+            'channels' => $chCount,
+            'pipeline_cards' => $pipeCount,
+            'saved_content' => $libCount,
+            'calendar_events' => $calCount
+        ]
+    ]);
+    exit;
+}
+
+// ── 2. GET ALL DB DATA ──
+if ($action === 'get_all') {
+    if (!$pdo) {
+        echo json_encode(['success' => false, 'error' => 'No database']);
+        exit;
+    }
+    $channels = $pdo->query("SELECT * FROM channels ORDER BY id ASC")->fetchAll();
+    $pipeline = $pdo->query("SELECT * FROM pipeline_videos ORDER BY id ASC")->fetchAll();
+    $content = $pdo->query("SELECT * FROM content_library ORDER BY id DESC LIMIT 50")->fetchAll();
+    $calendar = $pdo->query("SELECT * FROM calendar_events ORDER BY id ASC")->fetchAll();
+    $settingsRaw = $pdo->query("SELECT setting_key, setting_value FROM app_settings")->fetchAll();
+    $settings = [];
+    foreach ($settingsRaw as $s) {
+        $settings[$s['setting_key']] = $s['setting_value'];
+    }
+
+    echo json_encode([
+        'success' => true,
+        'driver' => $driver,
+        'data' => [
+            'channels' => $channels,
+            'pipeline' => $pipeline,
+            'content_library' => $content,
+            'calendar' => $calendar,
+            'settings' => $settings
+        ]
+    ]);
+    exit;
+}
+
+// ── 3. CHANNELS CRUD ──
+if ($action === 'save_channel') {
+    $cid = $inputData['channel_id'] ?? '';
+    $name = $inputData['name'] ?? '';
+    $role = $inputData['role'] ?? 'my_channel';
+    $subs = (int)($inputData['subscribers'] ?? 0);
+    $views = (int)($inputData['total_views'] ?? 0);
+    $vids = (int)($inputData['video_count'] ?? 0);
+    $med = (int)($inputData['median_views'] ?? 0);
+    $niche = $inputData['niche'] ?? 'General';
+    $handle = $inputData['handle'] ?? '';
+
+    if (empty($name)) {
+        echo json_encode(['success' => false, 'error' => 'Name required']);
+        exit;
+    }
+
+    $stmt = $pdo->prepare("INSERT INTO channels (channel_id, name, handle, role, subscribers, total_views, video_count, median_views, niche) 
+        VALUES (:cid, :name, :handle, :role, :subs, :views, :vids, :med, :niche)");
+    $stmt->execute([
+        ':cid' => $cid ?: 'ch_' . time(),
+        ':name' => $name,
+        ':handle' => $handle,
+        ':role' => $role,
+        ':subs' => $subs,
+        ':views' => $views,
+        ':vids' => $vids,
+        ':med' => $med,
+        ':niche' => $niche
+    ]);
+    echo json_encode(['success' => true, 'id' => $pdo->lastInsertId()]);
+    exit;
+}
+
+if ($action === 'delete_channel') {
+    $id = (int)($inputData['id'] ?? $_GET['id'] ?? 0);
+    if ($id) {
+        $pdo->prepare("DELETE FROM channels WHERE id = ?")->execute([$id]);
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'error' => 'Missing ID']);
+    }
+    exit;
+}
+
+// ── 4. PIPELINE CRUD ──
+if ($action === 'save_pipeline_card') {
+    $title = $inputData['title'] ?? '';
+    $format = $inputData['format'] ?? 'long';
+    $keyword = $inputData['keyword'] ?? '';
+    $priority = $inputData['priority'] ?? 'medium';
+    $status = $inputData['status'] ?? 'ideas';
+    $views = (int)($inputData['views'] ?? 0);
+    $ctr = (float)($inputData['ctr'] ?? 0);
+
+    if (empty($title)) {
+        echo json_encode(['success' => false, 'error' => 'Title required']);
+        exit;
+    }
+
+    $stmt = $pdo->prepare("INSERT INTO pipeline_videos (title, format, keyword, priority, status, views, ctr)
+        VALUES (:title, :format, :keyword, :priority, :status, :views, :ctr)");
+    $stmt->execute([
+        ':title' => $title,
+        ':format' => $format,
+        ':keyword' => $keyword,
+        ':priority' => $priority,
+        ':status' => $status,
+        ':views' => $views,
+        ':ctr' => $ctr
+    ]);
+    echo json_encode(['success' => true, 'id' => $pdo->lastInsertId()]);
+    exit;
+}
+
+if ($action === 'update_pipeline_status') {
+    $id = (int)($inputData['id'] ?? 0);
+    $status = $inputData['status'] ?? 'ideas';
+    if ($id) {
+        $pdo->prepare("UPDATE pipeline_videos SET status = ? WHERE id = ?")->execute([$status, $id]);
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'error' => 'Missing ID']);
+    }
+    exit;
+}
+
+if ($action === 'delete_pipeline_card') {
+    $id = (int)($inputData['id'] ?? $_GET['id'] ?? 0);
+    if ($id) {
+        $pdo->prepare("DELETE FROM pipeline_videos WHERE id = ?")->execute([$id]);
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'error' => 'Missing ID']);
+    }
+    exit;
+}
+
+// ── 5. SAVE CONTENT (SCRIPTS & SHORTS) ──
+if ($action === 'save_content') {
+    $type = $inputData['type'] ?? 'script';
+    $title = $inputData['title'] ?? 'Untitled Concept';
+    $hook = $inputData['hook'] ?? '';
+    $body = $inputData['body'] ?? '';
+    $voiceover = $inputData['voiceover'] ?? '';
+    $hashtags = $inputData['hashtags'] ?? '';
+    $duration = $inputData['duration'] ?? '40s';
+    $virality = $inputData['virality_score'] ?? '90/100';
+
+    $stmt = $pdo->prepare("INSERT INTO content_library (type, title, hook, body, voiceover, hashtags, duration, virality_score)
+        VALUES (:type, :title, :hook, :body, :voiceover, :hashtags, :duration, :virality)");
+    $stmt->execute([
+        ':type' => $type,
+        ':title' => $title,
+        ':hook' => $hook,
+        ':body' => $body,
+        ':voiceover' => $voiceover,
+        ':hashtags' => $hashtags,
+        ':duration' => $duration,
+        ':virality' => $virality
+    ]);
+    echo json_encode(['success' => true, 'id' => $pdo->lastInsertId()]);
+    exit;
+}
+
+// ── 6. SETTINGS ──
+if ($action === 'save_setting') {
+    $key = $inputData['key'] ?? '';
+    $val = $inputData['value'] ?? '';
+    if ($key) {
+        $stmt = $pdo->prepare("INSERT INTO app_settings (setting_key, setting_value) VALUES (:k, :v)
+            ON DUPLICATE KEY UPDATE setting_value = :v2");
+        if ($driver === 'sqlite') {
+            $stmt = $pdo->prepare("INSERT OR REPLACE INTO app_settings (setting_key, setting_value) VALUES (:k, :v)");
+            $stmt->execute([':k' => $key, ':v' => $val]);
+        } else {
+            $stmt->execute([':k' => $key, ':v' => $val, ':v2' => $val]);
+        }
+        echo json_encode(['success' => true]);
+        exit;
+    }
+    echo json_encode(['success' => false, 'error' => 'Missing key']);
+    exit;
+}
+
+// ── 7. TEST GROQ API KEY ──
 if ($action === 'test_groq') {
-    $apiKey = $_GET['key'] ?? '';
+    $apiKey = $_GET['key'] ?? $inputData['key'] ?? '';
     if (empty($apiKey)) {
         echo json_encode(['success' => false, 'error' => 'API key is required']);
         exit;
@@ -47,9 +252,9 @@ if ($action === 'test_groq') {
     exit;
 }
 
-// 2. ACTION: Test YouTube API Key
+// ── 8. TEST YOUTUBE API KEY ──
 if ($action === 'test_youtube') {
-    $apiKey = $_GET['key'] ?? '';
+    $apiKey = $_GET['key'] ?? $inputData['key'] ?? '';
     if (empty($apiKey)) {
         echo json_encode(['success' => false, 'error' => 'YouTube API key is required']);
         exit;
@@ -65,7 +270,7 @@ if ($action === 'test_youtube') {
     exit;
 }
 
-// 3. ACTION: Fetch Real Channel Videos via RSS
+// ── 9. CHANNEL RSS ──
 if ($action === 'channel_rss') {
     $channelId = $_GET['channel_id'] ?? 'UCX6OQ3DkcsbYNE6H8uQQuVA'; // Default MrBeast
     $res = httpGet("https://www.youtube.com/feeds/videos.xml?channel_id=$channelId");
@@ -112,7 +317,8 @@ if ($action === 'channel_rss') {
 }
 
 echo json_encode([
-    'service' => 'YT AutoPilot Real Data API Bridge',
+    'service' => 'YT AutoPilot 3.0 Backend Engine',
     'status' => 'online',
-    'actions' => ['test_groq', 'test_youtube', 'channel_rss']
+    'database' => $driver,
+    'actions' => ['db_status', 'get_all', 'save_channel', 'delete_channel', 'save_pipeline_card', 'save_content', 'test_groq', 'test_youtube', 'channel_rss']
 ]);

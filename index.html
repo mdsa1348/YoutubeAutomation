@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>YT AutoPilot 2.0 - Next-Gen YouTube Automation & Intelligence Engine</title>
-  <meta name="description" content="All-in-one YouTube Automation Command Center: Outlier & Viral Radar, Competitor Benchmark, Groq AI Studio, Claude MCP, Channel Analysis, SEO Intelligence." />
+  <title>YT AutoPilot 3.0 — Complete YouTube Intelligence & Automation Suite</title>
+  <meta name="description" content="All-in-one YouTube growth engine: viral detection, thumbnail A/B testing, hook analyzer, comment sentiment, content calendar, clip generator, SEO radar, and multi-agent automation." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -20,65 +20,148 @@
 </div>
 <canvas id="particleCanvas"></canvas>
 
-<!-- TOAST NOTIFICATION -->
+<!-- TOAST -->
 <div id="toast" class="toast"></div>
 
-<!-- VIRAL DNA MODAL -->
-<div id="viralDnaModal" class="modal-overlay" onclick="closeModalOnBg(event, 'viralDnaModal')">
-  <div class="modal-card">
+<!-- ============================================================ -->
+<!-- MODALS -->
+<!-- ============================================================ -->
+
+<!-- API VAULT MODAL (Google Sign-In & YouTube Connect) -->
+<div id="apiVaultModal" class="modal-overlay" onclick="closeModalOnBg(event,'apiVaultModal')">
+  <div class="modal-card" style="max-width:760px">
     <div class="modal-header">
-      <div class="modal-title-wrap">
-        <span class="modal-badge-icon">&#128300;</span>
-        <div>
-          <h2 id="modalVideoTitle">Deconstructing Viral DNA</h2>
-          <p class="modal-sub" id="modalVideoSub">Algorithmic Breakdown & Retention Factors</p>
+      <div>
+        <div class="modal-title">🔴 Connect YouTube & AI Engine</div>
+        <div class="modal-sub">Link your YouTube channel directly with Google Sign-In or API keys</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('apiVaultModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <!-- 1. GOOGLE SIGN-IN / YOUTUBE CONNECT (PRIMARY HERO METHOD) -->
+      <div class="card p-4 mb-4" style="background:linear-gradient(135deg,rgba(239,68,68,0.1),rgba(99,102,241,0.06));border:1px solid rgba(239,68,68,0.35)">
+        <div class="flex justify-between items-center mb-3">
+          <div class="flex items-center gap-2">
+            <svg class="google-icon" viewBox="0 0 24 24" width="22" height="22">
+              <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z"/>
+              <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"/>
+              <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z"/>
+              <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2-6.4-4.8L1.9 16.4C3.7 20.1 7.5 23 12 23z"/>
+            </svg>
+            <h3 style="font-size:1.05rem;font-weight:700">Connect Channel with Google (OAuth 2.0)</h3>
+          </div>
+          <span id="googleAuthBadge" class="badge badge-green">Recommended</span>
+        </div>
+        <p class="text-sm text-secondary mb-3">
+          Just like TubeBuddy and VidIQ — click below to sign in with the Google/Gmail account of your YouTube channel. Automatically pulls your channel name, subscriber count, total views, and video uploads.
+        </p>
+
+        <!-- Connected Channel Card (when authenticated) -->
+        <div id="googleConnectedCard" style="display:none" class="google-connected-card">
+          <div class="google-user-info">
+            <div class="google-avatar" id="googleChannelAvatar">📺</div>
+            <div>
+              <div class="font-bold text-base text-bright" id="googleChannelTitle">Channel Name</div>
+              <div class="text-xs text-muted" id="googleChannelSub">@handle • 0 Subscribers</div>
+            </div>
+          </div>
+          <div class="flex gap-2 items-center">
+            <span class="badge badge-green">✓ Connected</span>
+            <button class="btn-xs btn-outline" onclick="disconnectGoogle()">Disconnect</button>
+          </div>
+        </div>
+
+        <!-- Connect Actions (when not connected) -->
+        <div id="googleConnectActions" class="flex gap-2 items-center" style="flex-wrap:wrap">
+          <button class="btn-google" onclick="connectWithGoogle()">
+            <svg class="google-icon" viewBox="0 0 24 24">
+              <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z"/>
+              <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"/>
+              <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z"/>
+              <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2-6.4-4.8L1.9 16.4C3.7 20.1 7.5 23 12 23z"/>
+            </svg>
+            <span>Sign in with Google</span>
+          </button>
+          <button class="btn-outline btn-sm" onclick="quickConnectMyChannel()">⚡ Link My Channel Handle</button>
+          <button class="btn-outline btn-sm" onclick="toggleOAuthSettings()">⚙️ Google Client ID</button>
+        </div>
+
+        <!-- Collapsible OAuth Client ID Settings -->
+        <div id="googleOAuthSettings" class="mt-3 p-3 card" style="display:none;background:var(--bg-input);border:1px solid var(--border)">
+          <label class="form-label text-xs">Custom Google OAuth 2.0 Client ID (from Google Cloud Console)</label>
+          <div class="flex gap-2">
+            <input type="text" id="googleClientIdInput" placeholder="xxxx.apps.googleusercontent.com" class="input-field text-xs" style="flex:1" />
+            <button class="btn-primary btn-xs" onclick="saveGoogleClientId()">Save ID</button>
+          </div>
+          <p class="text-xs text-muted mt-2">
+            Scope requested: <code>https://www.googleapis.com/auth/youtube.readonly</code>
+          </p>
         </div>
       </div>
-      <button class="modal-close" onclick="closeModal('viralDnaModal')">&times;</button>
-    </div>
-    <div class="modal-body" id="modalDnaBody">
-      <!-- Injected dynamically -->
+
+      <!-- 2. GROQ AI API KEY (Sub-300ms Llama 3.3 70B) -->
+      <div class="card p-4 mb-3">
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="flex items-center gap-2">⚡ Groq AI (Llama 3.3 70B)</h3>
+          <span id="groqApiBadge" class="badge">Not Connected</span>
+        </div>
+        <p class="text-sm text-muted mb-3">Powers script generation, viral hook scoring, and Auto Clip Generator. 100% free with ultra-fast sub-300ms speeds.</p>
+        <div class="flex gap-2">
+          <input type="password" id="vaultGroqKey" placeholder="gsk_..." class="input-field" style="flex:1" />
+          <button class="btn-groq" onclick="saveGroqKey()">Test & Save</button>
+        </div>
+        <p class="form-hint mt-2">Get free key: <a href="https://console.groq.com/keys" target="_blank" class="link">console.groq.com/keys</a> (completely free)</p>
+      </div>
+
+      <!-- 3. MANUAL YOUTUBE API KEY (ALTERNATIVE) -->
+      <details class="card p-3 mb-3" style="background:rgba(255,255,255,0.02)">
+        <summary class="font-bold text-sm cursor-pointer text-muted" style="user-select:none">
+          ⚙️ Alternative: Manual YouTube Data API Key (For Developers)
+        </summary>
+        <div class="pt-3">
+          <p class="text-xs text-muted mb-2">If you have a Google Cloud API Key, you can paste it here instead of signing in with Google:</p>
+          <div class="flex gap-2">
+            <input type="password" id="vaultYtKey" placeholder="AIzaSy..." class="input-field" style="flex:1" />
+            <button class="btn-primary btn-sm" onclick="saveYtKey()">Save Key</button>
+          </div>
+        </div>
+      </details>
+
+      <!-- Status Summary -->
+      <div id="apiStatusSummary" class="card p-3" style="background:rgba(99,102,241,0.05);border-color:rgba(99,102,241,0.2)"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn-outline" onclick="closeModal('viralDnaModal')">Close</button>
-      <button class="btn-primary" onclick="stealToGroqStudio()">&#9889; Steal Concept to Groq AI Studio</button>
+      <button class="btn-outline" onclick="closeModal('apiVaultModal')">Close</button>
+      <button class="btn-primary" onclick="closeModal('apiVaultModal');showToast('Connectors updated! All tabs active.','success')">Done</button>
     </div>
   </div>
 </div>
 
 <!-- CHANNEL VAULT MODAL -->
-<div id="channelVaultModal" class="modal-overlay" onclick="closeModalOnBg(event, 'channelVaultModal')">
+<div id="channelVaultModal" class="modal-overlay" onclick="closeModalOnBg(event,'channelVaultModal')">
   <div class="modal-card">
     <div class="modal-header">
-      <div class="modal-title-wrap">
-        <span class="modal-badge-icon">&#128194;</span>
-        <div>
-          <h2>Manage Channel Vault</h2>
-          <p class="modal-sub">Save and switch between your channels &amp; niche competitors</p>
-        </div>
+      <div>
+        <div class="modal-title">📁 Channel Vault</div>
+        <div class="modal-sub">Manage your channels and competitors</div>
       </div>
-      <button class="modal-close" onclick="closeModal('channelVaultModal')">&times;</button>
+      <button class="modal-close" onclick="closeModal('channelVaultModal')">×</button>
     </div>
     <div class="modal-body">
-      <div class="card p-3 mb-3">
-        <h3 class="mb-2">&#10010; Add Channel to Vault</h3>
-        <div class="form-grid-3">
-          <input type="text" id="vaultNewName" placeholder="Channel Name (e.g. Ali Abdaal)" class="input-field" />
-          <input type="text" id="vaultNewId" placeholder="Handle (@handle) or ID (UCxxx)" class="input-field" />
+      <div class="card p-4 mb-3">
+        <h3 class="mb-3">➕ Add Channel</h3>
+        <div class="grid-3 mb-2">
+          <input type="text" id="vaultNewName" placeholder="Channel Name" class="input-field" />
+          <input type="text" id="vaultNewId" placeholder="@handle or UCxxx" class="input-field" />
           <select id="vaultNewRole" class="input-field">
-            <option value="my_channel">&#128100; My Channel</option>
-            <option value="top_competitor">&#9876;&#65039; Top Competitor</option>
-            <option value="niche_leader">&#127942; Niche Leader / Benchmark</option>
+            <option value="my_channel">👤 My Channel</option>
+            <option value="top_competitor">⚔️ Competitor</option>
+            <option value="niche_leader">🏆 Niche Leader</option>
           </select>
         </div>
-        <button class="btn-primary mt-2" onclick="addChannelToVault()">Save to Vault</button>
+        <button class="btn-primary btn-sm" onclick="addToVault()">Save to Vault</button>
       </div>
-      <div class="vault-list-wrap">
-        <h3>Saved Channels in Vault</h3>
-        <div id="vaultListContainer" class="vault-list mt-2">
-          <!-- Injected dynamically -->
-        </div>
-      </div>
+      <div id="vaultListContainer" class="vault-list"></div>
     </div>
     <div class="modal-footer">
       <button class="btn-outline" onclick="closeModal('channelVaultModal')">Done</button>
@@ -86,1222 +169,2312 @@
   </div>
 </div>
 
-<!-- API VAULT MODAL (REAL API CREDENTIALS) -->
-<div id="apiVaultModal" class="modal-overlay" onclick="closeModalOnBg(event, 'apiVaultModal')">
-  <div class="modal-card">
+<!-- VIRAL DNA MODAL -->
+<div id="viralDnaModal" class="modal-overlay" onclick="closeModalOnBg(event,'viralDnaModal')">
+  <div class="modal-card" style="max-width:680px">
     <div class="modal-header">
-      <div class="modal-title-wrap">
-        <span class="modal-badge-icon">&#128273;</span>
-        <div>
-          <h2>Real API Credentials &amp; Live Connectors</h2>
-          <p class="modal-sub">Connect your official YouTube Data API v3 and Groq AI keys for real live data</p>
-        </div>
+      <div>
+        <div class="modal-title">🔬 Viral DNA Breakdown</div>
+        <div id="dnaModalSub" class="modal-sub">Deconstructing why this video went viral</div>
       </div>
-      <button class="modal-close" onclick="closeModal('apiVaultModal')">&times;</button>
+      <button class="modal-close" onclick="closeModal('viralDnaModal')">×</button>
     </div>
-    <div class="modal-body">
-      <!-- YouTube Data API v3 -->
-      <div class="card p-3 mb-3">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <h3 style="display:flex;align-items:center;gap:8px;">&#128250; YouTube Data API v3 Key</h3>
-          <span id="ytApiStatusBadge" class="card-badge">Public RSS Mode</span>
-        </div>
-        <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:10px;">Used to query live channel stats, subscribers, uploads, views, and analytics directly from Google.</p>
-        <div style="display:flex;gap:10px;">
-          <input type="password" id="vaultYtApiKey" placeholder="AIzaSy..." class="input-field" style="flex:1;" />
-          <button class="btn-primary" onclick="testAndSaveYtApiKey()">Test &amp; Save</button>
-        </div>
-        <div style="font-size:0.75rem;color:#64748b;margin-top:6px;">
-          Get free key: <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" class="link">Google Cloud Console</a> &rarr; Enable YouTube Data API v3.
-        </div>
-      </div>
-
-      <!-- Groq AI Key -->
-      <div class="card p-3 mb-3">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <h3 style="display:flex;align-items:center;gap:8px;">&#9889; Groq Ultra-Fast AI Key (LPU)</h3>
-          <span id="groqApiStatusBadge" class="card-badge">Offline Demo</span>
-        </div>
-        <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:10px;">Enables sub-second (&lt;300ms) Llama 3.3 70B viral ideation and script generation.</p>
-        <div style="display:flex;gap:10px;">
-          <input type="password" id="vaultGroqApiKey" placeholder="gsk_..." class="input-field" style="flex:1;" />
-          <button class="btn-primary" style="background:linear-gradient(135deg, #d946ef 0%, #ec4899 100%);" onclick="testAndSaveGroqApiKey()">Test &amp; Save</button>
-        </div>
-        <div style="font-size:0.75rem;color:#64748b;margin-top:6px;">
-          Get free key: <a href="https://console.groq.com/keys" target="_blank" class="link">console.groq.com/keys</a> (Completely free with high speed limits).
-        </div>
-      </div>
-    </div>
+    <div class="modal-body" id="dnaModalBody"></div>
     <div class="modal-footer">
-      <button class="btn-outline" onclick="closeModal('apiVaultModal')">Close</button>
+      <button class="btn-outline" onclick="closeModal('viralDnaModal')">Close</button>
+      <button class="btn-groq" onclick="stealConceptToGroq()">⚡ Steal Concept to AI Studio</button>
     </div>
   </div>
 </div>
 
+<!-- NEW VIDEO MODAL -->
+<div id="newVideoModal" class="modal-overlay" onclick="closeModalOnBg(event,'newVideoModal')">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div><div class="modal-title">🎬 New Video Project</div></div>
+      <button class="modal-close" onclick="closeModal('newVideoModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Video Title / Concept</label>
+        <input type="text" id="newVideoTitle" class="input-field" placeholder="e.g. I Automated My Entire YouTube Channel with Claude AI" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Video Format</label>
+        <select id="newVideoFormat" class="input-field">
+          <option value="long">Long-Form (8–15 min)</option>
+          <option value="shorts">YouTube Shorts (30–60 sec)</option>
+          <option value="tutorial">Tutorial (10–20 min)</option>
+          <option value="listicle">Top 10 Countdown</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Target Keyword</label>
+        <input type="text" id="newVideoKeyword" class="input-field" placeholder="e.g. claude mcp automation" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Priority</label>
+        <select id="newVideoPriority" class="input-field">
+          <option value="high">🔴 High Priority</option>
+          <option value="medium">🟡 Medium</option>
+          <option value="low">🟢 Low</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModal('newVideoModal')">Cancel</button>
+      <button class="btn-primary" onclick="addVideoToPipeline()">Add to Pipeline</button>
+    </div>
+  </div>
+</div>
+
+<!-- FORMULA DETAIL MODAL -->
+<div id="formulaModal" class="modal-overlay" onclick="closeModalOnBg(event,'formulaModal')">
+  <div class="modal-card" style="max-width:600px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="formulaModalTitle">Title Formula</div>
+        <div class="modal-sub" id="formulaModalSub">Apply this formula to your topic</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('formulaModal')">×</button>
+    </div>
+    <div class="modal-body" id="formulaModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModal('formulaModal')">Close</button>
+      <button class="btn-primary" onclick="applyFormula()">⚡ Generate with AI</button>
+    </div>
+  </div>
+</div>
+
+<!-- DATABASE VAULT MODAL -->
+<div id="dbVaultModal" class="modal-overlay" onclick="closeModalOnBg(event,'dbVaultModal')">
+  <div class="modal-card" style="max-width:720px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">🗄️ Database & Storage Engine</div>
+        <div class="modal-sub">Persistent storage for channels, pipeline Kanban, content library & settings</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('dbVaultModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <!-- Connection Status Card -->
+      <div class="card p-4 mb-3" style="background:linear-gradient(135deg,rgba(16,185,129,0.08),rgba(6,182,212,0.08));border-color:rgba(16,185,129,0.3)">
+        <div class="flex justify-between items-center mb-3">
+          <div class="flex items-center gap-3">
+            <span class="db-dot" style="width:12px;height:12px"></span>
+            <div>
+              <div class="font-bold text-lg" id="dbModalStatusText">Database Connected</div>
+              <div class="text-xs text-muted" id="dbModalDriverText">Active Driver: SQLite (autopilot.sqlite)</div>
+            </div>
+          </div>
+          <span class="badge badge-green" id="dbModalBadge">Active & Healthy</span>
+        </div>
+        <p class="text-sm text-secondary">
+          All channel stats, video cards, generated scripts, calendar items, and API configurations are saved permanently into the local database. Works out-of-the-box with zero setup via SQLite, and automatically connects to MySQL if <code>yt_autopilot</code> is available.
+        </p>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="grid-4 mb-4">
+        <div class="card p-3 text-center">
+          <div class="text-muted text-xs">Channels</div>
+          <div class="font-bold text-xl text-cyan" id="dbStatChannels">0</div>
+        </div>
+        <div class="card p-3 text-center">
+          <div class="text-muted text-xs">Pipeline Videos</div>
+          <div class="font-bold text-xl text-green" id="dbStatPipeline">0</div>
+        </div>
+        <div class="card p-3 text-center">
+          <div class="text-muted text-xs">Generated Scripts</div>
+          <div class="font-bold text-xl text-pink" id="dbStatContent">0</div>
+        </div>
+        <div class="card p-3 text-center">
+          <div class="text-muted text-xs">Calendar Events</div>
+          <div class="font-bold text-xl text-amber" id="dbStatCalendar">0</div>
+        </div>
+      </div>
+
+      <!-- Database Actions -->
+      <div class="card p-4 mb-3">
+        <h3 class="mb-2">⚙️ Database Management</h3>
+        <p class="text-xs text-muted mb-3">Sync frontend state with the database or download an offline JSON backup.</p>
+        <div class="flex gap-2" style="flex-wrap:wrap">
+          <button class="btn-primary btn-sm" onclick="syncWithDatabase()">🔄 Sync All Data Now</button>
+          <button class="btn-outline btn-sm" onclick="exportDbJson()">📥 Export Full JSON Backup</button>
+          <button class="btn-outline btn-sm" onclick="seedDefaultDatabase()">⚡ Re-seed Defaults</button>
+        </div>
+      </div>
+
+      <!-- Database Config info -->
+      <div class="card p-3 text-xs font-mono text-muted" style="background:var(--bg-input)">
+        <div><strong>Config Location:</strong> d:/xampp/htdocs/YoutubeAutomatio/db.php</div>
+        <div><strong>REST Endpoint:</strong> api.php?action=get_all</div>
+        <div><strong>MySQL Database:</strong> yt_autopilot (host: 127.0.0.1:3306)</div>
+        <div><strong>Fallback Engine:</strong> SQLite 3 (autopilot.sqlite)</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModal('dbVaultModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
 <!-- SIDEBAR -->
+<!-- ============================================================ -->
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-header">
     <div class="logo-wrap">
       <div class="logo-icon">
-        <svg width="28" height="28" viewBox="0 0 28 28"><rect width="28" height="28" rx="8" fill="url(#lg)"/><path d="M10 8.5L21 14L10 19.5Z" fill="white"/><defs><linearGradient id="lg" x1="0" y1="0" x2="28" y2="28"><stop offset="0%" stop-color="#ff4444"/><stop offset="100%" stop-color="#cc0000"/></linearGradient></defs></svg>
+        <svg width="30" height="30" viewBox="0 0 30 30">
+          <rect width="30" height="30" rx="9" fill="url(#lg2)"/>
+          <path d="M11 8L23 15L11 22Z" fill="white"/>
+          <defs>
+            <linearGradient id="lg2" x1="0" y1="0" x2="30" y2="30">
+              <stop offset="0%" stop-color="#6366f1"/>
+              <stop offset="100%" stop-color="#ec4899"/>
+            </linearGradient>
+          </defs>
+        </svg>
       </div>
-      <span class="logo-text">YT <span class="accent">AutoPilot 2.0</span></span>
+      <span class="logo-text">YT <span class="accent">AutoPilot 3.0</span></span>
     </div>
-    <div class="ai-status"><span class="status-dot pulse"></span><span class="status-text">Groq &amp; MCP Active</span></div>
+    <div class="ai-status"><span class="status-dot pulse"></span><span id="globalStatus">Loading...</span></div>
   </div>
 
-  <div class="sidebar-section-label">COMMAND &amp; RADAR</div>
-  <ul class="nav-links">
-    <li class="nav-item active" data-tab="overview" onclick="switchTab('overview',this)"><span class="nav-icon">&#9889;</span><span>Overview</span><span class="nav-badge">Live</span></li>
-    <li class="nav-item" data-tab="outlier-radar" onclick="switchTab('outlier-radar',this)"><span class="nav-icon">&#128293;</span><span>Viral &amp; Outlier Radar</span><span class="nav-badge hot">ViewStats</span></li>
-    <li class="nav-item" data-tab="competitor-compare" onclick="switchTab('competitor-compare',this)"><span class="nav-icon">&#9876;&#65039;</span><span>Competitor Benchmark</span><span class="nav-badge new">VidIQ</span></li>
-    <li class="nav-item" data-tab="channel-analyzer" onclick="switchTab('channel-analyzer',this)"><span class="nav-icon">&#128202;</span><span>Channel Forensic</span></li>
-  </ul>
+  <div class="sidebar-nav">
+    <div class="sidebar-section-label">INTELLIGENCE</div>
+    <ul class="nav-links">
+      <li class="nav-item active" data-tab="overview" onclick="switchTab('overview',this)">
+        <span class="nav-icon">⚡</span><span class="nav-label">Command Center</span><span class="nav-badge hot">Live</span>
+      </li>
+      <li class="nav-item" data-tab="viral-radar" onclick="switchTab('viral-radar',this)">
+        <span class="nav-icon">🔥</span><span class="nav-label">Viral Intelligence</span><span class="nav-badge hot">Radar</span>
+      </li>
+      <li class="nav-item" data-tab="competitor" onclick="switchTab('competitor',this)">
+        <span class="nav-icon">⚔️</span><span class="nav-label">Competitor Intel</span><span class="nav-badge new">AI</span>
+      </li>
+      <li class="nav-item" data-tab="channel-forensic" onclick="switchTab('channel-forensic',this)">
+        <span class="nav-icon">📊</span><span class="nav-label">Channel Forensic</span>
+      </li>
+    </ul>
 
-  <div class="sidebar-section-label">AI &amp; MCP STUDIO</div>
-  <ul class="nav-links">
-    <li class="nav-item" data-tab="groq-ai-studio" onclick="switchTab('groq-ai-studio',this)"><span class="nav-icon">&#9889;</span><span>Groq AI Studio</span><span class="nav-badge super">Ultra-Fast</span></li>
-    <li class="nav-item" data-tab="content-creator" onclick="switchTab('content-creator',this)"><span class="nav-icon">&#10024;</span><span>Content Creator</span><span class="nav-badge new">AI</span></li>
-    <li class="nav-item" data-tab="mcp-integrations" onclick="switchTab('mcp-integrations',this)"><span class="nav-icon">&#128279;</span><span>MCP Integrations</span><span class="nav-badge">Claude</span></li>
-    <li class="nav-item" data-tab="agent-center" onclick="switchTab('agent-center',this)"><span class="nav-icon">&#129504;</span><span>Agent Center</span></li>
-  </ul>
+    <div class="sidebar-section-label">CONTENT CREATION</div>
+    <ul class="nav-links">
+      <li class="nav-item" data-tab="content-studio" onclick="switchTab('content-studio',this)">
+        <span class="nav-icon">✍️</span><span class="nav-label">Content Studio</span><span class="nav-badge super">AI</span>
+      </li>
+      <li class="nav-item" data-tab="thumbnail-lab" onclick="switchTab('thumbnail-lab',this)">
+        <span class="nav-icon">🖼️</span><span class="nav-label">Thumbnail Lab</span><span class="nav-badge new">A/B</span>
+      </li>
+      <li class="nav-item" data-tab="clip-generator" onclick="switchTab('clip-generator',this)">
+        <span class="nav-icon">📱</span><span class="nav-label">Auto Clip Generator</span><span class="nav-badge hot">Shorts</span>
+      </li>
+      <li class="nav-item" data-tab="seo-radar" onclick="switchTab('seo-radar',this)">
+        <span class="nav-icon">🎯</span><span class="nav-label">SEO & Keywords</span>
+      </li>
+    </ul>
 
-  <div class="sidebar-section-label">PRODUCTION &amp; TOOLS</div>
-  <ul class="nav-links">
-    <li class="nav-item" data-tab="seo-optimizer" onclick="switchTab('seo-optimizer',this)"><span class="nav-icon">&#127919;</span><span>SEO &amp; Keywords</span><span class="nav-badge">Radar</span></li>
-    <li class="nav-item" data-tab="video-pipeline" onclick="switchTab('video-pipeline',this)"><span class="nav-icon">&#127916;</span><span>Video Pipeline</span></li>
-    <li class="nav-item" data-tab="automation-hub" onclick="switchTab('automation-hub',this)"><span class="nav-icon">&#129302;</span><span>Automation Hub</span></li>
-    <li class="nav-item" data-tab="verify-center" onclick="switchTab('verify-center',this)"><span class="nav-icon">&#9989;</span><span>Verify Center</span></li>
-    <li class="nav-item" data-tab="github-repos" onclick="switchTab('github-repos',this)"><span class="nav-icon">&#11088;</span><span>GitHub Resources</span></li>
-  </ul>
+    <div class="sidebar-section-label">GROWTH & PLANNING</div>
+    <ul class="nav-links">
+      <li class="nav-item" data-tab="content-calendar" onclick="switchTab('content-calendar',this)">
+        <span class="nav-icon">📅</span><span class="nav-label">Content Calendar</span>
+      </li>
+      <li class="nav-item" data-tab="revenue-planner" onclick="switchTab('revenue-planner',this)">
+        <span class="nav-icon">💰</span><span class="nav-label">Revenue Planner</span>
+      </li>
+      <li class="nav-item" data-tab="video-pipeline" onclick="switchTab('video-pipeline',this)">
+        <span class="nav-icon">🎬</span><span class="nav-label">Video Pipeline</span>
+      </li>
+    </ul>
+
+    <div class="sidebar-section-label">AUTOMATION</div>
+    <ul class="nav-links">
+      <li class="nav-item" data-tab="ai-agents" onclick="switchTab('ai-agents',this)">
+        <span class="nav-icon">🤖</span><span class="nav-label">AI Agent Center</span>
+      </li>
+      <li class="nav-item" data-tab="automation-hub" onclick="switchTab('automation-hub',this)">
+        <span class="nav-icon">⚙️</span><span class="nav-label">Automation Hub</span>
+      </li>
+      <li class="nav-item" data-tab="github-resources" onclick="switchTab('github-resources',this)">
+        <span class="nav-icon">⭐</span><span class="nav-label">GitHub Resources</span>
+      </li>
+    </ul>
+  </div>
 
   <div class="sidebar-footer">
-    <div class="sidebar-user" onclick="openChannelVaultModal()" title="Manage Channel Vault">
+    <div class="sidebar-user" onclick="openModal('channelVaultModal')">
       <div class="user-avatar" id="sidebarAvatar">YT</div>
       <div class="user-info">
-        <div class="user-name" id="sidebarActiveChannelName">My Tech Channel</div>
-        <div class="user-plan">&#128194; Vault: <span id="sidebarVaultCount">3 channels</span></div>
+        <div class="user-name" id="sidebarChannelName">Select Channel</div>
+        <div class="user-plan">📁 <span id="sidebarVaultCount">0 channels</span> in vault</div>
       </div>
     </div>
   </div>
 </nav>
 
+<!-- ============================================================ -->
+<!-- TOPBAR -->
+<!-- ============================================================ -->
+<header class="topbar" id="topbar">
+  <div class="topbar-left">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="breadcrumb" id="breadcrumb">⚡ Command Center</div>
+    <div class="channel-vault-selector">
+      <span class="vault-icon">📁</span>
+      <select id="topbarChannelSelect" onchange="onChannelChange(this.value)" class="vault-dropdown">
+        <option value="">Select Channel...</option>
+      </select>
+      <button class="btn-icon-subtle" onclick="openModal('channelVaultModal')" title="Manage Vault">+</button>
+    </div>
+  </div>
+
+  <div class="topbar-center">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="globalSearch" placeholder="Search tabs, viral formulas, tools... (Press /)" class="search-input" onkeyup="handleGlobalSearch(event)" />
+      <span class="search-kbd">/</span>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <!-- DATABASE BADGE -->
+    <button class="db-pill" onclick="openModal('dbVaultModal')" title="View Database Status & Persistence">
+      <span class="db-dot" id="topbarDbDot"></span>
+      <span id="topbarDbText">🗄️ SQLite DB</span>
+    </button>
+    <button class="btn-outline btn-sm" onclick="openModal('apiVaultModal')" id="apiConnectBtn">🔑 APIs</button>
+    <button class="btn-primary btn-sm" onclick="quickAudit()">⚡ Audit</button>
+    <div class="notif-btn" onclick="showNotifications()"><span>🔔</span><span class="notif-dot" id="notifDot" style="display:none"></span></div>
+  </div>
+</header>
+
+<!-- ============================================================ -->
 <!-- MAIN CONTENT -->
-<main class="main-content">
-  <!-- TOPBAR -->
-  <header class="topbar">
-    <div class="topbar-left">
-      <button class="menu-btn" onclick="toggleSidebar()" title="Toggle Sidebar">&#9776;</button>
-      <div class="breadcrumb" id="breadcrumb">Overview</div>
+<!-- ============================================================ -->
+<main class="main-content" id="mainContent">
 
-      <!-- ACTIVE CHANNEL VAULT SELECTOR IN TOPBAR -->
-      <div class="channel-vault-selector">
-        <span class="vault-icon">&#128194;</span>
-        <select id="topbarChannelSelect" onchange="onChannelVaultChange(this.value)" class="vault-dropdown">
-          <!-- Dynamically populated from Vault -->
-        </select>
-        <button class="btn-icon-subtle" onclick="openChannelVaultModal()" title="Add / Manage Channels in Vault">&#10010;</button>
+<!-- ========================================================= -->
+<!-- TAB: COMMAND CENTER (OVERVIEW) -->
+<!-- ========================================================= -->
+<section class="tab-content active" id="tab-overview">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Command <span class="gradient-text">Center</span></h1>
+      <p class="page-sub">Your complete YouTube intelligence dashboard — real data, AI insights, and instant actions</p>
+    </div>
+    <div class="header-actions">
+      <span class="live-indicator"><span class="pulse-dot"></span> Intelligence Active</span>
+      <button class="btn-outline btn-sm" onclick="refreshOverview()">↻ Refresh</button>
+      <button class="btn-primary btn-sm" onclick="switchTab('viral-radar',document.querySelector('[data-tab=viral-radar]'))">🔥 Viral Radar</button>
+    </div>
+  </div>
+
+  <!-- API GATE OR STATS -->
+  <div id="overviewApiGate" style="display:none">
+    <div class="card glow-accent mb-4">
+      <div class="api-gate">
+        <div class="api-gate-icon">🔑</div>
+        <div class="api-gate-title">APIs Required to Unlock Live YouTube Automation</div>
+        <div class="api-gate-desc">This dashboard connects directly to YouTube and Groq AI. Enter your free API keys below to unlock real statistics, outlier detection, and the auto clip generator without leaving this page.</div>
+        
+        <div class="api-gate-inputs w-100" style="max-width:580px;margin:15px auto;text-align:left">
+          <!-- YouTube API Inline Box -->
+          <div class="card p-3 mb-3" style="background:var(--bg-input);border:1px solid var(--border)">
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-sm font-bold flex items-center gap-2">📺 YouTube Data API v3 <span id="gateBadgeYt" class="badge">Not Connected</span></span>
+              <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" class="link text-xs">Get Free Key (10K units/day) ↗</a>
+            </div>
+            <p class="text-xs text-muted mb-2"><strong>Needed for:</strong> Real channel stats, view velocity, competitor comparison & viral outlier detection</p>
+            <div class="flex gap-2">
+              <input type="password" id="gateYtKey" placeholder="AIzaSy..." class="input-field" style="flex:1" />
+              <button class="btn-primary btn-sm" onclick="saveKeyFromGate('yt')">Save & Unlock</button>
+            </div>
+          </div>
+
+          <!-- Groq API Inline Box -->
+          <div class="card p-3 mb-3" style="background:var(--bg-input);border:1px solid var(--border)">
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-sm font-bold flex items-center gap-2">⚡ Groq AI Key (Llama 3.3 70B) <span id="gateBadgeGroq" class="badge">Not Connected</span></span>
+              <a href="https://console.groq.com/keys" target="_blank" class="link text-xs">Get Free Key (Sub-300ms) ↗</a>
+            </div>
+            <p class="text-xs text-muted mb-2"><strong>Needed for:</strong> Auto Clip Generator (Script → Shorts), AI hook analyzer, viral script studio & multi-agents</p>
+            <div class="flex gap-2">
+              <input type="password" id="gateGroqKey" placeholder="gsk_..." class="input-field" style="flex:1" />
+              <button class="btn-groq btn-sm" onclick="saveKeyFromGate('groq')">Save & Unlock</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-3 items-center" style="flex-wrap:wrap;justify-content:center">
+          <button class="btn-outline" onclick="useDemo()">👁️ Preview with Demo Data</button>
+          <button class="btn-outline btn-sm" onclick="openModal('apiVaultModal')">⚙️ Open Full Vault</button>
+        </div>
       </div>
     </div>
+  </div>
 
-    <div class="topbar-right">
-      <div class="search-wrap">
-        <span class="search-icon">&#128269;</span>
-        <input type="text" id="globalSearch" placeholder="Search any channel, handle, or video..." class="search-input" onkeyup="handleGlobalSearch(event)" />
-      </div>
-      <button class="btn-outline btn-sm" onclick="openApiVaultModal()" title="Configure Live YouTube and Groq API Credentials">&#128273; Connect Real APIs</button>
-      <button class="btn-groq-quick" onclick="switchTab('groq-ai-studio', document.querySelector('[data-tab=groq-ai-studio]'))">&#9889; Groq AI</button>
-      <button class="btn-primary" onclick="quickAnalyzeActiveChannel()">&#129302; Audit Channel</button>
-      <div class="notif-btn" onclick="showNotificationCenter()"><span>&#128276;</span><span class="notif-dot"></span></div>
-    </div>
-  </header>
-
-  <!-- ========================================== -->
-  <!-- TAB 1: OVERVIEW -->
-  <!-- ========================================== -->
-  <section class="tab-content active" id="tab-overview">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">Command Center <span class="gradient-text">Overview</span></h1>
-        <p class="page-sub">Next-generation YouTube automation intelligence &mdash; live metrics, AI insights &amp; multi-channel controls</p>
-      </div>
-      <div class="header-actions">
-        <span class="live-indicator"><span class="pulse-dot"></span> Live Intelligence</span>
-        <button class="btn-outline" onclick="refreshActiveChannelData()">&#8635; Refresh Metrics</button>
-      </div>
-    </div>
-
-    <!-- METRIC STATS GRID -->
-    <div class="stats-grid">
+  <!-- STATS GRID -->
+  <div id="overviewStats">
+    <div class="grid-4 mb-4" id="statsGrid">
       <div class="stat-card">
-        <div class="stat-icon sub-icon">&#128101;</div>
+        <div class="stat-icon">👥</div>
         <div class="stat-body">
-          <div class="stat-value" id="statSubCount">1.24M</div>
+          <div class="stat-value" id="statSubs">—</div>
           <div class="stat-label">Subscribers</div>
-          <div class="stat-trend positive" id="statSubTrend">&#9650; +14.2K this month</div>
+          <div class="stat-trend neutral" id="statSubTrend">Connect API for live data</div>
         </div>
         <div class="stat-glow sub-glow"></div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon view-icon">&#128065;</div>
+        <div class="stat-icon">👁️</div>
         <div class="stat-body">
-          <div class="stat-value" id="statViewCount">84.6M</div>
-          <div class="stat-label">Total Channel Views</div>
-          <div class="stat-trend positive" id="statViewTrend">&#9650; +1.8M past 28d</div>
+          <div class="stat-value" id="statViews">—</div>
+          <div class="stat-label">Total Views</div>
+          <div class="stat-trend neutral" id="statViewTrend">Connect API for live data</div>
         </div>
         <div class="stat-glow view-glow"></div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon vid-icon">&#127916;</div>
+        <div class="stat-icon">🎬</div>
         <div class="stat-body">
-          <div class="stat-value" id="statVideoCount">142</div>
+          <div class="stat-value" id="statVideos">—</div>
           <div class="stat-label">Videos Published</div>
-          <div class="stat-trend neutral" id="statVideoTrend">2.4 videos / week</div>
+          <div class="stat-trend neutral" id="statVideoTrend">Connect API for live data</div>
         </div>
         <div class="stat-glow vid-glow"></div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon eng-icon">&#128293;</div>
+        <div class="stat-icon">🔥</div>
         <div class="stat-body">
-          <div class="stat-value" id="statEngRate">4.82%</div>
-          <div class="stat-label">Avg Engagement (Likes+Com)</div>
-          <div class="stat-trend positive" id="statEngTrend">&#127942; Top 10% in Niche</div>
+          <div class="stat-value" id="statEng">—</div>
+          <div class="stat-label">Avg Engagement Rate</div>
+          <div class="stat-trend neutral" id="statEngTrend">Connect API for live data</div>
         </div>
         <div class="stat-glow eng-glow"></div>
       </div>
     </div>
 
-    <!-- QUICK ANY-CHANNEL AUDIT BAR -->
-    <div class="quick-channel-input card">
+    <!-- QUICK AUDIT INPUT -->
+    <div class="card mb-4">
       <div class="card-header">
         <div>
-          <h2>&#128269; Forensic Channel Audit</h2>
-          <p class="card-desc">Enter any YouTube Channel ID (UCxxx), handle (@handle), or video URL to inspect</p>
+          <h2 class="card-title">🔍 Quick Channel Audit</h2>
+          <p class="card-desc">Enter any YouTube channel handle or ID to instantly analyze</p>
         </div>
-        <div class="tag-row">
-          <span class="card-badge">YouTube Data API v3</span>
-          <span class="card-badge badge-cyan">Auto-Cache</span>
+        <div class="flex gap-2 items-center">
+          <span class="badge badge-cyan">YouTube API v3</span>
         </div>
       </div>
-      <div class="channel-input-row">
-        <input type="text" id="quickChannelId" placeholder="Enter Channel ID (UCxxxxxx) or @handle (e.g. @MrBeast, @MKBHD)" class="input-field" value="@AutomationEmpire" />
-        <input type="text" id="quickApiKey" placeholder="YouTube Data API Key (optional - simulated demo if empty)" class="input-field" />
-        <button class="btn-primary btn-analyze" onclick="analyzeChannel()"><span id="analyzeBtnText">&#9889; Run Forensic Audit</span></button>
-      </div>
-      <div class="api-hint-row">
-        <span>&#128273; <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" class="link">Get Free YouTube Data API Key</a> (Optional: works seamlessly with demo data if blank)</span>
-        <span class="vault-quick-add-link" onclick="saveQuickInputToVault()">&#10010; Save this channel to Vault</span>
+      <div class="card-body">
+        <div class="flex gap-2 mb-2" style="flex-wrap:wrap">
+          <input type="text" id="auditChannelInput" placeholder="@handle or UCxxx channel ID..." class="input-field" style="flex:1;min-width:200px" onkeydown="if(event.key==='Enter')quickAudit()" />
+          <button class="btn-primary" onclick="quickAudit()"><span id="auditBtnText">⚡ Analyze Channel</span></button>
+          <button class="btn-outline btn-sm" onclick="openModal('channelVaultModal')">📁 Vault</button>
+        </div>
+        <p class="form-hint">💡 No API key? <span class="link" onclick="openModal('apiVaultModal')">Connect YouTube API</span> for real data, or <span class="link" onclick="loadDemoChannel()">load demo channel</span></p>
       </div>
     </div>
 
-    <!-- TWO COL GRID: OUTLIER RADAR HIGHLIGHT & AI ENGINE -->
-    <div class="two-col-grid">
-      <!-- OUTLIER PREVIEW CARD -->
+    <!-- TWO COL: OUTLIER PREVIEW + AI INSIGHTS -->
+    <div class="grid-split-2 mb-4">
+      <!-- Outlier Preview -->
       <div class="card">
         <div class="card-header">
           <div>
-            <h2>&#128293; Outlier Viral Highlights</h2>
-            <p class="card-desc">Videos performing 3x to 15x higher than channel median</p>
+            <h2 class="card-title">🔥 Top Viral Outliers</h2>
+            <p class="card-desc">Videos performing 3x–15x above channel median</p>
           </div>
-          <button class="btn-sm btn-outline" onclick="switchTab('outlier-radar', document.querySelector('[data-tab=outlier-radar]'))">View All Outliers &rarr;</button>
+          <button class="btn-outline btn-sm" onclick="switchTab('viral-radar',document.querySelector('[data-tab=viral-radar]'))">See All →</button>
         </div>
-        <div class="outlier-preview-list" id="overviewOutlierList">
-          <!-- Populated dynamically -->
+        <div class="card-body">
+          <div id="overviewOutliers">
+            <div class="api-gate" style="padding:30px 20px">
+              <div class="api-gate-icon" style="font-size:40px">📊</div>
+              <div class="api-gate-title" style="font-size:1rem">Connect YouTube API</div>
+              <div class="api-gate-desc" style="font-size:0.82rem">Enter a channel above or <span class="link" onclick="loadDemoChannel()">load demo data</span></div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- AI INTELLIGENCE FEED -->
+      <!-- AI Growth Playbook -->
       <div class="card">
         <div class="card-header">
           <div>
-            <h2>&#129504; Algorithmic Growth Playbook</h2>
-            <p class="card-desc">Real-time signals extracted from top 100 niche videos</p>
+            <h2 class="card-title">🧠 AI Growth Playbook</h2>
+            <p class="card-desc">Real-time viral formula signals</p>
           </div>
-          <span class="card-badge badge-green">VidIQ + Groq Insights</span>
+          <span class="badge badge-green">Groq AI</span>
         </div>
-        <div class="insights-list">
+        <div class="card-body">
           <div class="insight-item insight-tip">
-            <span class="insight-icon">&#128161;</span>
-            <div class="insight-text"><strong>Curiosity-Gap Titles Win:</strong> Titles with specific stakes ("I Built a $10k/mo Bot In 48 Hours") drive <strong>3.4x higher CTR</strong> than descriptive how-to titles.</div>
+            <span class="insight-icon">💡</span>
+            <div class="insight-text"><strong>Curiosity-Gap Titles Win:</strong> Titles with specific stakes drive <strong>3.4x higher CTR</strong> than descriptive how-to titles.</div>
           </div>
           <div class="insight-item insight-warn">
-            <span class="insight-icon">&#9888;&#65039;</span>
-            <div class="insight-text"><strong>Retention Drop at 0:25:</strong> 42% of viewers drop off during generic channel intros. Eliminate logos &amp; jump straight into the promise.</div>
+            <span class="insight-icon">⚠️</span>
+            <div class="insight-text"><strong>Retention Drop at 0:25:</strong> 42% of viewers drop off during generic intros. Jump straight into the promise.</div>
           </div>
           <div class="insight-item insight-success">
-            <span class="insight-icon">&#127942;</span>
-            <div class="insight-text"><strong>Shorts Funnel Synergy:</strong> Publishing 1 Short highlighting the climax 2 hours after your long-form video boosts browse impressions by <strong>68%</strong>.</div>
+            <span class="insight-icon">🏆</span>
+            <div class="insight-text"><strong>Shorts Funnel Synergy:</strong> Publishing a Short 2 hours after your long-form video boosts browse impressions by <strong>68%</strong>.</div>
           </div>
           <div class="insight-item insight-tip">
-            <span class="insight-icon">&#127919;</span>
-            <div class="insight-text"><strong>Thumbnail Contrast Index:</strong> Thumbnails with 3 or fewer elements + vibrant accent border achieve 8.6% CTR vs 3.2% niche average.</div>
+            <span class="insight-icon">🎯</span>
+            <div class="insight-text"><strong>Thumbnail Rule:</strong> Thumbnails with ≤3 elements + vibrant border achieve 8.6% CTR vs 3.2% niche average.</div>
           </div>
+          <button class="btn-groq btn-sm w-100 mt-3" onclick="switchTab('content-studio',document.querySelector('[data-tab=content-studio]'))">⚡ Generate Content Now</button>
         </div>
       </div>
     </div>
 
-    <!-- AUTOMATION PIPELINE RUNNER -->
-    <div class="card mt-4">
-      <div class="card-header">
-        <div>
-          <h2>&#129302; Automated Multi-Agent Pipeline</h2>
-          <p class="card-desc">Full autonomous flow: Niche scanning &rarr; Claude scripting &rarr; ElevenLabs voice &rarr; Auto-publish</p>
-        </div>
-        <div class="btn-group">
-          <button class="btn-sm btn-primary" onclick="triggerPipelineRun()">&#9654; Run Pipeline Now</button>
-          <span class="status-badge running">&#9679; Autonomous Mode: Ready</span>
-        </div>
-      </div>
-      <div class="pipeline-stages">
-        <div class="pipeline-stage done">
-          <div class="stage-icon">&#128161;</div>
-          <div class="stage-info"><div class="stage-name">Trend Radar</div><div class="stage-status">Outliers identified</div></div>
-          <div class="stage-check">&#10003;</div>
-        </div>
-        <div class="pipeline-connector"></div>
-        <div class="pipeline-stage done">
-          <div class="stage-info"><div class="stage-name">Claude / Groq Script</div><div class="stage-status">High-retention draft ready</div></div>
-          <div class="stage-icon">&#128221;</div>
-          <div class="stage-check">&#10003;</div>
-        </div>
-        <div class="pipeline-connector"></div>
-        <div class="pipeline-stage active">
-          <div class="stage-icon">&#127897;</div>
-          <div class="stage-info"><div class="stage-name">Voice Generator</div><div class="stage-status">ElevenLabs Ultra-Realistic</div></div>
-          <div class="stage-spinner spinning">&#8635;</div>
-        </div>
-        <div class="pipeline-connector"></div>
-        <div class="pipeline-stage pending">
-          <div class="stage-icon">&#127916;</div>
-          <div class="stage-info"><div class="stage-name">Video Assembler</div><div class="stage-status">Auto-captions &amp; B-roll</div></div>
-          <div class="stage-dot">&#9675;</div>
-        </div>
-        <div class="pipeline-connector"></div>
-        <div class="pipeline-stage pending">
-          <div class="stage-icon">&#128228;</div>
-          <div class="stage-info"><div class="stage-name">YouTube Publisher</div><div class="stage-status">Optimized metadata queued</div></div>
-          <div class="stage-dot">&#9675;</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================================== -->
-  <!-- TAB 2: VIRAL & OUTLIER RADAR (ViewStats Style) -->
-  <!-- ========================================== -->
-  <section class="tab-content" id="tab-outlier-radar">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">&#128293; Viral &amp; Outlier <span class="gradient-text">Radar</span></h1>
-        <p class="page-sub">Detect 3x &ndash; 20x breakout videos across any channel. Deconstruct why they went viral and steal the winning formula.</p>
-      </div>
-      <div class="header-actions">
-        <button class="btn-outline" onclick="loadSampleOutliers()">&#8635; Reload Outlier Feed</button>
-        <button class="btn-primary" onclick="openChannelVaultModal()">&#128194; Switch Channel</button>
-      </div>
-    </div>
-
-    <!-- OUTLIER FORMULA BANNER -->
-    <div class="outlier-kpi-banner">
-      <div class="outlier-kpi-item">
-        <div class="kpi-label">Channel Median Views</div>
-        <div class="kpi-value" id="radarMedianViews">38,500</div>
-        <div class="kpi-sub">Baseline for current channel</div>
-      </div>
-      <div class="outlier-kpi-item">
-        <div class="kpi-label">Highest Outlier Multiplier</div>
-        <div class="kpi-value text-unicorn" id="radarMaxMultiplier">14.8x</div>
-        <div class="kpi-sub">&#129412; Unicorn breakout detected</div>
-      </div>
-      <div class="outlier-kpi-item">
-        <div class="kpi-label">Viral Breakout Threshold</div>
-        <div class="kpi-value text-viral" id="radarViralThreshold">115,500+</div>
-        <div class="kpi-sub">3.0x median benchmark</div>
-      </div>
-      <div class="outlier-kpi-item">
-        <div class="kpi-label">Average Views Per Hour (VPH)</div>
-        <div class="kpi-value text-cyan" id="radarAvgVph">1,420 VPH</div>
-        <div class="kpi-sub">Current momentum rate</div>
-      </div>
-    </div>
-
-    <!-- FILTER & SEARCH CONTROLS -->
-    <div class="filter-controls-card card mb-4">
-      <div class="filter-pills-row">
-        <span class="filter-label">Filter Outlier Level:</span>
-        <button class="pill active" onclick="filterOutliers('all', this)">All Videos</button>
-        <button class="pill pill-unicorn" onclick="filterOutliers('unicorn', this)">&#129412; Unicorn (&gt;10x)</button>
-        <button class="pill pill-viral" onclick="filterOutliers('viral', this)">&#128293; Viral Breakout (5x - 10x)</button>
-        <button class="pill pill-high" onclick="filterOutliers('high', this)">&#9889; Strong Outlier (2x - 5x)</button>
-        <button class="pill pill-normal" onclick="filterOutliers('normal', this)">&#128065; Normal (0.8x - 2x)</button>
-        <button class="pill pill-under" onclick="filterOutliers('under', this)">&#9888;&#65039; Flop / Low (&lt;0.8x)</button>
-      </div>
-      <div class="filter-search-row mt-3">
-        <input type="text" id="outlierSearchInput" placeholder="Filter by keyword (e.g. 'Claude', 'AI', 'Shorts', 'Money')..." class="input-field" onkeyup="filterOutliersByText(this.value)" />
-        <select id="outlierSortSelect" class="input-field" onchange="sortOutliers(this.value)">
-          <option value="multiplier_desc">Sort by: Highest Outlier Multiplier</option>
-          <option value="views_desc">Sort by: Total Views</option>
-          <option value="vph_desc">Sort by: Views Per Hour (VPH)</option>
-          <option value="date_desc">Sort by: Newest Release</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- OUTLIER GRID CARDS -->
-    <div class="outlier-grid" id="outlierGridContainer">
-      <!-- Injected dynamically by JavaScript -->
-    </div>
-  </section>
-
-  <!-- ========================================== -->
-  <!-- TAB 3: COMPETITOR BENCHMARK (VidIQ Style) -->
-  <!-- ========================================== -->
-  <section class="tab-content" id="tab-competitor-compare">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">&#9876;&#65039; Competitor <span class="gradient-text">Benchmark</span></h1>
-        <p class="page-sub">Side-by-side forensic analysis of multiple channels. Identify upload gaps, content velocity, and winning topics.</p>
-      </div>
-      <div class="header-actions">
-        <button class="btn-primary" onclick="openChannelVaultModal()">&#10010; Add Competitor</button>
-      </div>
-    </div>
-
-    <!-- COMPARISON SELECTOR CARD -->
+    <!-- PIPELINE STATUS -->
     <div class="card mb-4">
       <div class="card-header">
         <div>
-          <h2>Select Channels to Compare (Head-to-Head)</h2>
-          <p class="card-desc">Compare up to 4 channels from your vault or add a new channel URL</p>
+          <h2 class="card-title">🤖 Automated Production Pipeline</h2>
+          <p class="card-desc">Trend → Script → Voice → Video → Publish</p>
         </div>
-        <button class="btn-sm btn-outline" onclick="runCompetitorComparison()">&#8635; Recalculate Matrix</button>
-      </div>
-      <div class="competitor-select-grid" id="competitorSelectorBoxes">
-        <!-- Dynamically rendered checkboxes of vault channels -->
-      </div>
-    </div>
-
-    <!-- SIDE-BY-SIDE MATRIX TABLE -->
-    <div class="card mb-4">
-      <div class="card-header">
-        <h2>Cross-Channel Performance Matrix</h2>
-        <span class="card-badge">Normalized Benchmark</span>
-      </div>
-      <div class="table-responsive">
-        <table class="benchmark-table" id="competitorBenchmarkTable">
-          <thead>
-            <tr>
-              <th>Metric / Dimension</th>
-              <th id="compColHeader0">My Tech Channel</th>
-              <th id="compColHeader1">Competitor Alpha</th>
-              <th id="compColHeader2">Competitor Beta</th>
-              <th id="compColHeader3">Niche Benchmark</th>
-            </tr>
-          </thead>
-          <tbody id="competitorTableBody">
-            <!-- Dynamically populated -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- WINNING PATTERNS & GAPS -->
-    <div class="two-col-grid">
-      <div class="card">
-        <div class="card-header">
-          <h2>&#129504; Cross-Channel Winning Patterns</h2>
-          <span class="card-badge badge-green">Pattern Discovery</span>
-        </div>
-        <div class="pattern-list" id="discoveredPatternsList">
-          <div class="pattern-box">
-            <div class="pattern-header"><span class="badge-tag">Duration Sweet Spot</span><strong>11 to 14 Minutes</strong></div>
-            <p>Videos between 11-14 mins have a <strong>42% higher retention completion rate</strong> across all 3 competitors than 20+ min videos.</p>
-          </div>
-          <div class="pattern-box">
-            <div class="pattern-header"><span class="badge-tag">Winning Title Angle</span><strong>Challenge / Extreme Stakes</strong></div>
-            <p>Titles starting with "I Automated..." or "We Tested 50..." out-viewed tutorials by <strong>5.8x</strong> on average.</p>
-          </div>
-          <div class="pattern-box">
-            <div class="pattern-header"><span class="badge-tag">Best Release Time</span><strong>Thursday 3:00 PM EST</strong></div>
-            <p>Generates the highest initial 2-hour velocity (VPH) spike among your niche competitors.</p>
-          </div>
+        <div class="flex gap-2">
+          <button class="btn-sm btn-primary" onclick="triggerPipeline()">▶ Run Pipeline</button>
+          <span class="status-badge running">● Autonomous Mode</span>
         </div>
       </div>
-
-      <div class="card">
-        <div class="card-header">
-          <h2>&#127919; Underserved Topic Gaps (Opportunity Radar)</h2>
-          <span class="card-badge badge-cyan">Blue Ocean Topics</span>
-        </div>
-        <div class="gap-list" id="topicGapsList">
-          <div class="gap-item">
-            <div class="gap-info">
-              <h4>"Claude MCP Deep Dive for Complete Beginners"</h4>
-              <p>High search demand, zero competitor videos over 50k views in last 30 days.</p>
-            </div>
-            <button class="btn-sm btn-groq" onclick="sendTopicToGroq('Claude MCP Deep Dive for Complete Beginners')">&#9889; Draft Script</button>
+      <div class="card-body">
+        <div class="pipeline-stages">
+          <div class="pipeline-stage done">
+            <div class="stage-icon">💡</div>
+            <div class="stage-name">Trend Radar</div>
+            <div class="stage-status">Outliers found</div>
+            <div class="stage-check">✓</div>
           </div>
-          <div class="gap-item">
-            <div class="gap-info">
-              <h4>"Automate YouTube with Local Open-Source LLMs"</h4>
-              <p>Ollama + YouTube API interest surging +180% this month; 0 high-production videos.</p>
-            </div>
-            <button class="btn-sm btn-groq" onclick="sendTopicToGroq('Automate YouTube with Local Open-Source LLMs')">&#9889; Draft Script</button>
+          <div class="pipeline-connector"></div>
+          <div class="pipeline-stage done">
+            <div class="stage-icon">✍️</div>
+            <div class="stage-name">AI Script</div>
+            <div class="stage-status">Draft ready</div>
+            <div class="stage-check">✓</div>
           </div>
-          <div class="gap-item">
-            <div class="gap-info">
-              <h4>"n8n vs Make.com: Full Automated Channel Teardown"</h4>
-              <p>High buyer intent, extremely high affiliate CPM ($18-$24).</p>
-            </div>
-            <button class="btn-sm btn-groq" onclick="sendTopicToGroq('n8n vs Make.com: Full Automated Channel Teardown')">&#9889; Draft Script</button>
+          <div class="pipeline-connector"></div>
+          <div class="pipeline-stage active">
+            <div class="stage-icon">🎙️</div>
+            <div class="stage-name">Voice Gen</div>
+            <div class="stage-status">ElevenLabs</div>
+            <div class="stage-spinner">↻</div>
+          </div>
+          <div class="pipeline-connector"></div>
+          <div class="pipeline-stage pending">
+            <div class="stage-icon">🎬</div>
+            <div class="stage-name">Video Assembly</div>
+            <div class="stage-status">Auto captions</div>
+          </div>
+          <div class="pipeline-connector"></div>
+          <div class="pipeline-stage pending">
+            <div class="stage-icon">📤</div>
+            <div class="stage-name">Publisher</div>
+            <div class="stage-status">Scheduled</div>
           </div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ========================================== -->
-  <!-- TAB 4: GROQ AI ULTRA-FAST STUDIO -->
-  <!-- ========================================== -->
-  <section class="tab-content" id="tab-groq-ai-studio">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">&#9889; Groq Ultra-AI <span class="gradient-text">Studio</span></h1>
-        <p class="page-sub">Sub-second AI inference powered by Groq Llama 3.3 70B &amp; Llama 3.1 8B. Generate viral scripts, steal competitor hooks, and optimize retention.</p>
-      </div>
-      <div class="header-actions">
-        <span class="badge-groq"><span class="pulse-dot"></span> &lt;300ms Inference</span>
-      </div>
+<!-- ========================================================= -->
+<!-- TAB: VIRAL INTELLIGENCE -->
+<!-- ========================================================= -->
+<section class="tab-content" id="tab-viral-radar">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">🔥 Viral <span class="gradient-text">Intelligence</span></h1>
+      <p class="page-sub">Detect 3x–20x breakout videos. Analyze their viral DNA and steal the winning formula.</p>
     </div>
-
-    <!-- GROQ SETTINGS & MODEL CONFIG -->
-    <div class="card mb-4">
-      <div class="card-header">
-        <div>
-          <h2>Groq API Configuration &amp; Model Engine</h2>
-          <p class="card-desc">Enter your free Groq API key (`gsk_...`) from <a href="https://console.groq.com/keys" target="_blank" class="link">console.groq.com</a> or use the instant offline smart engine.</p>
-        </div>
-        <span class="card-badge badge-cyan">Zero Latency</span>
-      </div>
-      <div class="form-grid-3">
-        <div>
-          <label class="form-label">Groq API Key</label>
-          <input type="password" id="groqApiKey" placeholder="gsk_xxxxxxxxxxxxxxxxxxxx (Optional)" class="input-field" onchange="saveGroqKey(this.value)" />
-        </div>
-        <div>
-          <label class="form-label">Model Selection</label>
-          <select id="groqModelSelect" class="input-field">
-            <option value="llama-3.3-70b-versatile">Llama 3.3 70B Versatile (Highest Quality)</option>
-            <option value="llama-3.1-8b-instant" selected>Llama 3.1 8B Instant (Ultra-Fast 500 T/s)</option>
-            <option value="mixtral-8x7b-32768">Mixtral 8x7B (Long Context 32K)</option>
-          </select>
-        </div>
-        <div>
-          <label class="form-label">Creativity &amp; Temperature</label>
-          <div class="range-wrap">
-            <input type="range" id="groqTempRange" min="0.2" max="1.0" step="0.1" value="0.7" oninput="document.getElementById('tempVal').textContent=this.value" />
-            <span id="tempVal">0.7</span>
-          </div>
-        </div>
-      </div>
+    <div class="header-actions">
+      <button class="btn-outline btn-sm" onclick="loadOutliers()">↻ Refresh Feed</button>
+      <button class="btn-primary btn-sm" onclick="openModal('channelVaultModal')">📁 Switch Channel</button>
     </div>
+  </div>
 
-    <!-- SPLIT PANE: PRESET RECIPES & WORKSPACE -->
-    <div class="groq-workspace-grid">
-      <!-- LEFT: PRESET PROMPT RECIPES -->
-      <div class="card">
-        <div class="card-header">
-          <h2>Viral Prompt Recipes</h2>
-          <span class="card-badge">1-Click</span>
-        </div>
-        <div class="prompt-preset-list">
-          <button class="preset-btn active" onclick="loadGroqPreset('steal_concept')">
-            <div class="preset-icon">&#128293;</div>
-            <div class="preset-text">
-              <div class="preset-title">Reverse-Engineer Outlier</div>
-              <div class="preset-sub">Deconstruct competitor viral video &amp; generate 5 concepts</div>
-            </div>
-          </button>
-          <button class="preset-btn" onclick="loadGroqPreset('viral_titles')">
-            <div class="preset-icon">&#127919;</div>
-            <div class="preset-text">
-              <div class="preset-title">10 High-CTR Title Angles</div>
-              <div class="preset-sub">Curiosity-gap, high-stakes, &amp; negativity bias formats</div>
-            </div>
-          </button>
-          <button class="preset-btn" onclick="loadGroqPreset('shorts_script')">
-            <div class="preset-icon">&#128241;</div>
-            <div class="preset-text">
-              <div class="preset-title">60-Sec Viral Shorts Script</div>
-              <div class="preset-sub">0:03 hook, micro-cliffhangers &amp; seamless loop</div>
-            </div>
-          </button>
-          <button class="preset-btn" onclick="loadGroqPreset('long_outline')">
-            <div class="preset-icon">&#128221;</div>
-            <div class="preset-text">
-              <div class="preset-title">Full 10-Min Video Blueprint</div>
-              <div class="preset-sub">Hook, tension curve, payoff &amp; end-screen funnel</div>
-            </div>
-          </button>
-          <button class="preset-btn" onclick="loadGroqPreset('vidiq_audit')">
-            <div class="preset-icon">&#128270;</div>
-            <div class="preset-text">
-              <div class="preset-title">VidIQ Channel Teardown</div>
-              <div class="preset-sub">Find why videos underperform and how to fix CTR</div>
-            </div>
-          </button>
-        </div>
-      </div>
-
-      <!-- RIGHT: PROMPT COMPOSER & TERMINAL OUTPUT -->
-      <div class="card">
-        <div class="card-header">
-          <h2>AI Studio Workspace</h2>
-          <div class="btn-group">
-            <button class="btn-sm btn-outline" onclick="clearGroqWorkspace()">Clear</button>
-            <button class="btn-sm btn-primary btn-groq-run" onclick="executeGroqGeneration()"><span id="groqRunBtnText">&#9889; Run Groq Inference</span></button>
-          </div>
-        </div>
-
-        <div class="prompt-input-area mb-3">
-          <label class="form-label">System Context &amp; Channel Target</label>
-          <input type="text" id="groqTargetNiche" class="input-field mb-2" value="YouTube Automation, AI Tools, Faceless Content" placeholder="Target Niche or Channel Focus..." />
-          <label class="form-label">Prompt Instruction</label>
-          <textarea id="groqPromptInput" class="textarea-field" rows="4" placeholder="Enter your instructions or click a preset recipe on the left..."></textarea>
-        </div>
-
-        <!-- GENERATED AI OUTPUT CONSOLE -->
-        <div class="ai-console-wrap">
-          <div class="console-header">
-            <div class="console-title">&#128421; Output Stream <span id="groqStreamStatus" class="console-status">Idle</span></div>
-            <div class="console-actions">
-              <button class="btn-xs btn-outline" onclick="copyConsoleOutput()">&#128203; Copy</button>
-              <button class="btn-xs btn-outline" onclick="exportConsoleToPipeline()">&#127916; Send to Pipeline</button>
-            </div>
-          </div>
-          <div class="console-body" id="groqConsoleOutput">
-Click "Run Groq Inference" above or select a preset recipe to begin generating.
-          </div>
-        </div>
-      </div>
+  <!-- KPI BANNER -->
+  <div class="kpi-banner mb-4">
+    <div class="kpi-item">
+      <div class="kpi-label">Channel Median</div>
+      <div class="kpi-value" id="kpiMedian">—</div>
+      <div class="kpi-sub">Baseline views</div>
     </div>
-  </section>
-
-  <!-- ========================================== -->
-  <!-- TAB 5: CHANNEL FORENSIC ANALYZER -->
-  <!-- ========================================== -->
-  <section class="tab-content" id="tab-channel-analyzer">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">&#128202; Deep Channel <span class="gradient-text">Forensic</span></h1>
-        <p class="page-sub">Analyze any YouTube channel: audience retention health, upload cadence, engagement ratios, and video performance catalog.</p>
-      </div>
-      <div class="header-actions">
-        <button class="btn-outline" onclick="exportChannelReport()">&#128229; Export PDF/JSON</button>
-      </div>
+    <div class="kpi-item">
+      <div class="kpi-label">Highest Multiplier</div>
+      <div class="kpi-value purple" id="kpiMaxMult">—</div>
+      <div class="kpi-sub">Best outlier</div>
     </div>
-
-    <!-- PROFILE HERO BANNER -->
-    <div class="channel-profile-hero card mb-4">
-      <div class="profile-avatar-wrap">
-        <div class="profile-avatar-large" id="profileLargeAvatar">&#128640;</div>
-        <span class="verified-badge">&#10003;</span>
-      </div>
-      <div class="profile-meta">
-        <div class="profile-name-row">
-          <h2 id="profileTitle">Automation Empire</h2>
-          <span class="handle-tag" id="profileHandle">@AutomationEmpire</span>
-          <span class="niche-badge" id="profileNicheBadge">AI &amp; Tech</span>
-        </div>
-        <p class="profile-desc" id="profileDescription">Scaling faceless automated channels with Claude, Python, ElevenLabs, and n8n workflows.</p>
-        <div class="profile-stats-inline">
-          <div class="inline-stat"><strong>1.24M</strong> Subscribers</div>
-          <div class="inline-stat"><strong>84.6M</strong> Views</div>
-          <div class="inline-stat"><strong>142</strong> Videos</div>
-          <div class="inline-stat"><strong>2022-04-18</strong> Joined</div>
-        </div>
-      </div>
+    <div class="kpi-item">
+      <div class="kpi-label">Viral Threshold</div>
+      <div class="kpi-value red" id="kpiViralThresh">—</div>
+      <div class="kpi-sub">3x median needed</div>
     </div>
-
-    <!-- RATIO BENCHMARKS -->
-    <div class="grid-3 mb-4">
-      <div class="card metric-box">
-        <div class="metric-title">Sub-to-View Velocity</div>
-        <div class="metric-val text-green" id="metricSubToView">68.2 Views/Sub</div>
-        <p class="metric-desc">Industry average is 30&ndash;50. Higher indicates viral browse reach.</p>
-      </div>
-      <div class="card metric-box">
-        <div class="metric-title">Upload Cadence</div>
-        <div class="metric-val text-cyan" id="metricCadence">2.4 Videos/Wk</div>
-        <p class="metric-desc">Optimal consistency for the YouTube algorithm recommendation loop.</p>
-      </div>
-      <div class="card metric-box">
-        <div class="metric-title">Estimated Monthly Revenue</div>
-        <div class="metric-val text-amber" id="metricEstRevenue">$14,200 &ndash; $28,500</div>
-        <p class="metric-desc">Based on $8.50 tech CPM benchmark and 2.1M monthly views.</p>
-      </div>
+    <div class="kpi-item">
+      <div class="kpi-label">Current VPH</div>
+      <div class="kpi-value cyan" id="kpiVph">—</div>
+      <div class="kpi-sub">Views per hour</div>
     </div>
+  </div>
 
-    <!-- RECENT VIDEOS TABLE -->
+  <!-- FILTER + TREND DETECT (side by side) -->
+  <div class="grid-split-2 mb-4">
     <div class="card">
       <div class="card-header">
-        <h2>Channel Video Catalog &amp; Outlier Multipliers</h2>
-        <span class="card-badge">Last 20 Uploads</span>
+        <h2 class="card-title">Filter Outliers</h2>
       </div>
-      <div class="table-responsive">
-        <table class="video-catalog-table">
-          <thead>
-            <tr>
-              <th>Video Title &amp; Details</th>
-              <th>Views</th>
-              <th>Outlier Multiplier</th>
-              <th>Likes / Comments</th>
-              <th>Published</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="catalogTableBody">
-            <!-- Dynamically populated -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================================== -->
-  <!-- TAB 6: CONTENT CREATOR -->
-  <!-- ========================================== -->
-  <section class="tab-content" id="tab-content-creator">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">&#10024; AI Content <span class="gradient-text">Creator</span></h1>
-        <p class="page-sub">Generate viral hooks, high-CTR titles, full scripts, and YouTube Shorts pacing algorithms.</p>
-      </div>
-      <div class="header-actions">
-        <button class="btn-primary" onclick="generateAllContent()">&#9889; Generate Full Package</button>
-      </div>
-    </div>
-
-    <div class="creator-grid">
-      <div class="card">
-        <div class="card-header"><h2>Video Concept Generator</h2><span class="card-badge">Step 1</span></div>
-        <div class="form-group mb-3">
-          <label class="form-label">Core Topic / Niche Keyword</label>
-          <input type="text" id="creatorTopic" class="input-field" placeholder="e.g., Build an AI Agent in 10 Minutes" value="Claude MCP YouTube Automation" />
+      <div class="card-body">
+        <div class="filter-pills mb-3" id="outlierFilters">
+          <button class="pill active" onclick="filterOutliers('all',this)">All Videos</button>
+          <button class="pill red" onclick="filterOutliers('unicorn',this)">🦄 Unicorn (>10x)</button>
+          <button class="pill red" onclick="filterOutliers('viral',this)">🔥 Viral (5–10x)</button>
+          <button class="pill amber" onclick="filterOutliers('high',this)">⚡ Strong (2–5x)</button>
+          <button class="pill" onclick="filterOutliers('normal',this)">📊 Normal</button>
+          <button class="pill" onclick="filterOutliers('under',this)">⚠️ Flop</button>
         </div>
-        <div class="form-group mb-3">
-          <label class="form-label">Format Style</label>
-          <select id="creatorFormat" class="input-field">
-            <option value="long">Long-Form Documentary / Case Study (8-12 min)</option>
-            <option value="shorts">YouTube Shorts / TikTok (30-60 sec)</option>
-            <option value="tutorial">Step-by-Step Hands-On Tutorial (10-15 min)</option>
-            <option value="listicle">Top 7 Ranked Countdown</option>
+        <div class="flex gap-2">
+          <input type="text" id="outlierSearch" placeholder="Search by keyword..." class="input-field" onkeyup="searchOutliers(this.value)" />
+          <select id="outlierSort" class="input-field" style="max-width:160px" onchange="sortOutliers(this.value)">
+            <option value="mult">Multiplier ↓</option>
+            <option value="views">Views ↓</option>
+            <option value="vph">VPH ↓</option>
+            <option value="date">Newest</option>
           </select>
         </div>
-        <button class="btn-primary w-100" onclick="generateTitlesAndHooks()">&#128161; Generate 5 Viral Angles</button>
-        <div class="angles-output mt-3" id="anglesOutput">
-          <!-- Populated -->
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header"><h2>Script &amp; Pacing Studio</h2><span class="card-badge">Step 2</span></div>
-        <div class="script-tabs mb-2">
-          <button class="tab-btn active" onclick="switchScriptView('hook')">0:00 Hook (Crucial)</button>
-          <button class="tab-btn" onclick="switchScriptView('body')">Body &amp; Retention Traps</button>
-          <button class="tab-btn" onclick="switchScriptView('cta')">Climax &amp; End-Screen CTA</button>
-        </div>
-        <textarea id="scriptEditor" class="textarea-field" rows="12" placeholder="Your AI-generated high-retention script will appear here..."></textarea>
-        <div class="script-footer mt-2">
-          <span id="scriptWordCount">Words: 0 | Est. Duration: 0:00</span>
-          <div class="btn-group">
-            <button class="btn-outline btn-sm" onclick="copyScript()">&#128203; Copy</button>
-            <button class="btn-primary btn-sm" onclick="sendScriptToPipeline()">&#127916; Push to Pipeline</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================================== -->
-  <!-- TAB 7: MCP INTEGRATIONS -->
-  <!-- ========================================== -->
-  <section class="tab-content" id="tab-mcp-integrations">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">&#128279; Claude Model Context <span class="gradient-text">Protocol (MCP)</span></h1>
-        <p class="page-sub">Connect Claude AI directly to local tools, YouTube APIs, ElevenLabs voice cloning, and video automation daemons.</p>
-      </div>
-      <div class="header-actions">
-        <button class="btn-primary" onclick="testAllMcpServers()">&#9889; Test All MCP Connections</button>
       </div>
     </div>
 
-    <div class="mcp-grid">
-      <!-- 6 MCP CARDS -->
-      <div class="card mcp-card">
-        <div class="mcp-header">
-          <div class="mcp-icon">&#128250;</div>
-          <div><h3>YouTube Data MCP</h3><span class="mcp-status connected">&#9679; Connected</span></div>
-        </div>
-        <p class="mcp-desc">Enables Claude to search videos, retrieve real-time analytics, inspect comments, and check competitor metadata via YouTube Data API v3.</p>
-        <div class="mcp-tools-list">
-          <span class="tool-tag">yt_search</span>
-          <span class="tool-tag">yt_get_channel</span>
-          <span class="tool-tag">yt_video_stats</span>
-          <span class="tool-tag">yt_get_comments</span>
-        </div>
-        <button class="btn-outline btn-sm w-100 mt-3" onclick="testMcpServer('YouTube Data')">Verify Connection</button>
-      </div>
-
-      <div class="card mcp-card">
-        <div class="mcp-header">
-          <div class="mcp-icon">&#127897;</div>
-          <div><h3>ElevenLabs Voice MCP</h3><span class="mcp-status connected">&#9679; Connected</span></div>
-        </div>
-        <p class="mcp-desc">Generates human-like voiceovers directly from Claude prompts using professional voice clones and dynamic emotional modulation.</p>
-        <div class="mcp-tools-list">
-          <span class="tool-tag">eleven_text_to_speech</span>
-          <span class="tool-tag">eleven_clone_voice</span>
-          <span class="tool-tag">eleven_get_history</span>
-        </div>
-        <button class="btn-outline btn-sm w-100 mt-3" onclick="testMcpServer('ElevenLabs')">Verify Connection</button>
-      </div>
-
-      <div class="card mcp-card">
-        <div class="mcp-header">
-          <div class="mcp-icon">&#127916;</div>
-          <div><h3>Whisper Transcript MCP</h3><span class="mcp-status connected">&#9679; Connected</span></div>
-        </div>
-        <p class="mcp-desc">Transcribes top competitor YouTube videos with timestamps for word-for-word retention and structure analysis.</p>
-        <div class="mcp-tools-list">
-          <span class="tool-tag">whisper_transcribe</span>
-          <span class="tool-tag">whisper_timestamp_map</span>
-          <span class="tool-tag">whisper_extract_hooks</span>
-        </div>
-        <button class="btn-outline btn-sm w-100 mt-3" onclick="testMcpServer('Whisper')">Verify Connection</button>
-      </div>
-
-      <div class="card mcp-card">
-        <div class="mcp-header">
-          <div class="mcp-icon">&#128444;&#65039;</div>
-          <div><h3>Canva / Thumbnail MCP</h3><span class="mcp-status connected">&#9679; Connected</span></div>
-        </div>
-        <p class="mcp-desc">Automates thumbnail generation, text placement, color grading, and A/B variant rendering using Canva and DALL-E/Midjourney pipelines.</p>
-        <div class="mcp-tools-list">
-          <span class="tool-tag">render_thumbnail</span>
-          <span class="tool-tag">ab_thumbnail_variant</span>
-          <span class="tool-tag">check_contrast_score</span>
-        </div>
-        <button class="btn-outline btn-sm w-100 mt-3" onclick="testMcpServer('Thumbnail')">Verify Connection</button>
-      </div>
-
-      <div class="card mcp-card">
-        <div class="mcp-header">
-          <div class="mcp-icon">&#9881;&#65039;</div>
-          <div><h3>n8n Automation MCP</h3><span class="mcp-status connected">&#9679; Connected</span></div>
-        </div>
-        <p class="mcp-desc">Triggers autonomous webhook workflows in local or self-hosted n8n instances for end-to-end video assembly and multi-platform publishing.</p>
-        <div class="mcp-tools-list">
-          <span class="tool-tag">trigger_workflow</span>
-          <span class="tool-tag">get_pipeline_status</span>
-          <span class="tool-tag">retry_job</span>
-        </div>
-        <button class="btn-outline btn-sm w-100 mt-3" onclick="testMcpServer('n8n')">Verify Connection</button>
-      </div>
-
-      <div class="card mcp-card">
-        <div class="mcp-header">
-          <div class="mcp-icon">&#128190;</div>
-          <div><h3>Local File &amp; Video MCP</h3><span class="mcp-status connected">&#9679; Connected</span></div>
-        </div>
-        <p class="mcp-desc">Inspects local project renders in `d:/xampp/htdocs/YoutubeAutomatio`, checks video file sizes, and parses subtitle `.srt` files.</p>
-        <div class="mcp-tools-list">
-          <span class="tool-tag">read_render_file</span>
-          <span class="tool-tag">export_final_cut</span>
-          <span class="tool-tag">backup_assets</span>
-        </div>
-        <button class="btn-outline btn-sm w-100 mt-3" onclick="testMcpServer('Local Filesystem')">Verify Connection</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================================== -->
-  <!-- TAB 8: AGENT CENTER -->
-  <!-- ========================================== -->
-  <section class="tab-content" id="tab-agent-center">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">&#129504; Multi-Agent <span class="gradient-text">Command Center</span></h1>
-        <p class="page-sub">Autonomous AI workers operating 24/7 to research topics, write scripts, audit competitors, and publish content.</p>
-      </div>
-      <div class="header-actions">
-        <button class="btn-primary" onclick="launchAllAgents()">&#9654; Start All Agents</button>
-      </div>
-    </div>
-
-    <div class="agent-grid">
-      <div class="card agent-card">
-        <div class="agent-header">
-          <div class="agent-avatar">&#128065;</div>
-          <div><h3>TrendScout Agent</h3><span class="status-badge running">&#9679; Scanning YouTube</span></div>
-        </div>
-        <p class="agent-desc">Monitors 25 niche competitor channels hourly. Detects videos with &gt;3x average view velocity within 4 hours of upload.</p>
-        <div class="agent-metric"><span>Tasks Done:</span> <strong>342 Scans</strong></div>
-        <div class="agent-metric"><span>Last Alert:</span> <strong>14 mins ago</strong></div>
-      </div>
-
-      <div class="agent-card card">
-        <div class="agent-header">
-          <div class="agent-avatar">&#9997;&#65039;</div>
-          <div><h3>ScriptArchitect Agent</h3><span class="status-badge running">&#9679; Claude 3.5 Sonnet</span></div>
-        </div>
-        <p class="agent-desc">Converts raw trend signals into structured retention-engineered scripts following MrBeast, Veritasium, and Magnates Media blueprints.</p>
-        <div class="agent-metric"><span>Scripts Written:</span> <strong>48 Scripts</strong></div>
-        <div class="agent-metric"><span>Avg Retention:</span> <strong>64.2%</strong></div>
-      </div>
-
-      <div class="agent-card card">
-        <div class="agent-header">
-          <div class="agent-avatar">&#127912;</div>
-          <div><h3>ThumbnailLab Agent</h3><span class="status-badge running">&#9679; Generating Variants</span></div>
-        </div>
-        <p class="agent-desc">Creates 3 A/B thumbnail variations per video, tests contrast ratios, face emotion intensities, and simulates mobile CTR.</p>
-        <div class="agent-metric"><span>Rendered:</span> <strong>144 Thumbnails</strong></div>
-        <div class="agent-metric"><span>Best Variant CTR:</span> <strong>9.8%</strong></div>
-      </div>
-
-      <div class="agent-card card">
-        <div class="agent-header">
-          <div class="agent-avatar">&#128640;</div>
-          <div><h3>GrowthPilot Agent</h3><span class="status-badge running">&#9679; Active</span></div>
-        </div>
-        <p class="agent-desc">Audits published videos at 24h, 48h, and 7d. Automatically tweaks titles if CTR is under 4% to revive algorithm distribution.</p>
-        <div class="agent-metric"><span>Titles A/B Tested:</span> <strong>82 Tweaks</strong></div>
-        <div class="agent-metric"><span>Views Revived:</span> <strong>+240K</strong></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================================== -->
-  <!-- TAB 9: SEO & KEYWORDS (VidIQ Style) -->
-  <!-- ========================================== -->
-  <section class="tab-content" id="tab-seo-optimizer">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">&#127919; SEO &amp; Keyword <span class="gradient-text">Radar</span></h1>
-        <p class="page-sub">VidIQ-grade search volume vs competition scores, Title Power Scorer, and 1-click YouTube Studio tag copy.</p>
-      </div>
-      <div class="header-actions">
-        <button class="btn-primary" onclick="analyzeSeoPackage()">&#9889; Score My Title &amp; SEO</button>
-      </div>
-    </div>
-
-    <!-- VIDIQ KEYWORD RADAR CARD -->
-    <div class="card mb-4">
+    <!-- REAL-TIME TREND SPIKES -->
+    <div class="card">
       <div class="card-header">
         <div>
-          <h2>Keyword Opportunity Explorer (VidIQ Formula)</h2>
-          <p class="card-desc">Calculates: Opportunity Score = Search Volume &times; (100 &minus; Competition) / 100</p>
+          <h2 class="card-title">📈 Trending Now</h2>
+          <p class="card-desc">Keywords spiking in your niche right now</p>
         </div>
-        <span class="card-badge badge-green">High Opportunity Finder</span>
+        <button class="btn-outline btn-sm" onclick="loadTrends()">↻ Refresh</button>
       </div>
-      <div class="keyword-search-row">
-        <input type="text" id="seoKeywordInput" placeholder="Enter target search keyword (e.g. 'Claude MCP YouTube', 'AI Automation', 'n8n bot')..." class="input-field" value="Claude MCP Automation" />
-        <button class="btn-primary" onclick="searchKeywordOpportunity()">&#128269; Explore Keyword</button>
+      <div class="card-body">
+        <div id="trendSpikes">
+          <div class="trend-card">
+            <div class="trend-rank">1</div>
+            <div class="trend-info">
+              <div class="trend-keyword">Claude AI Agents</div>
+              <div class="trend-meta">AI Tools • 12,400 searches/hr</div>
+            </div>
+            <div class="trend-spike">
+              <div class="trend-pct hot">+340% 🔥</div>
+            </div>
+            <button class="btn-xs btn-groq" onclick="generateFromTrend('Claude AI Agents')">Script →</button>
+          </div>
+          <div class="trend-card">
+            <div class="trend-rank">2</div>
+            <div class="trend-info">
+              <div class="trend-keyword">n8n automation tutorial</div>
+              <div class="trend-meta">Automation • 8,200 searches/hr</div>
+            </div>
+            <div class="trend-spike">
+              <div class="trend-pct up">+180%</div>
+            </div>
+            <button class="btn-xs btn-groq" onclick="generateFromTrend('n8n automation tutorial')">Script →</button>
+          </div>
+          <div class="trend-card">
+            <div class="trend-rank">3</div>
+            <div class="trend-info">
+              <div class="trend-keyword">Faceless YouTube channel</div>
+              <div class="trend-meta">Creator • 6,800 searches/hr</div>
+            </div>
+            <div class="trend-spike">
+              <div class="trend-pct up">+145%</div>
+            </div>
+            <button class="btn-xs btn-groq" onclick="generateFromTrend('Faceless YouTube channel')">Script →</button>
+          </div>
+        </div>
       </div>
+    </div>
+  </div>
 
-      <!-- KEYWORD GAUGES -->
-      <div class="keyword-gauges-grid mt-4">
-        <div class="gauge-card">
-          <div class="gauge-label">Search Volume</div>
-          <div class="gauge-val text-green" id="gaugeSearchVol">84 / 100</div>
-          <div class="progress-bar-wrap"><div class="progress-bar-fill fill-green" id="gaugeBarVol" style="width: 84%"></div></div>
-          <div class="gauge-sub">High Search Demand (~45k/mo)</div>
+  <!-- OUTLIER GRID + HOOK ANALYZER (side panel) -->
+  <div class="grid-split mb-4">
+    <!-- HOOK ANALYZER (inline) -->
+    <div class="card" style="align-self:start">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">🎬 Hook Analyzer</h2>
+          <p class="card-desc">Paste any YouTube URL — AI scores the first 60 seconds</p>
         </div>
-
-        <div class="gauge-card">
-          <div class="gauge-label">Competition Level</div>
-          <div class="gauge-val text-cyan" id="gaugeCompetition">28 / 100</div>
-          <div class="progress-bar-wrap"><div class="progress-bar-fill fill-cyan" id="gaugeBarComp" style="width: 28%"></div></div>
-          <div class="gauge-sub">Very Low (Few authoritative videos)</div>
+      </div>
+      <div class="card-body">
+        <div class="form-group">
+          <label class="form-label">YouTube Video URL</label>
+          <input type="text" id="hookVideoUrl" class="input-field" placeholder="https://youtube.com/watch?v=..." />
         </div>
-
-        <div class="gauge-card highlight">
-          <div class="gauge-label">Overall Opportunity Score</div>
-          <div class="gauge-val text-unicorn" id="gaugeOpportunity">88 / 100</div>
-          <div class="progress-bar-wrap"><div class="progress-bar-fill fill-unicorn" id="gaugeBarOpp" style="width: 88%"></div></div>
-          <div class="gauge-sub">&#127942; GOLDMINE: High demand, weak competition!</div>
+        <button class="btn-primary w-100 mb-3" onclick="analyzeHook()"><span id="hookBtnText">🔬 Analyze Hook Strength</span></button>
+        <div id="hookResults" style="display:none">
+          <div class="divider"></div>
+          <div class="flex justify-between items-center mb-3">
+            <span class="text-sm font-bold">Hook Score</span>
+            <div class="score-ring-wrap">
+              <div class="score-ring">
+                <svg width="90" height="90" viewBox="0 0 90 90">
+                  <circle cx="45" cy="45" r="38" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="8"/>
+                  <circle id="hookScoreCircle" cx="45" cy="45" r="38" fill="none" stroke="#6366f1" stroke-width="8" stroke-dasharray="238.76" stroke-dashoffset="238.76" stroke-linecap="round" style="transition:stroke-dashoffset 1s ease"/>
+                </svg>
+                <div class="score-ring-num" id="hookScoreNum">—</div>
+              </div>
+            </div>
+          </div>
+          <div class="hook-bar-chart" id="hookFactors"></div>
+          <div class="card p-3 mt-3" style="background:rgba(99,102,241,0.06);border-color:rgba(99,102,241,0.2)" id="hookAdvice"></div>
         </div>
       </div>
     </div>
 
-    <!-- TITLE SCORER & TAG GENERATOR -->
-    <div class="two-col-grid">
-      <div class="card">
-        <div class="card-header"><h2>Title Clickability Scorer</h2><span class="card-badge" id="titleScoreBadge">Score: 88/100</span></div>
-        <div class="form-group mb-3">
-          <label class="form-label">Video Title to Test</label>
-          <input type="text" id="seoTitleInput" class="input-field" value="How I Built a $10,000/mo YouTube Channel Using Claude MCP" onkeyup="evaluateTitleRealtime(this.value)" />
-        </div>
-        <div class="score-breakdown" id="titleScoreFactors">
-          <div class="factor-item pass">&#10003; Length optimal (56 chars &mdash; displays fully on mobile)</div>
-          <div class="factor-item pass">&#10003; High-Stakes Power Word ($10,000/mo)</div>
-          <div class="factor-item pass">&#10003; Cutting-Edge Tech Keyword (Claude MCP)</div>
-          <div class="factor-item pass">&#10003; First-Person Narrative ("How I Built")</div>
+    <!-- OUTLIER CARDS -->
+    <div>
+      <div id="viralApiGate" style="display:none">
+        <div class="card glow-accent">
+          <div class="api-gate" style="padding:40px 24px">
+            <div class="api-gate-icon">📺</div>
+            <div class="api-gate-title">YouTube API Required for Viral Radar</div>
+            <div class="api-gate-desc">To detect 3x–20x breakout videos, calculate view velocity (VPH), and pull video analytics, connect your YouTube Data API v3 key below:</div>
+            <div class="card p-3 w-100 my-2" style="max-width:480px;background:var(--bg-input);border:1px solid var(--border);text-align:left">
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-xs font-bold text-muted">ENTER KEY:</span>
+                <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" class="link text-xs">Get Free Key ↗</a>
+              </div>
+              <div class="flex gap-2">
+                <input type="password" id="viralGateYtKey" placeholder="AIzaSy..." class="input-field" style="flex:1" />
+                <button class="btn-primary btn-sm" onclick="saveKeyFromViralGate()">Save & Scan</button>
+              </div>
+            </div>
+            <div class="flex gap-3 items-center mt-2">
+              <button class="btn-outline btn-sm" onclick="loadDemoOutliers()">👁️ Or Preview Demo Outliers</button>
+              <button class="btn-outline btn-sm" onclick="openModal('apiVaultModal')">⚙️ Vault</button>
+            </div>
+          </div>
         </div>
       </div>
+      <div class="outlier-grid" id="outlierGrid"></div>
+    </div>
+  </div>
+</section>
 
+<!-- ========================================================= -->
+<!-- TAB: COMPETITOR INTEL -->
+<!-- ========================================================= -->
+<section class="tab-content" id="tab-competitor">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">⚔️ Competitor <span class="gradient-text">Intel</span></h1>
+      <p class="page-sub">Side-by-side forensic analysis of multiple channels. Find their gaps and dominate.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" onclick="openModal('channelVaultModal')">+ Add Competitor</button>
+    </div>
+  </div>
+
+  <div class="grid-split-2 mb-4">
+    <!-- Benchmark Table -->
+    <div class="card" style="grid-column:1/-1">
+      <div class="card-header">
+        <h2 class="card-title">Cross-Channel Performance Matrix</h2>
+        <div class="flex gap-2">
+          <span class="badge badge-cyan">Live Comparison</span>
+          <button class="btn-outline btn-sm" onclick="runComparison()">↻ Recalculate</button>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <div id="compApiGate" style="display:none">
+          <div class="api-gate" style="padding:40px 24px">
+            <div class="api-gate-icon">⚔️</div>
+            <div class="api-gate-title">YouTube API & Competitors Required</div>
+            <div class="api-gate-desc">To compare channels head-to-head, analyze subscriber growth rates, and spy on competitor upload velocity, enter your YouTube API key:</div>
+            <div class="card p-3 w-100 my-2" style="max-width:480px;background:var(--bg-input);border:1px solid var(--border);text-align:left">
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-xs font-bold text-muted">YOUTUBE API KEY:</span>
+                <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" class="link text-xs">Get Free Key ↗</a>
+              </div>
+              <div class="flex gap-2 mb-2">
+                <input type="password" id="compGateYtKey" placeholder="AIzaSy..." class="input-field" style="flex:1" />
+                <button class="btn-primary btn-sm" onclick="saveKeyFromCompGate()">Save & Unlock</button>
+              </div>
+            </div>
+            <div class="flex gap-3 items-center mt-2">
+              <button class="btn-primary btn-sm" onclick="openModal('channelVaultModal')">📁 Add Competitors to Vault</button>
+              <button class="btn-outline btn-sm" onclick="loadDemoBenchmark()">👁️ Preview Sample Matrix</button>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap" id="benchmarkTableWrap" style="display:none">
+          <table id="benchmarkTable">
+            <thead><tr id="benchmarkHeaderRow"></tr></thead>
+            <tbody id="benchmarkBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-split-2 mb-4">
+    <!-- Winning Patterns -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">🧠 Cross-Channel Winning Patterns</h2>
+        <span class="badge badge-green">AI Detected</span>
+      </div>
+      <div class="card-body">
+        <div id="winPatterns">
+          <div class="pattern-box">
+            <div class="pattern-header"><span class="badge badge-amber">Duration Sweet Spot</span><strong style="color:var(--text-bright);margin-left:8px">11–14 Minutes</strong></div>
+            <p>Videos 11–14 min have 42% higher retention completion than 20+ min videos across all competitors.</p>
+          </div>
+          <div class="pattern-box">
+            <div class="pattern-header"><span class="badge badge-red">Winning Title Angle</span><strong style="color:var(--text-bright);margin-left:8px">Challenge / High Stakes</strong></div>
+            <p>Titles starting with "I Automated..." or "We Tested 50..." outperform tutorials by 5.8x on average.</p>
+          </div>
+          <div class="pattern-box">
+            <div class="pattern-header"><span class="badge badge-green">Best Upload Time</span><strong style="color:var(--text-bright);margin-left:8px">Thursday 3 PM EST</strong></div>
+            <p>Generates highest initial VPH spike in the AI/tech niche based on competitor upload patterns.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Blue Ocean Topics + Competitor Alerts -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">🌊 Blue Ocean Topics</h2>
+          <p class="card-desc">High demand, low competition — your opportunity window</p>
+        </div>
+        <span class="badge badge-cyan">Opportunity Radar</span>
+      </div>
+      <div class="card-body">
+        <div id="blueOceanTopics">
+          <div class="gap-item">
+            <div class="gap-info">
+              <h4>Claude MCP for Complete Beginners</h4>
+              <p>High search demand — zero competitor videos over 50k views in last 30 days</p>
+            </div>
+            <div class="flex gap-1">
+              <button class="btn-xs btn-groq" onclick="generateFromTrend('Claude MCP for Complete Beginners')">⚡ Script</button>
+              <button class="btn-xs btn-outline" onclick="sendOutlierToClips('Claude MCP for Complete Beginners')">📱 Shorts</button>
+            </div>
+          </div>
+          <div class="gap-item">
+            <div class="gap-info">
+              <h4>Automate YouTube with Local LLMs</h4>
+              <p>Ollama + YouTube interest surging +180% — 0 high-production videos</p>
+            </div>
+            <div class="flex gap-1">
+              <button class="btn-xs btn-groq" onclick="generateFromTrend('Automate YouTube with Local LLMs')">⚡ Script</button>
+              <button class="btn-xs btn-outline" onclick="sendOutlierToClips('Automate YouTube with Local LLMs')">📱 Shorts</button>
+            </div>
+          </div>
+          <div class="gap-item">
+            <div class="gap-info">
+              <h4>n8n vs Make.com Full Teardown</h4>
+              <p>High buyer intent — affiliate CPM $18–24 — minimal competition</p>
+            </div>
+            <div class="flex gap-1">
+              <button class="btn-xs btn-groq" onclick="generateFromTrend('n8n vs Make.com Full Teardown')">⚡ Script</button>
+              <button class="btn-xs btn-outline" onclick="sendOutlierToClips('n8n vs Make.com Full Teardown')">📱 Shorts</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Competitor Upload Alerts -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">🔔 Competitor Upload Alerts</h2>
+        <p class="card-desc">Get notified within hours when competitors post new videos</p>
+      </div>
+      <div class="flex gap-2">
+        <span class="status-badge running" id="alertDaemonStatus">● Monitoring Active</span>
+        <button class="btn-outline btn-sm" onclick="checkCompetitorUploads()">↻ Check Now</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div id="competitorAlerts">
+        <div class="insight-item insight-tip">
+          <span class="insight-icon">📡</span>
+          <div class="insight-text">Add competitors to your vault and this section will show their latest uploads with estimated view velocity and viral potential scores.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- TAB: CHANNEL FORENSIC -->
+<!-- ========================================================= -->
+<section class="tab-content" id="tab-channel-forensic">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">📊 Channel <span class="gradient-text">Forensic</span></h1>
+      <p class="page-sub">Deep dive into any channel: retention health, upload cadence, comment intelligence, and revenue estimates.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-outline btn-sm" onclick="exportChannelReport()">📄 Export Report</button>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="flex gap-2" style="flex-wrap:wrap">
+        <input type="text" id="forensicChannelInput" placeholder="@handle or channel ID..." class="input-field" style="flex:1;min-width:200px" onkeydown="if(event.key==='Enter')loadForensic()" />
+        <button class="btn-primary" onclick="loadForensic()"><span id="forensicBtnText">🔬 Deep Analyze</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Hero -->
+  <div id="forensicApiGate">
+    <div class="card glow-accent mb-4">
+      <div class="api-gate" style="padding:40px">
+        <div class="api-gate-icon">📊</div>
+        <div class="api-gate-title">Enter a Channel Above to Analyze</div>
+        <div class="api-gate-desc">Enter any @handle or channel ID, and optionally connect your YouTube API for richer data including comments, engagement rates, and upload patterns.</div>
+        <button class="btn-primary" onclick="document.getElementById('forensicChannelInput').focus()">↑ Enter Channel ID</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="forensicContent" style="display:none">
+    <!-- Channel Hero -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="flex items-start gap-4" style="flex-wrap:wrap">
+          <div style="font-size:56px;flex-shrink:0" id="forensicAvatar">🚀</div>
+          <div style="flex:1">
+            <div class="flex items-center gap-3 mb-1 wrap">
+              <h2 style="font-size:1.5rem;font-weight:800;color:var(--text-bright)" id="forensicName">Channel Name</h2>
+              <span class="badge badge-green">✓ Verified</span>
+              <span class="badge" id="forensicNiche">Tech</span>
+            </div>
+            <div class="text-sm text-muted mb-3" id="forensicHandle">@handle</div>
+            <div class="chip-stats-row">
+              <div class="chip-stat"><strong id="forensicSubs">—</strong> Subscribers</div>
+              <div class="chip-stat"><strong id="forensicTotalViews">—</strong> Total Views</div>
+              <div class="chip-stat"><strong id="forensicVideoCount">—</strong> Videos</div>
+              <div class="chip-stat"><strong id="forensicJoined">—</strong> Joined</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metrics -->
+    <div class="grid-3 mb-4">
+      <div class="card p-4">
+        <div class="text-xs text-muted mb-1">Sub-to-View Velocity</div>
+        <div class="text-lg font-bold text-green" id="metricVelocity">—</div>
+        <div class="text-xs text-muted mt-1">Industry avg: 30–50 views/sub</div>
+      </div>
+      <div class="card p-4">
+        <div class="text-xs text-muted mb-1">Upload Cadence</div>
+        <div class="text-lg font-bold text-cyan" id="metricCadence">—</div>
+        <div class="text-xs text-muted mt-1">Optimal: 1–3 videos/week</div>
+      </div>
+      <div class="card p-4">
+        <div class="text-xs text-muted mb-1">Est. Monthly Revenue</div>
+        <div class="text-lg font-bold text-amber" id="metricRevenue">—</div>
+        <div class="text-xs text-muted mt-1">Based on niche CPM estimates</div>
+      </div>
+    </div>
+
+    <!-- Videos + Comment Sentiment (side by side) -->
+    <div class="grid-split-2 mb-4">
+      <!-- Video Catalog -->
       <div class="card">
         <div class="card-header">
-          <h2>High-Ranking Tag Clusters</h2>
-          <button class="btn-sm btn-outline" onclick="copyAllTags()">&#128203; Copy All for Studio</button>
+          <h2 class="card-title">Recent Videos & Outlier Multipliers</h2>
+          <span class="badge">Last 20 uploads</span>
         </div>
-        <p class="card-desc mb-2">Generated semantic tag clusters ready to paste into YouTube Studio:</p>
-        <div class="tags-cloud" id="tagCloudContainer">
-          <span class="tag-pill">claude mcp</span>
-          <span class="tag-pill">youtube automation</span>
-          <span class="tag-pill">ai agent tutorial</span>
-          <span class="tag-pill">faceless youtube</span>
-          <span class="tag-pill">n8n automation</span>
-          <span class="tag-pill">elevenlabs tts</span>
-          <span class="tag-pill">make money with ai</span>
-          <span class="tag-pill">python automation</span>
-          <span class="tag-pill">claude 3.5 sonnet</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================================== -->
-  <!-- TAB 10: VIDEO PIPELINE (Kanban) -->
-  <!-- ========================================== -->
-  <section class="tab-content" id="tab-video-pipeline">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">&#127916; Video Production <span class="gradient-text">Pipeline</span></h1>
-        <p class="page-sub">Visual Kanban workflow: Ideas &rarr; Scripting &rarr; Voiceover &amp; Editing &rarr; Published</p>
-      </div>
-      <div class="header-actions">
-        <button class="btn-primary" onclick="addNewKanbanCard()">&#10010; New Video Project</button>
-      </div>
-    </div>
-
-    <div class="kanban-board">
-      <div class="kanban-col">
-        <div class="col-header"><span class="col-title">&#128161; Ideas &amp; Outliers</span><span class="col-count" id="countIdeas">3</span></div>
-        <div class="col-cards" id="colIdeas">
-          <div class="kanban-card"><div class="card-tag tag-high">Outlier 8.2x</div><h4>I Tested 50 Claude MCP Tools</h4><p>Target: 10 mins | CPM: $14</p></div>
-          <div class="kanban-card"><div class="card-tag tag-trend">Trending</div><h4>Zero to 100k Subs with n8n</h4><p>Case study format</p></div>
-          <div class="kanban-card"><div class="card-tag tag-green">SEO 92</div><h4>ElevenLabs vs OpenAI Voice</h4><p>Audio comparison shootout</p></div>
+        <div class="card-body p-0">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Views</th>
+                  <th>Multiplier</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="forensicVideoTable"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <div class="kanban-col">
-        <div class="col-header"><span class="col-title">&#128221; Scripting</span><span class="col-count" id="countScripting">2</span></div>
-        <div class="col-cards" id="colScripting">
-          <div class="kanban-card"><div class="card-tag tag-claude">Claude AI Draft</div><h4>Automate YouTube Shorts in Python</h4><p>Draft 2: 780 words</p></div>
-          <div class="kanban-card"><div class="card-tag tag-high">Priority</div><h4>The Death of Manual Editing</h4><p>Hook written | Body 40%</p></div>
-        </div>
-      </div>
-
-      <div class="kanban-col">
-        <div class="col-header"><span class="col-title">&#127897; Production &amp; Edit</span><span class="col-count" id="countProduction">1</span></div>
-        <div class="col-cards" id="colProduction">
-          <div class="kanban-card"><div class="card-tag tag-voice">ElevenLabs Rendered</div><h4>How Top Channels Make $50k/mo</h4><p>Audio synced | Adding B-roll</p></div>
-        </div>
-      </div>
-
-      <div class="kanban-col">
-        <div class="col-header"><span class="col-title">&#9989; Published &amp; Live</span><span class="col-count" id="countPublished">4</span></div>
-        <div class="col-cards" id="colPublished">
-          <div class="kanban-card"><div class="card-tag tag-live">142K Views</div><h4>Claude MCP Complete Guide</h4><p>VPH: 340 | CTR: 8.4%</p></div>
-          <div class="kanban-card"><div class="card-tag tag-live">89K Views</div><h4>Build an AI Video Factory</h4><p>VPH: 120 | CTR: 6.9%</p></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================================== -->
-  <!-- TAB 11: AUTOMATION HUB -->
-  <!-- ========================================== -->
-  <section class="tab-content" id="tab-automation-hub">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">&#129302; Automation <span class="gradient-text">Hub</span></h1>
-        <p class="page-sub">Connect webhooks, configure n8n &amp; Make workflows, schedule uploads, and manage cloud credentials.</p>
-      </div>
-      <div class="header-actions">
-        <button class="btn-primary" onclick="showToast('Webhooks verified &amp; ready!', 'success')">&#9889; Test Webhooks</button>
-      </div>
-    </div>
-
-    <div class="automation-grid">
+      <!-- Comment Intelligence -->
       <div class="card">
-        <div class="card-header"><h2>Active Workflow Daemons</h2><span class="status-badge running">&#9679; 4 Daemons Live</span></div>
-        <div class="daemon-list">
-          <div class="daemon-item">
-            <div class="daemon-info"><h4>n8n Autonomous Channel Pipeline</h4><p>Scrapes trends &rarr; Claude draft &rarr; ElevenLabs &rarr; Render</p></div>
-            <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">💬 Comment Intelligence</h2>
+            <p class="card-desc">AI sentiment analysis of recent comments</p>
           </div>
-          <div class="daemon-item">
-            <div class="daemon-info"><h4>Hourly Outlier &amp; Competitor Radar</h4><p>Polls top 10 niche channels for viral breakouts</p></div>
-            <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
+          <button class="btn-outline btn-sm" onclick="loadCommentIntel()">↻ Analyze</button>
+        </div>
+        <div class="card-body">
+          <!-- Sentiment Summary -->
+          <div class="gauge-grid mb-3" style="grid-template-columns:repeat(2,1fr)">
+            <div class="gauge-card">
+              <div class="gauge-label">Love Signals</div>
+              <div class="gauge-value text-green" id="sentLove">—%</div>
+            </div>
+            <div class="gauge-card">
+              <div class="gauge-label">Viral Triggers</div>
+              <div class="gauge-value text-amber" id="sentViral">—%</div>
+            </div>
+            <div class="gauge-card">
+              <div class="gauge-label">Content Ideas</div>
+              <div class="gauge-value text-cyan" id="sentIdeas">—</div>
+            </div>
+            <div class="gauge-card">
+              <div class="gauge-label">Confusion Signals</div>
+              <div class="gauge-value text-red" id="sentConfusion">—%</div>
+            </div>
           </div>
-          <div class="daemon-item">
-            <div class="daemon-info"><h4>Auto-Thumbnail A/B CTR Optimizer</h4><p>Swaps thumbnail after 24h if CTR is below 4.5%</p></div>
-            <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
+          <div id="topComments">
+            <div class="insight-item insight-tip">
+              <span class="insight-icon">💬</span>
+              <div class="insight-text">Run forensic analysis on a channel to see comment intelligence and audience sentiment breakdown.</div>
+            </div>
           </div>
-          <div class="daemon-item">
-            <div class="daemon-info"><h4>Automated Git Auto-Push Watcher</h4><p>Pushes project changes to GitHub repository</p></div>
-            <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- TAB: CONTENT STUDIO -->
+<!-- ========================================================= -->
+<section class="tab-content" id="tab-content-studio">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">✍️ Content <span class="gradient-text">Studio</span></h1>
+      <p class="page-sub">AI-powered script writing, hook crafting, title generation, and full video blueprints</p>
+    </div>
+    <div class="header-actions">
+      <span class="badge badge-pink">⚡ Groq Ultra-Fast</span>
+      <button class="btn-primary" onclick="generateFullPackage()">⚡ Generate Full Package</button>
+    </div>
+  </div>
+
+  <!-- Groq Config -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h2 class="card-title">⚡ AI Engine Configuration</h2>
+      <div id="groqStatusBadge" class="badge">Offline Demo</div>
+    </div>
+    <div class="card-body">
+      <div class="grid-3">
+        <div class="form-group mb-0">
+          <label class="form-label">Groq API Key</label>
+          <input type="password" id="studioGroqKey" placeholder="gsk_... (or use API Vault)" class="input-field" onchange="updateGroqFromStudio(this.value)" />
+        </div>
+        <div class="form-group mb-0">
+          <label class="form-label">AI Model</label>
+          <select id="studioModel" class="input-field">
+            <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Best Quality)</option>
+            <option value="llama-3.1-8b-instant" selected>Llama 3.1 8B (Ultra-Fast)</option>
+            <option value="mixtral-8x7b-32768">Mixtral 8x7B (Long Context)</option>
+          </select>
+        </div>
+        <div class="form-group mb-0">
+          <label class="form-label">Creativity: <span id="tempDisplay">0.7</span></label>
+          <div class="range-wrap">
+            <input type="range" min="0.2" max="1.0" step="0.1" value="0.7" oninput="document.getElementById('tempDisplay').textContent=this.value" />
+            <span class="range-val">High</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORKSPACE GRID -->
+  <div class="grid-split mb-4">
+    <!-- LEFT: Preset Recipes -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">🎯 Viral Prompt Recipes</h2>
+        <span class="badge">1-Click</span>
+      </div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:8px">
+        <button class="formula-card" onclick="loadPreset('reverse_engineer')">
+          <div class="formula-text">🔥 Reverse-Engineer Viral Video</div>
+          <div class="formula-example">Deconstruct a competitor's hit and generate 5 better concepts</div>
+          <div class="formula-tags"><span class="badge badge-red">High ROI</span></div>
+        </button>
+        <button class="formula-card" onclick="loadPreset('10_titles')">
+          <div class="formula-text">🎯 10 High-CTR Title Angles</div>
+          <div class="formula-example">Curiosity-gap, high-stakes, fear, and social proof formats</div>
+          <div class="formula-tags"><span class="badge badge-amber">CTR Boost</span></div>
+        </button>
+        <button class="formula-card" onclick="loadPreset('full_blueprint')">
+          <div class="formula-text">📋 Full 10-Min Video Blueprint</div>
+          <div class="formula-example">Hook, tension curve, payoff, and end-screen CTA funnel</div>
+          <div class="formula-tags"><span class="badge badge-green">Complete</span></div>
+        </button>
+        <button class="formula-card" onclick="loadPreset('hook_30')">
+          <div class="formula-text">⚡ Viral Hook (First 30 Seconds)</div>
+          <div class="formula-example">Pattern interrupt, curiosity gap, and promise delivery</div>
+          <div class="formula-tags"><span class="badge badge-cyan">Retention</span></div>
+        </button>
+        <button class="formula-card" onclick="loadPreset('description')">
+          <div class="formula-text">📝 Auto Video Description</div>
+          <div class="formula-example">SEO-optimized with timestamps, CTAs, and affiliate slots</div>
+          <div class="formula-tags"><span class="badge badge-pink">SEO</span></div>
+        </button>
+        <button class="formula-card" onclick="loadPreset('channel_audit')">
+          <div class="formula-text">🔍 VidIQ Channel Teardown</div>
+          <div class="formula-example">Find why videos underperform and fix CTR</div>
+          <div class="formula-tags"><span class="badge">Audit</span></div>
+        </button>
+        <button class="formula-card" onclick="loadPreset('community_post')">
+          <div class="formula-text">📣 Community Post Generator</div>
+          <div class="formula-example">Engage audience between uploads with polls and teasers</div>
+          <div class="formula-tags"><span class="badge badge-green">Engagement</span></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT: AI Workspace -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">🖥️ AI Studio Workspace</h2>
+        <div class="flex gap-2">
+          <button class="btn-xs btn-outline" onclick="clearStudio()">Clear</button>
+          <button class="btn-xs btn-primary btn-groq" onclick="runGroq()"><span id="groqRunBtn">⚡ Run AI</span></button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="form-group">
+          <label class="form-label">Target Niche / Channel Focus</label>
+          <input type="text" id="studioNiche" class="input-field mb-2" value="YouTube Automation, AI Tools, Faceless Content" placeholder="Your channel's niche..." />
+          <label class="form-label">Prompt / Instructions</label>
+          <textarea id="studioPrompt" class="textarea-field" rows="5" placeholder="Click a recipe on the left or type your own instructions..."></textarea>
+        </div>
+
+        <!-- OUTPUT CONSOLE -->
+        <div class="console-wrap">
+          <div class="console-header">
+            <div class="console-title">
+              <span class="console-dot" id="consoleDot"></span>
+              Output Stream <span id="consoleStatus" style="color:var(--text-muted);font-size:0.75rem">Idle</span>
+            </div>
+            <div class="console-actions">
+              <button class="btn-xs btn-outline" onclick="copyOutput()">📋 Copy</button>
+              <button class="btn-xs btn-outline" onclick="sendToPipeline()">🎬 → Pipeline</button>
+              <button class="btn-xs btn-outline" onclick="sendToClips()">📱 → Clips</button>
+            </div>
+          </div>
+          <div class="console-body" id="groqOutput">Click a recipe or press Run AI to generate content...</div>
+        </div>
+
+        <!-- Word count & actions -->
+        <div class="flex justify-between items-center mt-2">
+          <span class="text-xs text-muted" id="wordCount">Words: 0 | Est: 0:00</span>
+          <div class="flex gap-2">
+            <button class="btn-xs btn-outline" onclick="copyOutput()">📋 Copy All</button>
+            <button class="btn-xs btn-amber" onclick="scoreTitle()">🎯 Score Title</button>
+          </div>
+        </div>
+
+        <!-- QUICK BRIDGE ACTION BAR -->
+        <div class="card p-3 mt-3 flex justify-between items-center wrap gap-2" style="background:rgba(99,102,241,0.06);border-color:rgba(99,102,241,0.25)">
+          <div>
+            <div class="text-xs font-bold text-bright">⚡ Direct Content Bridges</div>
+            <div class="text-xs text-muted">Use this generated output in other tabs without copy-pasting:</div>
+          </div>
+          <div class="flex gap-2 wrap">
+            <button class="btn-sm btn-primary" onclick="sendToClips()">📱 Convert to Viral Shorts (Clip Gen)</button>
+            <button class="btn-sm btn-outline" onclick="sendToThumbnailLab()">🖼️ Make Thumbnail</button>
+            <button class="btn-sm btn-outline" onclick="sendToPipeline()">🎬 Push to Kanban</button>
+            <button class="btn-sm btn-outline" onclick="sendToCalendar()">📅 Schedule</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TITLE SWIPE FILE -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">📚 Title Swipe File</h2>
+        <p class="card-desc">200+ proven viral title formulas — click any to apply to your topic</p>
+      </div>
+      <div class="flex gap-2 items-center">
+        <input type="text" id="swipeSearch" placeholder="Filter formulas..." class="input-field" style="max-width:200px" onkeyup="filterSwipeFile(this.value)" />
+        <div class="tab-pills" id="swipeFilters">
+          <button class="tab-pill active" onclick="filterSwipe('all',this)">All</button>
+          <button class="tab-pill" onclick="filterSwipe('curiosity',this)">Curiosity</button>
+          <button class="tab-pill" onclick="filterSwipe('money',this)">Money</button>
+          <button class="tab-pill" onclick="filterSwipe('fear',this)">Fear</button>
+          <button class="tab-pill" onclick="filterSwipe('social',this)">Social Proof</button>
+          <button class="tab-pill" onclick="filterSwipe('challenge',this)">Challenge</button>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="grid-3" id="swipeFileGrid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- TAB: THUMBNAIL LAB -->
+<!-- ========================================================= -->
+<section class="tab-content" id="tab-thumbnail-lab">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">🖼️ Thumbnail <span class="gradient-text">Lab</span></h1>
+      <p class="page-sub">A/B test thumbnails, get AI scoring, analyze contrast and emotion. Thumbnails = 60-80% of CTR.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" onclick="scoreAllThumbs()">🔬 Score All</button>
+    </div>
+  </div>
+
+  <!-- Upload Zones -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h2 class="card-title">Upload Thumbnail Variants (A/B/C Test)</h2>
+      <span class="badge badge-red">CTR: Most Critical Factor</span>
+    </div>
+    <div class="card-body">
+      <div class="thumb-preview-grid mb-3" id="thumbGrid">
+        <!-- Slots injected by JS -->
+      </div>
+      <div class="flex gap-2 items-center flex-wrap">
+        <input type="text" id="thumbVideoTitle" placeholder="Video title for this thumbnail..." class="input-field" style="flex:1;min-width:200px" />
+        <button class="btn-primary" onclick="scoreAllThumbs()">🔬 AI Score All</button>
+        <button class="btn-outline btn-sm" onclick="resetThumbs()">↻ Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scoring Results -->
+  <div class="grid-split-2 mb-4">
+    <!-- Detailed Scores -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">📊 Detailed Scoring Breakdown</h2>
+      </div>
+      <div class="card-body" id="thumbScoreDetail">
+        <div class="insight-item insight-tip">
+          <span class="insight-icon">🖼️</span>
+          <div class="insight-text">Upload 2–3 thumbnail variants above, then click "AI Score All" to get detailed CTR prediction scores for each.</div>
+        </div>
+        <!-- Scoring criteria info -->
+        <div class="divider"></div>
+        <div class="text-xs text-muted mb-2 font-bold">SCORING CRITERIA</div>
+        <div class="flex flex-col gap-2">
+          <div class="flex justify-between items-center">
+            <span class="text-sm">🎨 Contrast & Color Pop</span>
+            <span class="badge badge-red">30% weight</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm">😮 Face Emotion Intensity</span>
+            <span class="badge badge-amber">25% weight</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm">📝 Text Clarity (mobile)</span>
+            <span class="badge badge-cyan">20% weight</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm">🎯 Element Count (≤3)</span>
+            <span class="badge badge-green">15% weight</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm">🔥 Curiosity Gap Visual</span>
+            <span class="badge">10% weight</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Niche CTR Benchmark + Advice -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">🏆 CTR Benchmarks & Best Practices</h2>
+      </div>
+      <div class="card-body">
+        <div class="gauge-grid mb-3" style="grid-template-columns:repeat(2,1fr)">
+          <div class="gauge-card highlight">
+            <div class="gauge-label">Your Predicted CTR</div>
+            <div class="gauge-value purple" id="predCTR">—</div>
+          </div>
+          <div class="gauge-card">
+            <div class="gauge-label">Niche Average CTR</div>
+            <div class="gauge-value" style="color:var(--text-primary)">3.2–5.8%</div>
+          </div>
+          <div class="gauge-card">
+            <div class="gauge-label">Top 10% CTR</div>
+            <div class="gauge-value text-green">8.6%+</div>
+          </div>
+          <div class="gauge-card">
+            <div class="gauge-label">Winner Thumbnail</div>
+            <div class="gauge-value text-amber" id="thumbWinner">—</div>
+          </div>
+        </div>
+        <div class="insight-item insight-success">
+          <span class="insight-icon">💡</span>
+          <div class="insight-text"><strong>Pro Tip:</strong> Shocked/surprised face expression improves CTR by +34% on average. Red and yellow accents grab attention in the browse feed.</div>
+        </div>
+        <div class="insight-item insight-warn">
+          <span class="insight-icon">⚠️</span>
+          <div class="insight-text"><strong>Mobile First:</strong> Thumbnails display at 120px wide on mobile. Text must be readable at that size — max 3 words per thumbnail.</div>
+        </div>
+        <div class="insight-item insight-danger">
+          <span class="insight-icon">🚫</span>
+          <div class="insight-text"><strong>Clickbait Line:</strong> YouTube penalizes thumbnails that don't match content. Check your "Promise vs Delivery" score stays in green zone.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thumbnail Text + Color Analyzer -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">🎨 Thumbnail Text & Color Checker</h2>
+      <p class="card-desc">Describe your thumbnail to get AI recommendations</p>
+    </div>
+    <div class="card-body">
+      <div class="grid-split-2">
+        <div>
+          <div class="form-group">
+            <label class="form-label">Describe your thumbnail</label>
+            <textarea id="thumbDescription" class="textarea-field" rows="4" placeholder="e.g. Dark background, shocked person on left, red text 'I Made $10K' on right, YouTube logo in corner..."></textarea>
+          </div>
+          <button class="btn-primary" onclick="analyzeThumbnailText()">🎨 Analyze & Improve</button>
+        </div>
+        <div id="thumbColorAnalysis">
+          <div class="insight-item insight-tip">
+            <span class="insight-icon">🎨</span>
+            <div class="insight-text">Describe your thumbnail layout above to get color theory, contrast analysis, and specific improvement suggestions from AI.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- TAB: AUTO CLIP GENERATOR (SHORTS) -->
+<!-- ========================================================= -->
+<section class="tab-content" id="tab-clip-generator">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">📱 Auto Clip <span class="gradient-text">Generator</span></h1>
+      <p class="page-sub">Convert any script or long-form video into 5–10 viral Shorts automatically. One video → unlimited reach.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" onclick="generateAllClips()">⚡ Generate All Clips</button>
+    </div>
+  </div>
+
+  <div class="grid-split-2 mb-4">
+    <!-- INPUT -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">📝 Source Content</h2>
+        <span class="badge badge-cyan">Step 1</span>
+      </div>
+      <div class="card-body">
+        <div class="tab-pills mb-3" id="clipSourceTabs">
+          <button class="tab-pill active" onclick="switchClipSource('script',this)">Paste Script</button>
+          <button class="tab-pill" onclick="switchClipSource('url',this)">YouTube URL</button>
+          <button class="tab-pill" onclick="switchClipSource('topic',this)">Topic Idea</button>
+        </div>
+        <div id="clipSourceScript">
+          <div class="form-group">
+            <label class="form-label">Full Video Script</label>
+            <textarea id="clipScript" class="textarea-field" rows="10" placeholder="Paste your full video script here. The AI will find the 5 most 'shockable' moments and convert them into Shorts..."></textarea>
+          </div>
+        </div>
+        <div id="clipSourceUrl" style="display:none">
+          <div class="form-group">
+            <label class="form-label">YouTube Video URL</label>
+            <input type="text" id="clipVideoUrl" class="input-field" placeholder="https://youtube.com/watch?v=..." />
+            <p class="form-hint mt-1">The AI will fetch the transcript and extract viral moments</p>
+          </div>
+        </div>
+        <div id="clipSourceTopic" style="display:none">
+          <div class="form-group">
+            <label class="form-label">Topic or Niche Idea</label>
+            <input type="text" id="clipTopic" class="input-field mb-2" placeholder="e.g. How to make money with Claude AI" />
+            <label class="form-label">Number of Shorts to Generate</label>
+            <select id="clipCount" class="input-field">
+              <option value="3">3 Shorts</option>
+              <option value="5" selected>5 Shorts</option>
+              <option value="7">7 Shorts</option>
+              <option value="10">10 Shorts</option>
+            </select>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="form-group mb-0">
+          <label class="form-label">Niche / Channel Style</label>
+          <select id="clipStyle" class="input-field">
+            <option value="educational">Educational / Tutorial</option>
+            <option value="story">Story-Driven</option>
+            <option value="listicle">Quick Tips / Listicle</option>
+            <option value="viral">Pure Viral / Entertainment</option>
+            <option value="tech">Tech / AI Breakdown</option>
+          </select>
+        </div>
+        <button class="btn-primary w-100 mt-3" onclick="generateAllClips()"><span id="clipsGenBtn">⚡ Generate Viral Clips</span></button>
+      </div>
+    </div>
+
+    <!-- CLIPS PREVIEW -->
+    <div>
+      <div id="clipsApiGate" style="display:none">
+        <div class="card glow-accent">
+          <div class="api-gate" style="padding:40px 24px">
+            <div class="api-gate-icon">⚡</div>
+            <div class="api-gate-title">Groq AI Required for Auto Clip Generator</div>
+            <div class="api-gate-desc">To extract viral Shorts moments, write 3-second retention hooks, generate B-roll cues, and craft seamless loop endings, connect your free Groq AI key:</div>
+            
+            <div class="card p-3 w-100 my-2" style="max-width:480px;background:var(--bg-input);border:1px solid var(--border);text-align:left">
+              <div class="text-xs font-bold text-muted mb-1">WHAT IS NEEDED:</div>
+              <ul class="text-xs text-secondary" style="padding-left:18px;margin-bottom:12px;line-height:1.6">
+                <li><strong>1. Free Groq API Key:</strong> Instant at <a href="https://console.groq.com/keys" target="_blank" class="link">console.groq.com/keys</a> (Takes 30 seconds, 0 cost)</li>
+                <li><strong>2. Source Material:</strong> Paste your script, video URL, or topic idea on the left</li>
+                <li><strong>3. Output:</strong> 3–10 high-retention Shorts scripts with audio & visual hooks ready for CapCut / ElevenLabs</li>
+              </ul>
+              <div class="flex gap-2">
+                <input type="password" id="gateGroqKeyClips" placeholder="gsk_..." class="input-field" style="flex:1" />
+                <button class="btn-groq btn-sm" onclick="saveGroqKeyFromClips()">Save & Unlock</button>
+              </div>
+            </div>
+
+            <div class="flex gap-3 items-center mt-2">
+              <button class="btn-outline btn-sm" onclick="previewSampleClips()">👁️ Preview Sample Viral Shorts</button>
+              <button class="btn-outline btn-sm" onclick="openModal('apiVaultModal')">⚙️ Vault</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- CAPTION STYLING & FILTER TOOLBAR -->
+      <div id="clipsControls" style="display:none;margin-bottom:12px">
+        <div class="card p-2 flex justify-between items-center wrap gap-2">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-muted">CAPTION STYLE:</span>
+            <div class="tab-pills" id="captionStylePills">
+              <button class="tab-pill active" onclick="setCaptionStyle('hormozi',this)">⚡ Hormozi Bold</button>
+              <button class="tab-pill" onclick="setCaptionStyle('mrbeast',this)">🔥 Beast Dynamic</button>
+              <button class="tab-pill" onclick="setCaptionStyle('clean',this)">✨ Minimalist</button>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button class="btn-xs btn-outline" onclick="copyAllClipsVoiceover()">🎙️ Copy All Voiceovers</button>
+            <button class="btn-xs btn-primary" onclick="sendAllClipsToPipeline()">🎬 Send All to Pipeline</button>
           </div>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-header"><h2>Webhook Endpoints</h2><span class="card-badge">REST / Webhooks</span></div>
-        <div class="form-group mb-3">
+      <div id="clipsGrid" style="display:none">
+        <!-- Clips injected by JS -->
+      </div>
+      <div id="clipsPlaceholder" class="card">
+        <div class="api-gate" style="padding:40px">
+          <div class="api-gate-icon">📱</div>
+          <div class="api-gate-title">Generated Clips Appear Here</div>
+          <div class="api-gate-desc">Paste a script or topic and click Generate. Each clip includes: 0:00 Hook, visual/audio cues, retention re-hook, loop ending, and 1-click export to CapCut & ElevenLabs.</div>
+          <button class="btn-outline btn-sm mt-2" onclick="previewSampleClips()">👁️ Click to Preview 3 Sample Shorts</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">🧠 Shorts Viral Formula</h2>
+    </div>
+    <div class="card-body">
+      <div class="grid-4">
+        <div class="card p-3" style="background:rgba(99,102,241,0.06);border-color:rgba(99,102,241,0.2);text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">⚡</div>
+          <div class="font-bold mb-1">0:00 Hook</div>
+          <div class="text-xs text-muted">Pattern interrupt in first 3 seconds. Shock, question, or bold claim. No intro allowed.</div>
+        </div>
+        <div class="card p-3" style="background:rgba(16,185,129,0.06);border-color:rgba(16,185,129,0.2);text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">🎣</div>
+          <div class="font-bold mb-1">Micro Cliffhanger</div>
+          <div class="text-xs text-muted">Every 8–12 seconds, add a new micro-hook to prevent scroll-away.</div>
+        </div>
+        <div class="card p-3" style="background:rgba(245,158,11,0.06);border-color:rgba(245,158,11,0.2);text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">💎</div>
+          <div class="font-bold mb-1">Value Delivery</div>
+          <div class="text-xs text-muted">One shocking fact, tip, or revelation. Dense information = more rewatch loops.</div>
+        </div>
+        <div class="card p-3" style="background:rgba(236,72,153,0.06);border-color:rgba(236,72,153,0.2);text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">🔄</div>
+          <div class="font-bold mb-1">Loop Ending</div>
+          <div class="text-xs text-muted">End implies the beginning. Seamless loop = algorithm keeps serving your Short.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- TAB: SEO & KEYWORDS -->
+<!-- ========================================================= -->
+<section class="tab-content" id="tab-seo-radar">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">🎯 SEO & Keyword <span class="gradient-text">Radar</span></h1>
+      <p class="page-sub">VidIQ-grade opportunity scoring, title clickability scorer, niche saturation detector, and tag generator.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" onclick="runSeoScan()">⚡ Full SEO Scan</button>
+    </div>
+  </div>
+
+  <!-- KEYWORD SEARCH -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">🔍 Keyword Opportunity Explorer</h2>
+        <p class="card-desc">Formula: Opportunity = Search Volume × (100 − Competition) / 100</p>
+      </div>
+      <span class="badge badge-green">VidIQ Formula</span>
+    </div>
+    <div class="card-body">
+      <div class="flex gap-2 mb-4" style="flex-wrap:wrap">
+        <input type="text" id="seoKeyword" placeholder="Enter keyword (e.g. claude mcp, ai automation, faceless youtube)..." class="input-field" style="flex:1;min-width:200px" onkeydown="if(event.key==='Enter')exploreKeyword()" />
+        <button class="btn-primary" onclick="exploreKeyword()">🔍 Explore</button>
+      </div>
+      <div class="gauge-grid" id="seoGauges">
+        <div class="gauge-card">
+          <div class="gauge-label">Search Volume</div>
+          <div class="gauge-value text-green" id="gaugeVol">—</div>
+          <div class="progress-wrap mt-2"><div class="progress-fill fill-green" id="gaugeVolBar" style="width:0%"></div></div>
+          <div class="gauge-sub" id="gaugeVolSub">Enter keyword to analyze</div>
+        </div>
+        <div class="gauge-card">
+          <div class="gauge-label">Competition Level</div>
+          <div class="gauge-value text-cyan" id="gaugeComp">—</div>
+          <div class="progress-wrap mt-2"><div class="progress-fill fill-cyan" id="gaugeCompBar" style="width:0%"></div></div>
+          <div class="gauge-sub" id="gaugeCompSub">—</div>
+        </div>
+        <div class="gauge-card highlight">
+          <div class="gauge-label">💎 Opportunity Score</div>
+          <div class="gauge-value purple" id="gaugeOpp">—</div>
+          <div class="progress-wrap mt-2"><div class="progress-fill fill-accent" id="gaugeOppBar" style="width:0%"></div></div>
+          <div class="gauge-sub" id="gaugeOppSub">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-split-2 mb-4">
+    <!-- Title Scorer -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">🎯 Title Clickability Scorer</h2>
+        <span class="badge" id="titleScoreBadge">Score: —</span>
+      </div>
+      <div class="card-body">
+        <div class="form-group">
+          <label class="form-label">Test Your Title (live scoring)</label>
+          <input type="text" id="seoTitle" class="input-field mb-3" placeholder="How I Made $10,000/mo with Claude AI..." onkeyup="scoreTitle()" />
+        </div>
+        <!-- Score Ring -->
+        <div class="flex items-center gap-4 mb-3">
+          <div class="score-ring-wrap">
+            <div class="score-ring">
+              <svg width="90" height="90" viewBox="0 0 90 90">
+                <circle cx="45" cy="45" r="38" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="8"/>
+                <circle id="titleScoreCircle" cx="45" cy="45" r="38" fill="none" stroke="#6366f1" stroke-width="8" stroke-dasharray="238.76" stroke-dashoffset="238.76" stroke-linecap="round" style="transition:stroke-dashoffset 0.6s ease"/>
+              </svg>
+              <div class="score-ring-num" id="titleScoreNum">—</div>
+            </div>
+            <div class="score-ring-label">CTR Score</div>
+          </div>
+          <div id="titleFactors" style="flex:1">
+            <div class="text-sm text-muted">Enter a title to see scoring breakdown</div>
+          </div>
+        </div>
+        <div id="titleImprove"></div>
+      </div>
+    </div>
+
+    <!-- Niche Saturation + Tag Generator -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">🌊 Niche Saturation Detector</h2>
+        <span class="badge badge-cyan">Blue Ocean Finder</span>
+      </div>
+      <div class="card-body">
+        <div class="flex gap-2 mb-3">
+          <input type="text" id="nicheTopic" class="input-field" placeholder="Topic to check saturation..." style="flex:1" />
+          <button class="btn-primary btn-sm" onclick="checkNicheSaturation()">Check</button>
+        </div>
+        <div id="saturationResult">
+          <div class="insight-item insight-tip">
+            <span class="insight-icon">🌊</span>
+            <div class="insight-text">Enter any topic to see: videos per month, average views, saturation level, and blue ocean pivot suggestions.</div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="card-title mb-2" style="font-size:0.9rem">🏷️ Auto Tag Generator</div>
+        <div class="flex gap-2 mb-3">
+          <input type="text" id="tagKeyword" class="input-field" placeholder="Keyword for tags..." style="flex:1" />
+          <button class="btn-outline btn-sm" onclick="generateTags()">Generate</button>
+        </div>
+        <div id="tagCloud" class="mb-2" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        <button class="btn-xs btn-outline" id="copyTagsBtn" style="display:none" onclick="copyTags()">📋 Copy All Tags for Studio</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload Timing Heatmap -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">⏰ Optimal Upload Timing Heatmap</h2>
+        <p class="card-desc">Best times to publish by day and hour for maximum algorithm push</p>
+      </div>
+      <select id="timingNiche" class="input-field" style="max-width:180px" onchange="renderHeatmap(this.value)">
+        <option value="tech">Tech / AI</option>
+        <option value="finance">Finance / Business</option>
+        <option value="entertainment">Entertainment</option>
+        <option value="education">Education</option>
+        <option value="gaming">Gaming</option>
+      </select>
+    </div>
+    <div class="card-body">
+      <div class="scroll-x">
+        <div id="heatmapContainer"></div>
+      </div>
+      <div class="flex gap-3 mt-3 items-center flex-wrap">
+        <span class="text-xs text-muted">🟢 Best Upload Window</span>
+        <div class="flex gap-1 items-center"><div style="width:12px;height:12px;border-radius:2px;background:rgba(16,185,129,0.8)"></div><span class="text-xs text-muted">Excellent</span></div>
+        <div class="flex gap-1 items-center"><div style="width:12px;height:12px;border-radius:2px;background:rgba(245,158,11,0.7)"></div><span class="text-xs text-muted">Good</span></div>
+        <div class="flex gap-1 items-center"><div style="width:12px;height:12px;border-radius:2px;background:rgba(239,68,68,0.5)"></div><span class="text-xs text-muted">Avoid</span></div>
+        <div class="flex gap-1 items-center"><div style="width:12px;height:12px;border-radius:2px;background:rgba(255,255,255,0.05)"></div><span class="text-xs text-muted">Neutral</span></div>
+      </div>
+      <div id="bestTimeRecommendation" class="insight-item insight-success mt-3" style="display:none">
+        <span class="insight-icon">⏰</span>
+        <div class="insight-text" id="bestTimeText"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- TAB: CONTENT CALENDAR -->
+<!-- ========================================================= -->
+<section class="tab-content" id="tab-content-calendar">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">📅 Content <span class="gradient-text">Calendar</span></h1>
+      <p class="page-sub">30/90 day AI-planned content schedule. Balanced mix of viral experiments, SEO traffic, and evergreen content.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-outline btn-sm" onclick="prevMonth()">← Prev</button>
+      <span style="font-size:1rem;font-weight:700;color:var(--text-bright)" id="calMonthLabel">October 2026</span>
+      <button class="btn-outline btn-sm" onclick="nextMonth()">Next →</button>
+      <button class="btn-primary" onclick="fillCalendarWithAI()">🤖 AI Plan Month</button>
+    </div>
+  </div>
+
+  <div class="grid-split mb-4">
+    <!-- Calendar -->
+    <div class="card" style="grid-column:1/-1">
+      <div class="card-header">
+        <h2 class="card-title">Monthly Video Schedule</h2>
+        <div class="flex gap-2 items-center">
+          <span class="cal-event long" style="padding:4px 10px;border-radius:4px">Long-Form</span>
+          <span class="cal-event short" style="padding:4px 10px;border-radius:4px">Shorts</span>
+          <span class="cal-event trend" style="padding:4px 10px;border-radius:4px">Trend</span>
+          <span class="cal-event review" style="padding:4px 10px;border-radius:4px">Review</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="calendar-grid">
+          <div class="cal-day-header">Sun</div>
+          <div class="cal-day-header">Mon</div>
+          <div class="cal-day-header">Tue</div>
+          <div class="cal-day-header">Wed</div>
+          <div class="cal-day-header">Thu</div>
+          <div class="cal-day-header">Fri</div>
+          <div class="cal-day-header">Sat</div>
+          <!-- Days injected by JS -->
+          <div id="calDays" style="display:contents"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Planned Topics + Stats -->
+  <div class="grid-split-2">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">📋 Planned Video Topics</h2>
+        <button class="btn-primary btn-sm" onclick="addCalendarEvent()">+ Add Video</button>
+      </div>
+      <div class="card-body">
+        <div id="plannedTopics"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">📊 Month Strategy</h2>
+      </div>
+      <div class="card-body">
+        <div class="insight-item insight-success">
+          <span class="insight-icon">🏆</span>
+          <div class="insight-text"><strong>Optimal Mix:</strong> 60% evergreen SEO + 30% viral experiments + 10% trend-reactive content for consistent algorithm growth.</div>
+        </div>
+        <div class="insight-item insight-tip">
+          <span class="insight-icon">📱</span>
+          <div class="insight-text"><strong>Shorts Strategy:</strong> Publish 1–2 Shorts per long-form video. Upload the Short 2–4 hours after the main video for maximum browse push.</div>
+        </div>
+        <div class="insight-item insight-warn">
+          <span class="insight-icon">⚠️</span>
+          <div class="insight-text"><strong>Consistency Rule:</strong> Missing uploads reduces algorithm favorability by 18%. Schedule in advance and use auto-upload.</div>
+        </div>
+        <div class="flex gap-3 mt-3" style="flex-wrap:wrap">
+          <div class="card p-3 text-center" style="flex:1;min-width:100px">
+            <div class="font-bold text-lg" id="calLongCount">0</div>
+            <div class="text-xs text-muted">Long-Form</div>
+          </div>
+          <div class="card p-3 text-center" style="flex:1;min-width:100px">
+            <div class="font-bold text-lg text-pink" id="calShortCount">0</div>
+            <div class="text-xs text-muted">Shorts</div>
+          </div>
+          <div class="card p-3 text-center" style="flex:1;min-width:100px">
+            <div class="font-bold text-lg text-amber" id="calTrendCount">0</div>
+            <div class="text-xs text-muted">Trend Videos</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- TAB: REVENUE PLANNER (Modern Creator Monetization Engine) -->
+<!-- ========================================================= -->
+<section class="tab-content" id="tab-revenue-planner">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">💰 Revenue <span class="gradient-text">Planner</span></h1>
+      <p class="page-sub">Complete creator monetization modeler — AdSense, sponsorships, affiliate deals, and digital product sales with real-time projections.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-success" onclick="calculateRevenue()">💰 Recalculate Projections</button>
+    </div>
+  </div>
+
+  <!-- QUICK PRESETS -->
+  <div class="rev-preset-bar mb-4">
+    <span class="text-xs text-muted font-bold" style="letter-spacing:0.5px">QUICK SCENARIOS:</span>
+    <button class="rev-preset-btn" onclick="applyRevPreset(50000, 5000, 'tech', 4.5)">🌱 Starter (50K views · 5K subs)</button>
+    <button class="rev-preset-btn" onclick="applyRevPreset(250000, 25000, 'tech', 4.5)">🚀 Growth (250K views · 25K subs)</button>
+    <button class="rev-preset-btn active" onclick="applyRevPreset(1500000, 250000, 'tech', 4.5)">🔥 Full-Time (1.5M views · 250K subs)</button>
+    <button class="rev-preset-btn" onclick="applyRevPreset(5000000, 750000, 'finance', 5.0)">💼 Pro Channel (5M views · 750K subs)</button>
+    <button class="rev-preset-btn" onclick="applyRevPreset(15000000, 2500000, 'entertainment', 3.8)">👑 Mega Channel (15M views · 2.5M subs)</button>
+  </div>
+
+  <!-- HERO KPI BANNER -->
+  <div class="rev-hero-banner mb-4">
+    <div class="rev-hero-card hero-primary">
+      <div class="rev-hero-label">🏆 Total Projected Monthly Revenue</div>
+      <div class="rev-hero-value text-green" id="revTotal">$21.0K</div>
+      <div class="rev-hero-sub">Combined income across 4 monetization streams</div>
+    </div>
+    <div class="rev-hero-card">
+      <div class="rev-hero-label">📅 Annual Run-Rate Projection</div>
+      <div class="rev-hero-value text-cyan" id="revAnnual">$252.3K</div>
+      <div class="rev-hero-sub">Before taxes, reinvestments & production costs</div>
+    </div>
+    <div class="rev-hero-card">
+      <div class="rev-hero-label">📈 Effective RPM (All Streams)</div>
+      <div class="rev-hero-value text-amber" id="revEffectiveRpm">$14.00</div>
+      <div class="rev-hero-sub">Net revenue earned per 1,000 video views</div>
+    </div>
+    <div class="rev-hero-card">
+      <div class="rev-hero-label">🤝 Est. Sponsorship Rate / Vid</div>
+      <div class="rev-hero-value text-pink" id="revSponsorRate">$2,500 – $4,500</div>
+      <div class="rev-hero-sub">Based on niche median views & engagement</div>
+    </div>
+  </div>
+
+  <!-- VISUAL REVENUE DISTRIBUTION STACK -->
+  <div class="card p-4 mb-4">
+    <div class="flex justify-between items-center mb-2">
+      <span class="font-bold text-sm">📊 Revenue Stream Composition</span>
+      <span class="text-xs text-muted">Auto-balanced dynamically</span>
+    </div>
+    <div class="rev-stack-bar" id="revStackBar">
+      <div class="rev-stack-seg seg-adsense" id="revSegAdsense" style="width:66%" title="AdSense: 66%"></div>
+      <div class="rev-stack-seg seg-sponsors" id="revSegSponsors" style="width:24%" title="Sponsorships: 24%"></div>
+      <div class="rev-stack-seg seg-affiliate" id="revSegAffiliate" style="width:4%" title="Affiliates: 4%"></div>
+      <div class="rev-stack-seg seg-products" id="revSegProducts" style="width:6%" title="Digital Products: 6%"></div>
+    </div>
+    <div class="rev-legend mt-3">
+      <div class="rev-legend-item"><span class="rev-legend-dot bg-green"></span><span>📺 AdSense: <strong id="revPctAdsense">66%</strong></span></div>
+      <div class="rev-legend-item"><span class="rev-legend-dot bg-cyan"></span><span>🤝 Sponsorships: <strong id="revPctSponsors">24%</strong></span></div>
+      <div class="rev-legend-item"><span class="rev-legend-dot bg-amber"></span><span>🔗 Affiliates: <strong id="revPctAffiliate">4%</strong></span></div>
+      <div class="rev-legend-item"><span class="rev-legend-dot bg-pink"></span><span>📦 Digital Products: <strong id="revPctProducts">6%</strong></span></div>
+    </div>
+  </div>
+
+  <div class="grid-split-2 mb-4">
+    <!-- Interactive Controls Card -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">🎛️ Channel Metrics & Sliders</h2>
+          <p class="card-desc">Adjust sliders or type directly — instant real-time calculation</p>
+        </div>
+        <span class="badge badge-cyan">Live Modeler</span>
+      </div>
+      <div class="card-body">
+        <!-- Monthly Views Slider + Number -->
+        <div class="slider-control-group mb-4">
+          <div class="flex justify-between items-center mb-1">
+            <label class="form-label mb-0">Monthly Views</label>
+            <div class="flex items-center gap-2">
+              <span class="slider-value-pill" id="revViewsFormatted">1,500,000 views</span>
+              <input type="number" id="revViews" class="input-field input-field-compact" value="1500000" oninput="syncViewsFromInput(this.value)" />
+            </div>
+          </div>
+          <input type="range" id="revViewsSlider" min="10000" max="15000000" step="10000" value="1500000" class="modern-slider" oninput="syncViewsFromSlider(this.value)" />
+          <div class="flex justify-between text-xs text-muted mt-1"><span>10K</span><span>2.5M</span><span>5M</span><span>10M</span><span>15M+</span></div>
+        </div>
+
+        <!-- Subscribers Slider + Number -->
+        <div class="slider-control-group mb-4">
+          <div class="flex justify-between items-center mb-1">
+            <label class="form-label mb-0">Subscriber Count</label>
+            <div class="flex items-center gap-2">
+              <span class="slider-value-pill" id="revSubsFormatted">250,000 subs</span>
+              <input type="number" id="revSubs" class="input-field input-field-compact" value="250000" oninput="syncSubsFromInput(this.value)" />
+            </div>
+          </div>
+          <input type="range" id="revSubsSlider" min="1000" max="3000000" step="1000" value="250000" class="modern-slider" oninput="syncSubsFromSlider(this.value)" />
+          <div class="flex justify-between text-xs text-muted mt-1"><span>1K</span><span>250K</span><span>750K</span><span>1.5M</span><span>3M+</span></div>
+        </div>
+
+        <!-- Niche Selector -->
+        <div class="form-group mb-4">
+          <label class="form-label">Content Niche (Determines Baseline CPM)</label>
+          <select id="revNiche" class="input-field" onchange="calculateRevenue()">
+            <option value="tech" selected>💻 Tech / AI — $12–22 CPM ($17 avg)</option>
+            <option value="finance">💳 Finance / Investing — $18–35 CPM ($26 avg)</option>
+            <option value="business">📈 Business / SaaS — $15–30 CPM ($22 avg)</option>
+            <option value="education">🎓 Education / How-To — $8–15 CPM ($11 avg)</option>
+            <option value="health">🥗 Health & Fitness — $10–20 CPM ($14 avg)</option>
+            <option value="gaming">🎮 Gaming — $4–10 CPM ($6 avg)</option>
+            <option value="entertainment">🍿 Entertainment / Vlogs — $3–8 CPM ($5 avg)</option>
+          </select>
+        </div>
+
+        <!-- Custom CPM Override & Engagement -->
+        <div class="grid-2 gap-3 mb-2">
+          <div class="form-group">
+            <label class="form-label">Custom CPM Override ($)</label>
+            <input type="number" id="revCpm" class="input-field" placeholder="Auto niche CPM" oninput="calculateRevenue()" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Avg Engagement (%)</label>
+            <input type="number" id="revEng" class="input-field" value="4.5" step="0.1" oninput="calculateRevenue()" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Revenue Breakdown Detail Card -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">💵 Detailed Monetization Breakdown</h2>
+          <p class="card-desc">Monthly itemized forecast with creator margins</p>
+        </div>
+        <span class="badge badge-green">Monthly Forecast</span>
+      </div>
+      <div class="card-body">
+        <div class="calc-row">
+          <div>
+            <div class="calc-label font-bold">📺 YouTube AdSense (55% Creator Share)</div>
+            <div class="text-xs text-muted">Estimated monetized playback RPM model</div>
+          </div>
+          <div class="calc-value text-green font-bold text-lg" id="revAdsense">$14,025</div>
+        </div>
+        <div class="calc-row">
+          <div>
+            <div class="calc-label font-bold">🤝 Brand Sponsorships</div>
+            <div class="text-xs text-muted">1–2 dedicated or integrated placements / mo</div>
+          </div>
+          <div class="calc-value text-cyan font-bold text-lg" id="revSponsors">$5,000</div>
+        </div>
+        <div class="calc-row">
+          <div>
+            <div class="calc-label font-bold">🔗 Affiliate Marketing</div>
+            <div class="text-xs text-muted">2% viewer click-through & product commissions</div>
+          </div>
+          <div class="calc-value text-amber font-bold text-lg" id="revAffiliate">$750</div>
+        </div>
+        <div class="calc-row">
+          <div>
+            <div class="calc-label font-bold">📦 Digital Products / Memberships</div>
+            <div class="text-xs text-muted">Templates, courses, community (1% sub conversion)</div>
+          </div>
+          <div class="calc-value text-pink font-bold text-lg" id="revProducts">$1,250</div>
+        </div>
+        
+        <div class="divider my-3"></div>
+        
+        <div class="calc-row" style="background:rgba(16,185,129,0.06);padding:12px;border-radius:var(--radius-sm);border:1px solid rgba(16,185,129,0.2)">
+          <div>
+            <div class="calc-label font-bold text-base" style="color:var(--text-bright)">🏆 Total Projected Monthly</div>
+            <div class="text-xs text-muted">Direct to bank account before production expenses</div>
+          </div>
+          <div class="calc-total text-green text-2xl font-bold" id="revTotalSummary">$21,025</div>
+        </div>
+        <div class="calc-row mt-2">
+          <div class="calc-label">📅 Projected Annualized Total</div>
+          <div class="calc-value text-cyan font-bold" id="revAnnualSummary">$252,300 / yr</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CPM by Niche Guide + Growth Milestones -->
+  <div class="grid-split-2">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">📊 CPM by Niche Guide</h2>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Niche</th><th>CPM Range</th><th>Best Opportunity</th></tr></thead>
+            <tbody>
+              <tr><td>Finance / Investing</td><td class="text-green font-bold">$18–35</td><td>Stock picks, DeFi, budgeting</td></tr>
+              <tr><td>Business / Marketing</td><td class="text-green font-bold">$15–30</td><td>SaaS reviews, B2B tools</td></tr>
+              <tr><td>Tech / AI</td><td class="text-cyan font-bold">$12–22</td><td>AI tutorials, software reviews</td></tr>
+              <tr><td>Health / Wellness</td><td class="text-cyan font-bold">$10–20</td><td>Fitness, supplements, mental health</td></tr>
+              <tr><td>Education</td><td class="text-amber font-bold">$8–15</td><td>Courses, certifications</td></tr>
+              <tr><td>Gaming</td><td class="text-muted">$4–10</td><td>Sponsored streams</td></tr>
+              <tr><td>Entertainment</td><td class="text-muted">$3–8</td><td>Brand deals, merch</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">🚀 Growth Milestones</h2>
+      </div>
+      <div class="card-body">
+        <div id="growthMilestones">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- TAB: VIDEO PIPELINE (KANBAN) -->
+<!-- ========================================================= -->
+<section class="tab-content" id="tab-video-pipeline">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">🎬 Video <span class="gradient-text">Pipeline</span></h1>
+      <p class="page-sub">Visual Kanban workflow — drag and drop videos through production stages.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" onclick="openModal('newVideoModal')">+ New Video Project</button>
+    </div>
+  </div>
+
+  <div class="kanban-board" id="kanbanBoard">
+    <div class="kanban-col" id="col-ideas" ondragover="dragOver(event)" ondrop="drop(event,'ideas')">
+      <div class="col-header">
+        <span class="col-title">💡 Ideas & Outliers</span>
+        <span class="col-count" id="countIdeas">0</span>
+      </div>
+      <div id="cardsIdeas" class="flex flex-col gap-2"></div>
+    </div>
+    <div class="kanban-col" id="col-scripting" ondragover="dragOver(event)" ondrop="drop(event,'scripting')">
+      <div class="col-header">
+        <span class="col-title">✍️ Scripting</span>
+        <span class="col-count" id="countScripting">0</span>
+      </div>
+      <div id="cardsScripting" class="flex flex-col gap-2"></div>
+    </div>
+    <div class="kanban-col" id="col-production" ondragover="dragOver(event)" ondrop="drop(event,'production')">
+      <div class="col-header">
+        <span class="col-title">🎙️ Production & Edit</span>
+        <span class="col-count" id="countProduction">0</span>
+      </div>
+      <div id="cardsProduction" class="flex flex-col gap-2"></div>
+    </div>
+    <div class="kanban-col" id="col-published" ondragover="dragOver(event)" ondrop="drop(event,'published')">
+      <div class="col-header">
+        <span class="col-title">✅ Published & Live</span>
+        <span class="col-count" id="countPublished">0</span>
+      </div>
+      <div id="cardsPublished" class="flex flex-col gap-2"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- TAB: AI AGENTS -->
+<!-- ========================================================= -->
+<section class="tab-content" id="tab-ai-agents">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">🤖 AI Agent <span class="gradient-text">Center</span></h1>
+      <p class="page-sub">Autonomous AI workers operating 24/7. Research, script, thumbnail, and publish on autopilot.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" onclick="startAllAgents()">▶ Start All Agents</button>
+    </div>
+  </div>
+
+  <div class="grid-4 mb-4">
+    <div class="card agent-card">
+      <div class="agent-header">
+        <div class="agent-avatar">👀</div>
+        <div>
+          <h3>TrendScout</h3>
+          <span class="status-badge running">● Scanning</span>
+        </div>
+      </div>
+      <p class="agent-desc">Monitors 25 niche competitor channels hourly. Detects videos with >3x view velocity within 4 hours of upload.</p>
+      <div class="agent-metrics">
+        <div class="agent-metric"><span>Scans Done:</span><strong id="agentScans">342</strong></div>
+        <div class="agent-metric"><span>Last Alert:</span><strong>14 mins ago</strong></div>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <button class="btn-xs btn-outline w-100" onclick="runAgent('trendscout')">▶ Run Now</button>
+        <label class="switch"><input type="checkbox" checked id="agentTrendToggle" /><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <div class="card agent-card">
+      <div class="agent-header">
+        <div class="agent-avatar">✍️</div>
+        <div>
+          <h3>ScriptArchitect</h3>
+          <span class="status-badge running">● Claude 3.5</span>
+        </div>
+      </div>
+      <p class="agent-desc">Converts trend signals into retention-engineered scripts using MrBeast, Veritasium, and Magnates Media blueprints.</p>
+      <div class="agent-metrics">
+        <div class="agent-metric"><span>Scripts:</span><strong id="agentScripts">48</strong></div>
+        <div class="agent-metric"><span>Avg Retention:</span><strong>64.2%</strong></div>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <button class="btn-xs btn-outline w-100" onclick="runAgent('script')">▶ Run Now</button>
+        <label class="switch"><input type="checkbox" checked id="agentScriptToggle" /><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <div class="card agent-card">
+      <div class="agent-header">
+        <div class="agent-avatar">🎨</div>
+        <div>
+          <h3>ThumbnailLab</h3>
+          <span class="status-badge running">● Generating</span>
+        </div>
+      </div>
+      <p class="agent-desc">Creates A/B thumbnail variants, tests contrast ratios, emotion intensities, and simulates mobile CTR performance.</p>
+      <div class="agent-metrics">
+        <div class="agent-metric"><span>Rendered:</span><strong>144 thumbs</strong></div>
+        <div class="agent-metric"><span>Best CTR:</span><strong>9.8%</strong></div>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <button class="btn-xs btn-outline w-100" onclick="runAgent('thumbnail')">▶ Run Now</button>
+        <label class="switch"><input type="checkbox" checked id="agentThumbToggle" /><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <div class="card agent-card">
+      <div class="agent-header">
+        <div class="agent-avatar">🚀</div>
+        <div>
+          <h3>GrowthPilot</h3>
+          <span class="status-badge running">● Active</span>
+        </div>
+      </div>
+      <p class="agent-desc">Audits published videos at 24h, 48h, 7d. Auto-tweaks titles if CTR < 4% to revive algorithm distribution.</p>
+      <div class="agent-metrics">
+        <div class="agent-metric"><span>Titles A/B Tested:</span><strong>82</strong></div>
+        <div class="agent-metric"><span>Views Revived:</span><strong class="text-green">+240K</strong></div>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <button class="btn-xs btn-outline w-100" onclick="runAgent('growth')">▶ Run Now</button>
+        <label class="switch"><input type="checkbox" checked id="agentGrowthToggle" /><span class="slider"></span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agent Log -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">📋 Agent Activity Log</h2>
+      <div class="flex gap-2">
+        <span class="live-tag">● Live Feed</span>
+        <button class="btn-xs btn-outline" onclick="clearAgentLog()">Clear</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="console-wrap">
+        <div class="console-header">
+          <div class="console-title">
+            <span class="console-dot green"></span>
+            Agent Activity Stream
+          </div>
+        </div>
+        <div class="console-body" id="agentLog">
+[TrendScout] ● Scanning channel: @MrBeast — 2 new uploads detected
+[ThumbnailLab] ✓ Generated 3 variants for "I Built a $10k/mo AI Channel" — Winner: Variant B (9.2% CTR predicted)
+[GrowthPilot] ⚡ Video "Claude MCP Guide" at 72h has 3.1% CTR — triggering title A/B test
+[ScriptArchitect] ✓ Script complete: "How I Automated My Entire YouTube Channel" — 1,240 words, est. 9:30 runtime
+[TrendScout] 🔥 BREAKOUT DETECTED: "AI Agents Explained" — 8.4x above channel median for @Fireship
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- TAB: AUTOMATION HUB -->
+<!-- ========================================================= -->
+<section class="tab-content" id="tab-automation-hub">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">⚙️ Automation <span class="gradient-text">Hub</span></h1>
+      <p class="page-sub">Connect webhooks, configure n8n & Make.com workflows, and manage end-to-end video publishing daemons.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" onclick="testWebhooks()">⚡ Test All Webhooks</button>
+    </div>
+  </div>
+
+  <div class="grid-split-2 mb-4">
+    <!-- Daemons -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">🔄 Active Workflow Daemons</h2>
+        <span class="status-badge running">● 4 Daemons Live</span>
+      </div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:12px">
+        <div class="flex justify-between items-center p-3" style="background:var(--bg-input);border-radius:var(--radius-sm);border:1px solid var(--border)">
+          <div>
+            <div class="font-bold text-sm">n8n Autonomous Channel Pipeline</div>
+            <div class="text-xs text-muted">Scrapes trends → Claude draft → ElevenLabs → Render</div>
+          </div>
+          <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
+        </div>
+        <div class="flex justify-between items-center p-3" style="background:var(--bg-input);border-radius:var(--radius-sm);border:1px solid var(--border)">
+          <div>
+            <div class="font-bold text-sm">Hourly Outlier & Competitor Radar</div>
+            <div class="text-xs text-muted">Polls top 10 niche channels for viral breakouts</div>
+          </div>
+          <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
+        </div>
+        <div class="flex justify-between items-center p-3" style="background:var(--bg-input);border-radius:var(--radius-sm);border:1px solid var(--border)">
+          <div>
+            <div class="font-bold text-sm">Auto-Thumbnail A/B CTR Optimizer</div>
+            <div class="text-xs text-muted">Swaps thumbnail after 24h if CTR below 4.5%</div>
+          </div>
+          <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
+        </div>
+        <div class="flex justify-between items-center p-3" style="background:var(--bg-input);border-radius:var(--radius-sm);border:1px solid var(--border)">
+          <div>
+            <div class="font-bold text-sm">Git Auto-Push Watcher</div>
+            <div class="text-xs text-muted">Pushes project changes to GitHub on save</div>
+          </div>
+          <label class="switch"><input type="checkbox" checked /><span class="slider"></span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Webhooks -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">🔗 Webhook Endpoints</h2>
+        <span class="badge">REST API</span>
+      </div>
+      <div class="card-body">
+        <div class="form-group">
           <label class="form-label">n8n Inbound Webhook</label>
           <input type="text" class="input-field" value="http://localhost:5678/webhook/yt-generate-video" />
         </div>
-        <div class="form-group mb-3">
+        <div class="form-group">
           <label class="form-label">Make.com Inbound Webhook</label>
-          <input type="text" class="input-field" value="https://hook.eu1.make.com/xxxxxxxxx-yt-trigger" />
+          <input type="text" class="input-field" value="https://hook.eu1.make.com/xxx-yt-trigger" />
         </div>
-        <button class="btn-primary" onclick="showToast('Webhook payload sent successfully!', 'success')">&#128640; Dispatch Test Event</button>
+        <div class="form-group">
+          <label class="form-label">Custom Webhook Payload</label>
+          <textarea class="textarea-field" rows="4" placeholder='{"action":"generate_video","topic":"AI automation","niche":"tech"}'></textarea>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn-primary w-100" onclick="dispatchWebhook()">🚀 Dispatch Event</button>
+        </div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- ========================================== -->
-  <!-- TAB 12: VERIFY CENTER -->
-  <!-- ========================================== -->
-  <section class="tab-content" id="tab-verify-center">
-    <div class="page-header">
+  <!-- MCP Integrations -->
+  <h2 class="mb-3" style="font-size:1.1rem;font-weight:700;color:var(--text-bright)">🔗 Claude MCP Integrations</h2>
+  <div class="grid-3 mb-4">
+    <div class="card mcp-card">
+      <div class="mcp-header">
+        <div class="mcp-icon">📺</div>
+        <div><h3>YouTube Data MCP</h3><span class="mcp-status connected">● Connected</span></div>
+      </div>
+      <p class="mcp-desc">40+ YouTube API tools exposed directly to Claude Desktop for live analytics.</p>
+      <div class="mcp-tools"><span class="tool-tag">yt_search</span><span class="tool-tag">yt_channel_stats</span><span class="tool-tag">yt_video_data</span></div>
+      <button class="btn-outline btn-sm w-100" onclick="testMcp('YouTube Data')">Verify Connection</button>
+    </div>
+    <div class="card mcp-card">
+      <div class="mcp-header">
+        <div class="mcp-icon">🎙️</div>
+        <div><h3>ElevenLabs Voice MCP</h3><span class="mcp-status connected">● Connected</span></div>
+      </div>
+      <p class="mcp-desc">Generate realistic voiceovers from Claude prompts with voice cloning.</p>
+      <div class="mcp-tools"><span class="tool-tag">tts</span><span class="tool-tag">clone_voice</span><span class="tool-tag">get_voices</span></div>
+      <button class="btn-outline btn-sm w-100" onclick="testMcp('ElevenLabs')">Verify Connection</button>
+    </div>
+    <div class="card mcp-card">
+      <div class="mcp-header">
+        <div class="mcp-icon">📝</div>
+        <div><h3>Whisper Transcript MCP</h3><span class="mcp-status connected">● Connected</span></div>
+      </div>
+      <p class="mcp-desc">Transcribe competitor videos for hook extraction and structure analysis.</p>
+      <div class="mcp-tools"><span class="tool-tag">transcribe</span><span class="tool-tag">extract_hooks</span><span class="tool-tag">timestamp_map</span></div>
+      <button class="btn-outline btn-sm w-100" onclick="testMcp('Whisper')">Verify Connection</button>
+    </div>
+    <div class="card mcp-card">
+      <div class="mcp-header">
+        <div class="mcp-icon">🖼️</div>
+        <div><h3>Canva / Thumbnail MCP</h3><span class="mcp-status connected">● Connected</span></div>
+      </div>
+      <p class="mcp-desc">Auto-generate thumbnails, A/B variants, and contrast-optimized designs.</p>
+      <div class="mcp-tools"><span class="tool-tag">render_thumb</span><span class="tool-tag">ab_variant</span><span class="tool-tag">contrast_check</span></div>
+      <button class="btn-outline btn-sm w-100" onclick="testMcp('Canva')">Verify Connection</button>
+    </div>
+    <div class="card mcp-card">
+      <div class="mcp-header">
+        <div class="mcp-icon">⚙️</div>
+        <div><h3>n8n Automation MCP</h3><span class="mcp-status connected">● Connected</span></div>
+      </div>
+      <p class="mcp-desc">Trigger autonomous n8n workflows for full video assembly and publishing.</p>
+      <div class="mcp-tools"><span class="tool-tag">trigger_workflow</span><span class="tool-tag">get_status</span><span class="tool-tag">retry_job</span></div>
+      <button class="btn-outline btn-sm w-100" onclick="testMcp('n8n')">Verify Connection</button>
+    </div>
+    <div class="card mcp-card">
+      <div class="mcp-header">
+        <div class="mcp-icon">📤</div>
+        <div><h3>YouTube Uploader MCP</h3><span class="mcp-status connected">● Connected</span></div>
+      </div>
+      <p class="mcp-desc">Let Claude directly upload, schedule, and update video metadata via OAuth.</p>
+      <div class="mcp-tools"><span class="tool-tag">upload_video</span><span class="tool-tag">schedule_publish</span><span class="tool-tag">update_meta</span></div>
+      <button class="btn-outline btn-sm w-100" onclick="testMcp('Uploader')">Verify Connection</button>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- TAB: GITHUB RESOURCES -->
+<!-- ========================================================= -->
+<section class="tab-content" id="tab-github-resources">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">⭐ GitHub <span class="gradient-text">Resources</span></h1>
+      <p class="page-sub">5 vendored repositories + 12 curated open-source automation tools, all ready to run locally.</p>
+    </div>
+    <div class="header-actions">
+      <div class="filter-pills" id="repoFilters">
+        <button class="pill active" onclick="filterRepos('all',this)">All (17)</button>
+        <button class="pill" onclick="filterRepos('mcp',this)">MCP Servers</button>
+        <button class="pill" onclick="filterRepos('automation',this)">Automation</button>
+        <button class="pill" onclick="filterRepos('ai',this)">AI & Video</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vendored Repos -->
+  <div class="card mb-4" style="border-color:rgba(16,185,129,0.3);background:rgba(16,185,129,0.03)">
+    <div class="card-header">
       <div>
-        <h1 class="page-title">&#9989; Verify <span class="gradient-text">Center</span></h1>
-        <p class="page-sub">Comprehensive channel audit checklist, monetization criteria check, and engagement calculator.</p>
+        <h2 class="card-title">📁 Locally Vendored Repositories (Ready to Run)</h2>
+        <p class="card-desc">Cloned and integrated into <span class="font-mono text-sm">d:/xampp/htdocs/YoutubeAutomatio/repos/</span></p>
       </div>
-      <div class="header-actions">
-        <button class="btn-primary" onclick="runCompleteAudit()">&#9889; Run Full Health Audit</button>
-      </div>
+      <span class="badge badge-green">✓ 5 Repos Live</span>
     </div>
-
-    <div class="audit-grid">
-      <div class="card">
-        <div class="card-header"><h2>Algorithmic Health Audit</h2><span class="card-badge badge-green">Score: 94/100 (Pass)</span></div>
-        <div class="audit-list">
-          <div class="audit-item pass"><span class="audit-icon">&#9989;</span><div><h4>Channel Banner &amp; Branding</h4><p>High-res banner, customized avatar, clear niche proposition</p></div></div>
-          <div class="audit-item pass"><span class="audit-icon">&#9989;</span><div><h4>Consistent Upload Cadence</h4><p>2+ uploads per week consistently for 90 days</p></div></div>
-          <div class="audit-item pass"><span class="audit-icon">&#9989;</span><div><h4>Community Tab Activity</h4><p>Polls &amp; teasers maintain audience engagement between uploads</p></div></div>
-          <div class="audit-item warn"><span class="audit-icon">&#9888;&#65039;</span><div><h4>Shorts-to-Long Form Ratio</h4><p>Recommend 2 Shorts per 1 Long-form for maximum browse reach</p></div></div>
-          <div class="audit-item pass"><span class="audit-icon">&#9989;</span><div><h4>Copyright &amp; Community Guidelines</h4><p>0 strikes detected &mdash; 100% clean account standing</p></div></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header"><h2>Engagement &amp; Revenue Calculator</h2><span class="card-badge">Calculator</span></div>
-        <div class="form-group mb-2"><label class="form-label">Monthly Views</label><input type="number" id="calcViews" class="input-field" value="1500000" oninput="calculateProjections()" /></div>
-        <div class="form-group mb-2"><label class="form-label">Estimated CPM ($)</label><input type="number" id="calcCpm" class="input-field" value="9.50" oninput="calculateProjections()" /></div>
-        <div class="calc-results mt-3">
-          <div class="calc-box"><div class="calc-label">Monthly AdSense (55% Creator Share)</div><div class="calc-val text-green" id="resMonthlyRev">$7,837.50</div></div>
-          <div class="calc-box"><div class="calc-label">Est. Sponsorship &amp; Affiliate</div><div class="calc-val text-cyan" id="resSponsorRev">$4,500.00</div></div>
-          <div class="calc-box"><div class="calc-label">Total Projected Monthly Gross</div><div class="calc-val text-unicorn" id="resTotalRev">$12,337.50</div></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================================== -->
-  <!-- TAB 13: GITHUB RESOURCES -->
-  <!-- ========================================== -->
-  <section class="tab-content" id="tab-github-repos">
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">&#11088; GitHub <span class="gradient-text">Resources Hub</span></h1>
-        <p class="page-sub">Curated open-source automation repositories, MCP servers, scrapers, and video pipelines.</p>
-      </div>
-      <div class="header-actions">
-        <div class="repo-filter-row">
-          <button class="pill active" onclick="renderRepos('all', this)">All (12)</button>
-          <button class="pill" onclick="renderRepos('mcp', this)">MCP Servers</button>
-          <button class="pill" onclick="renderRepos('automation', this)">Automation &amp; Bots</button>
-          <button class="pill" onclick="renderRepos('ai', this)">AI &amp; Video</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- LOCALLY IMPORTED REPOSITORIES (VENDOR HUB) -->
-    <div class="card mb-4" style="border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.04);">
-      <div class="card-header">
-        <div>
-          <h2 style="display:flex;align-items:center;gap:8px;">
-            <span>&#128194;</span> Locally Imported Repositories (Ready to Run)
-          </h2>
-          <p class="card-desc">The 5 top YouTube Automation &amp; MCP repositories have been cloned and integrated directly into your local workspace at <code>d:/xampp/htdocs/YoutubeAutomatio/repos/</code></p>
-        </div>
-        <span class="card-badge badge-green">&#10003; 5 Repos Cloned &amp; Vendored</span>
-      </div>
-
+    <div class="card-body">
       <div class="grid-3">
-        <div class="card p-3" style="background: rgba(255, 255, 255, 0.03);">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <strong style="color:#fff;">&#129302; youtube-automation-agent</strong>
-            <span class="card-badge badge-cyan">Tubegent</span>
-          </div>
-          <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:12px;">24/7 multi-agent autonomous team: Trend analysis, scriptwriting, thumbnail generation &amp; publishing.</p>
-          <div style="font-size:0.75rem;color:#64748b;font-family:'JetBrains Mono',monospace;margin-bottom:10px;">/repos/youtube-automation-agent/</div>
-          <button class="btn-xs btn-primary w-100" onclick="showToast('Run command: python run_local_agents.py --run tubegent', 'info')">&#9654; CLI: python main.py</button>
+        <div class="card p-3" style="background:rgba(255,255,255,0.02)">
+          <div class="flex justify-between items-center mb-2"><strong>🤖 youtube-automation-agent</strong><span class="badge badge-cyan">Tubegent</span></div>
+          <p class="text-sm text-muted mb-3">24/7 multi-agent autonomous team: strategy, scripting, thumbnails, SEO.</p>
+          <div class="font-mono text-xs text-muted mb-2">/repos/youtube-automation-agent/</div>
+          <button class="btn-xs btn-primary w-100" onclick="showToast('Run: python run_local_agents.py --run tubegent','info')">▶ python main.py</button>
         </div>
-
-        <div class="card p-3" style="background: rgba(255, 255, 255, 0.03);">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <strong style="color:#fff;">&#128250; youtube-mcp-server</strong>
-            <span class="card-badge badge-green">Claude MCP</span>
-          </div>
-          <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:12px;">Full Claude Model Context Protocol server exposing YouTube Data API v3 tools directly to Claude Desktop.</p>
-          <div style="font-size:0.75rem;color:#64748b;font-family:'JetBrains Mono',monospace;margin-bottom:10px;">/repos/youtube-mcp-server/</div>
-          <button class="btn-xs btn-outline w-100" onclick="showToast('Config in mcp_config/claude_desktop_config.json', 'info')">&#128279; View MCP Config</button>
+        <div class="card p-3" style="background:rgba(255,255,255,0.02)">
+          <div class="flex justify-between items-center mb-2"><strong>📺 youtube-mcp-server</strong><span class="badge badge-green">Claude MCP</span></div>
+          <p class="text-sm text-muted mb-3">40+ YouTube Data API v3 tools exposed directly to Claude Desktop.</p>
+          <div class="font-mono text-xs text-muted mb-2">/repos/youtube-mcp-server/</div>
+          <button class="btn-xs btn-outline w-100" onclick="showToast('Config in mcp_config/claude_desktop_config.json','info')">🔗 View MCP Config</button>
         </div>
-
-        <div class="card p-3" style="background: rgba(255, 255, 255, 0.03);">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <strong style="color:#fff;">&#128221; mcp-youtube</strong>
-            <span class="card-badge badge-cyan">Transcripts</span>
-          </div>
-          <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:12px;">Direct Python server pulling closed captions and time-coded transcripts for competitor hook analysis.</p>
-          <div style="font-size:0.75rem;color:#64748b;font-family:'JetBrains Mono',monospace;margin-bottom:10px;">/repos/mcp-youtube/</div>
-          <button class="btn-xs btn-outline w-100" onclick="showToast('Run: python -m repos.mcp_youtube.server', 'info')">&#9654; Test Transcript Tool</button>
+        <div class="card p-3" style="background:rgba(255,255,255,0.02)">
+          <div class="flex justify-between items-center mb-2"><strong>📝 mcp-youtube</strong><span class="badge badge-cyan">Transcripts</span></div>
+          <p class="text-sm text-muted mb-3">Pull closed captions and time-coded transcripts for hook analysis.</p>
+          <div class="font-mono text-xs text-muted mb-2">/repos/mcp-youtube/</div>
+          <button class="btn-xs btn-outline w-100" onclick="showToast('Run: python -m repos.mcp_youtube.server','info')">▶ Test Transcript</button>
         </div>
-
-        <div class="card p-3" style="background: rgba(255, 255, 255, 0.03);">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <strong style="color:#fff;">&#127916; youtube-autopilot</strong>
-            <span class="card-badge badge-green">Pipeline</span>
-          </div>
-          <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:12px;">End-to-end editorial pipeline: trend detection, multi-agent scripting, and automated video compilation.</p>
-          <div style="font-size:0.75rem;color:#64748b;font-family:'JetBrains Mono',monospace;margin-bottom:10px;">/repos/youtube-autopilot/</div>
-          <button class="btn-xs btn-outline w-100" onclick="showToast('Run: cd repos/youtube-autopilot && python app.py', 'info')">&#9654; Launch Pipeline</button>
+        <div class="card p-3" style="background:rgba(255,255,255,0.02)">
+          <div class="flex justify-between items-center mb-2"><strong>🎬 youtube-autopilot</strong><span class="badge badge-green">Pipeline</span></div>
+          <p class="text-sm text-muted mb-3">End-to-end editorial pipeline: trend detection, scripting, video compilation.</p>
+          <div class="font-mono text-xs text-muted mb-2">/repos/youtube-autopilot/</div>
+          <button class="btn-xs btn-outline w-100" onclick="showToast('Run: cd repos/youtube-autopilot && python app.py','info')">▶ Launch Pipeline</button>
         </div>
-
-        <div class="card p-3" style="background: rgba(255, 255, 255, 0.03);">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <strong style="color:#fff;">&#128228; youtube-uploader-mcp</strong>
-            <span class="card-badge badge-cyan">Publisher</span>
-          </div>
-          <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:12px;">Model Context Protocol tool allowing Claude to programmatically upload and schedule video files.</p>
-          <div style="font-size:0.75rem;color:#64748b;font-family:'JetBrains Mono',monospace;margin-bottom:10px;">/repos/youtube-uploader-mcp/</div>
-          <button class="btn-xs btn-outline w-100" onclick="showToast('Node MCP server in repos/youtube-uploader-mcp/', 'info')">&#9654; Setup OAuth</button>
+        <div class="card p-3" style="background:rgba(255,255,255,0.02)">
+          <div class="flex justify-between items-center mb-2"><strong>📤 youtube-uploader-mcp</strong><span class="badge badge-cyan">Publisher</span></div>
+          <p class="text-sm text-muted mb-3">MCP tool for Claude to upload and schedule YouTube videos programmatically.</p>
+          <div class="font-mono text-xs text-muted mb-2">/repos/youtube-uploader-mcp/</div>
+          <button class="btn-xs btn-outline w-100" onclick="showToast('Node MCP server in repos/youtube-uploader-mcp/','info')">▶ Setup OAuth</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="repos-grid" id="reposGridContainer">
-      <!-- Injected by JavaScript -->
-    </div>
-  </section>
+  <div class="grid-auto" id="repoGrid"></div>
+</section>
+
 </main>
+
+<!-- GLOBAL SEARCH RESULTS OVERLAY -->
+<div id="globalSearchResults" class="search-results-overlay" style="display:none"></div>
 
 <script src="app.js"></script>
 </body>
