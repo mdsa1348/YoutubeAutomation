@@ -25,15 +25,20 @@ const state = {
 };
 
 // ── DATABASE PERSISTENCE ENGINE ──
-const API_BASE = (window.location.protocol === 'file:')
+const isVercel = window.location.hostname.includes('vercel.app') || window.location.hostname.includes('now.sh');
+let API_BASE = (window.location.protocol === 'file:')
   ? 'http://localhost/YoutubeAutomatio/api.php'
-  : 'api.php';
+  : (isVercel ? '/api' : 'api.php');
 
 let dbStatus = { connected: false, driver: 'none', stats: {} };
 
 async function initDatabase() {
   try {
-    const res = await fetch(`${API_BASE}?action=db_status`);
+    let res = await fetch(`${API_BASE}?action=db_status`);
+    if (!res.ok && API_BASE === 'api.php') {
+      res = await fetch(`/api?action=db_status`);
+      if (res.ok) API_BASE = '/api';
+    }
     if (!res.ok) throw new Error('Backend HTTP ' + res.status);
     const data = await res.json();
     if (data.success && data.status === 'connected') {
@@ -59,12 +64,21 @@ function updateDbUI(data) {
   const statCnt = document.getElementById('dbStatContent');
   const statCal = document.getElementById('dbStatCalendar');
 
-  const driverLabel = data.driver === 'mysql' ? 'MySQL DB' : 'SQLite DB';
+  let driverLabel = 'SQLite DB';
+  let driverDetail = 'Driver: SQLite (autopilot.sqlite · Zero Config)';
+  if (data.driver === 'mysql') {
+    driverLabel = 'MySQL DB';
+    driverDetail = 'Driver: MySQL (database: yt_autopilot)';
+  } else if (data.driver === 'cloud_vault') {
+    driverLabel = 'Cloud Vault (Vercel)';
+    driverDetail = 'Driver: Vercel Serverless Edge + Client Sync';
+  }
+
   if (text) text.innerHTML = `🗄️ ${driverLabel}`;
   if (dot) dot.style.background = '#10b981';
 
   if (modalStatus) modalStatus.textContent = `Database Connected (${driverLabel})`;
-  if (modalDriver) modalDriver.textContent = data.driver === 'mysql' ? 'Driver: MySQL (database: yt_autopilot)' : 'Driver: SQLite (autopilot.sqlite · Zero Config)';
+  if (modalDriver) modalDriver.textContent = driverDetail;
   if (modalBadge) { modalBadge.textContent = 'Active & Healthy'; modalBadge.className = 'badge badge-green'; }
 
   if (data.stats) {
