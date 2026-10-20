@@ -12,6 +12,22 @@ desktop.ini
 # Environment & Sensitive configs
 .env
 .env.local
+.venv/
+config/client_secret.json
+config/youtube_token.json
+config/*.json
+!config/client_secret.example.json
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Generated Media Output
+output/
 
 # Logs
 *.log
+
+
+
