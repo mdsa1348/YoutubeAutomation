@@ -53,19 +53,9 @@ def get_authenticated_service():
             print(f"[!] Error refreshing token: {e}")
             creds = None
 
-    if not creds and os.path.exists(CLIENT_SECRET_FILE):
-        try:
-            flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRET_FILE, SCOPES)
-            creds = flow.run_local_server(port=8090, prompt="consent")
-            os.makedirs(CONFIG_DIR, exist_ok=True)
-            with open(TOKEN_FILE, "w") as token:
-                token.write(creds.to_json())
-        except Exception as e:
-            print(f"[!] Error in OAuth flow: {e}")
-            return None
-
-    if creds:
+    if creds and creds.valid:
         return build("youtube", "v3", credentials=creds)
+        
     return None
 
 def upload_video_to_youtube(
