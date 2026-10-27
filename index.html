@@ -388,6 +388,9 @@
       <li class="nav-item" data-tab="clip-generator" onclick="switchTab('clip-generator',this)">
         <span class="nav-icon">📱</span><span class="nav-label">Auto Clip Generator</span><span class="nav-badge hot">Shorts</span>
       </li>
+      <li class="nav-item" data-tab="video-studio" onclick="switchTab('video-studio',this)">
+        <span class="nav-icon">🎬</span><span class="nav-label">Video Studio & Assembler</span><span class="nav-badge hot">Pro</span>
+      </li>
       <li class="nav-item" data-tab="seo-radar" onclick="switchTab('seo-radar',this)">
         <span class="nav-icon">🎯</span><span class="nav-label">SEO & Keywords</span>
       </li>
@@ -1693,6 +1696,439 @@
           <div class="font-bold mb-1">Loop Ending</div>
           <div class="text-xs text-muted">End implies the beginning. Seamless loop = algorithm keeps serving your Short.</div>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- TAB: VIDEO STUDIO & ASSEMBLER -->
+<!-- ========================================================= -->
+<section class="tab-content" id="tab-video-studio">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">🎬 Video Studio & <span class="gradient-text">Assembler</span></h1>
+      <p class="page-sub">Multi-track timeline sequencer, visual/audio signal modulation, automated loop padding, and FFmpeg batch rendering engine.</p>
+    </div>
+    <div class="header-actions flex gap-2">
+      <button class="btn-outline btn-sm" onclick="checkFFmpegStatus()">🔍 Check FFmpeg Engine</button>
+      <button class="btn-outline btn-sm" onclick="loadStudioPreset('padding_tdm')">⚡ Load Case Study Preset</button>
+      <button class="btn-primary btn-sm" onclick="compileStudioFFmpeg()">⚡ Compile FFmpeg</button>
+      <button class="btn-green btn-sm" onclick="exportStudioBatch()">💾 Export .BAT Script</button>
+    </div>
+  </div>
+
+  <!-- STUDIO KPI STATUS BAR -->
+  <div class="kpi-grid mb-4">
+    <div class="kpi-card">
+      <div class="kpi-label">TOTAL TIMELINE RUNTIME</div>
+      <div class="kpi-value text-bright" id="studioTotalRuntime">46m 15s</div>
+      <div class="kpi-sub text-muted" id="studioTotalSeconds">2,775 total seconds</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">CONTENT DENSITY RATIO</div>
+      <div class="kpi-value" style="color:var(--accent-cyan)" id="studioDensityRatio">52.9% Main</div>
+      <div class="kpi-sub text-muted" id="studioDilutionSub">47.1% Tail Padding Filler</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">SIGNAL MODULATION</div>
+      <div class="kpi-value" style="color:var(--accent)" id="studioModulationSummary">2.0% Zoom • 30 FPS</div>
+      <div class="kpi-sub text-muted" id="studioPitchSummary">+1.02 Semitones • Lanczos</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">COMPLIANCE RISK INDEX</div>
+      <div class="kpi-value" id="studioRiskBadge" style="color:var(--accent-amber)">Moderate (68/100)</div>
+      <div class="kpi-sub text-muted" id="studioRiskSub">Unlisted Staging Required</div>
+    </div>
+  </div>
+
+  <!-- VISUAL TIMELINE BAR -->
+  <div class="card p-3 mb-4" style="background:var(--bg-surface);border:1px solid var(--border)">
+    <div class="flex justify-between items-center mb-2">
+      <div class="flex items-center gap-2">
+        <span style="font-size:1.1rem">⏱️</span>
+        <span class="font-bold text-sm">Interactive Timeline Map</span>
+      </div>
+      <div class="flex gap-3 text-xs">
+        <span class="flex items-center gap-1"><span style="width:10px;height:10px;background:#6366f1;border-radius:2px;display:inline-block"></span> Pre-roll (Slot 1)</span>
+        <span class="flex items-center gap-1"><span style="width:10px;height:10px;background:#10b981;border-radius:2px;display:inline-block"></span> Main Content (Slot 2)</span>
+        <span class="flex items-center gap-1"><span style="width:10px;height:10px;background:#f59e0b;border-radius:2px;display:inline-block"></span> Tail Padding (Slot 3)</span>
+      </div>
+    </div>
+    <div id="studioTimelineBar" class="studio-timeline-bar">
+      <div id="barSlot1" class="timeline-segment seg-slot1" style="width:1%" title="Intro: 15s (0.5%)"></div>
+      <div id="barSlot2" class="timeline-segment seg-slot2" style="width:52%" title="Main Feature: 24m 15s (52.4%)">24m 15s (Main Feature)</div>
+      <div id="barSlot3" class="timeline-segment seg-slot3" style="width:47%" title="Tail Filler: 21m 45s (47.1%)">21m 45s (TDM Loop Filler)</div>
+    </div>
+    <div class="flex justify-between text-xs text-muted mt-1">
+      <span>00:00:00</span>
+      <span id="timelineMidPoint">~24:30 (Cut point)</span>
+      <span id="timelineEndPoint">46:15:00</span>
+    </div>
+  </div>
+
+  <!-- MAIN WORKSPACE SPLIT: TRACKS (LEFT) & TRANSFORMS (RIGHT) -->
+  <div class="grid-split-2 mb-4">
+    <!-- LEFT: 3-TRACK SEQUENCER -->
+    <div class="card">
+      <div class="card-header">
+        <div class="flex items-center gap-2">
+          <span style="font-size:1.2rem">🎞️</span>
+          <h2 class="card-title">Track Sequencer & Assembly</h2>
+        </div>
+        <span class="badge badge-primary">Step 1</span>
+      </div>
+      <div class="card-body">
+        <p class="text-xs text-secondary mb-3">
+          Sequence multiple clips in order. The FFmpeg engine normalizes dimensions, sample rates, and audio channels before concatenating.
+        </p>
+
+        <!-- MULTI-FILE DIRECT PICKER & DROPZONE -->
+        <div class="studio-dropzone mb-3" onclick="document.getElementById('studioMultiFileInput').click()">
+          <input type="file" id="studioMultiFileInput" multiple accept="video/*" style="display:none" onchange="handleStudioMultiFiles(event)" />
+          <div style="font-size:1.8rem;margin-bottom:4px">📁</div>
+          <div class="font-bold text-sm text-bright">Click to Select Multiple Videos (or Drag & Drop)</div>
+          <div class="text-xs text-muted">Select 2 or more video clips from your computer to auto-sequence and merge</div>
+        </div>
+
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs font-bold text-muted uppercase">Sequence Order:</span>
+          <div class="flex gap-2">
+            <button class="btn-xs btn-outline" onclick="addStudioClipSlot()">➕ Add Video Clip</button>
+            <button class="btn-xs btn-outline" onclick="loadStudioPreset('padding_tdm')">↺ Reset Default</button>
+          </div>
+        </div>
+
+        <!-- TRACK 1: PRE-ROLL -->
+        <div class="studio-track-card mb-3" id="slotCard1">
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center gap-2">
+              <span class="badge badge-primary text-xs">Slot 1</span>
+              <span class="font-bold text-sm">Intro / Channel Branding</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="track1Active" checked onchange="updateStudioState()" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="form-group mb-2">
+            <label class="form-label text-xs">File Path or Name</label>
+            <input type="text" id="track1File" class="input-field text-xs" value="intro_branding.mp4" oninput="updateStudioState()" placeholder="C:\videos\intro.mp4" />
+          </div>
+          <div class="flex gap-2">
+            <div style="flex:1">
+              <label class="form-label text-xs">Trim Start (s)</label>
+              <input type="number" id="track1TrimStart" class="input-field text-xs" value="0" min="0" oninput="updateStudioState()" />
+            </div>
+            <div style="flex:1">
+              <label class="form-label text-xs">Duration (s)</label>
+              <input type="number" id="track1Duration" class="input-field text-xs" value="15" min="1" oninput="updateStudioState()" />
+            </div>
+          </div>
+        </div>
+
+        <!-- TRACK 2: MAIN FEATURE MEDIA -->
+        <div class="studio-track-card mb-3" id="slotCard2" style="border-left:3px solid var(--accent-green)">
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center gap-2">
+              <span class="badge badge-green text-xs">Slot 2</span>
+              <span class="font-bold text-sm">Main Feature (Episode / Movie)</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="track2Active" checked disabled />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="form-group mb-2">
+            <label class="form-label text-xs">File Path or Name</label>
+            <input type="text" id="track2File" class="input-field text-xs" value="natok_episode_02.mp4" oninput="updateStudioState()" placeholder="C:\videos\movie.mp4" />
+          </div>
+          <div class="flex gap-2 mb-2">
+            <div style="flex:1">
+              <label class="form-label text-xs" title="Strip intro theme songs or title cards">Trim Cut Start (s)</label>
+              <input type="number" id="track2TrimStart" class="input-field text-xs" value="25" min="0" oninput="updateStudioState()" />
+              <span class="text-xs text-muted">Strip title cards</span>
+            </div>
+            <div style="flex:1">
+              <label class="form-label text-xs" title="Strip end credits or sponsor logos">Cut End Time (s)</label>
+              <input type="number" id="track2TrimEnd" class="input-field text-xs" value="1470" min="1" oninput="updateStudioState()" />
+              <span class="text-xs text-muted">24:30 (story cut)</span>
+            </div>
+          </div>
+
+          <!-- MIDDLE SONG / MUSIC CUTTER -->
+          <div class="card p-2 mb-2" style="background:rgba(239,68,68,0.06);border:1px dashed rgba(239,68,68,0.25);border-radius:var(--radius-sm)">
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-xs font-bold text-bright flex items-center gap-1">🎵 Cut / Mute Middle Song</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="track2SongCutActive" onchange="toggleSongCutInputs(); updateStudioState();" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div id="track2SongCutInputs" style="display:none" class="pt-1">
+              <div class="flex gap-2 mb-1">
+                <div style="flex:1">
+                  <label class="form-label text-xs">Song Start (s)</label>
+                  <input type="number" id="track2SongStart" class="input-field text-xs" value="600" min="0" oninput="updateStudioState()" placeholder="600 (10:00)" />
+                </div>
+                <div style="flex:1">
+                  <label class="form-label text-xs">Song End (s)</label>
+                  <input type="number" id="track2SongEnd" class="input-field text-xs" value="780" min="1" oninput="updateStudioState()" placeholder="780 (13:00)" />
+                </div>
+              </div>
+              <div class="flex gap-3 text-xs mt-1">
+                <label class="flex items-center gap-1 text-muted" style="cursor:pointer">
+                  <input type="radio" name="songCutMode" value="slice" checked onchange="updateStudioState()" /> Slice & Skip Song
+                </label>
+                <label class="flex items-center gap-1 text-muted" style="cursor:pointer">
+                  <input type="radio" name="songCutMode" value="mute" onchange="updateStudioState()" /> Mute Audio Only
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRACK 3: POST-ROLL FILLER -->
+        <div class="studio-track-card mb-3" id="slotCard3" style="border-left:3px solid var(--accent-amber)">
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center gap-2">
+              <span class="badge badge-amber text-xs">Slot 3</span>
+              <span class="font-bold text-sm">Tail Padding (Gameplay / Outro Loop)</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="track3Active" checked onchange="updateStudioState()" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="form-group mb-2">
+            <label class="form-label text-xs">File Path or Name</label>
+            <input type="text" id="track3File" class="input-field text-xs" value="pubg_tdm_loop_22m.mp4" oninput="updateStudioState()" placeholder="C:\videos\gameplay_loop.mp4" />
+          </div>
+          <div class="flex gap-2">
+            <div style="flex:1">
+              <label class="form-label text-xs">Trim Start (s)</label>
+              <input type="number" id="track3TrimStart" class="input-field text-xs" value="0" min="0" oninput="updateStudioState()" />
+            </div>
+            <div style="flex:1">
+              <label class="form-label text-xs">Duration (s)</label>
+              <input type="number" id="track3Duration" class="input-field text-xs" value="1305" min="1" oninput="updateStudioState()" />
+              <span class="text-xs text-muted">~21m 45s</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- DYNAMIC ADDITIONAL CLIPS CONTAINER -->
+        <div id="studioDynamicClips"></div>
+
+        <div class="form-group">
+          <label class="form-label text-xs">Output File Name</label>
+          <input type="text" id="studioOutputFile" class="input-field text-xs" value="assembled_output.mp4" oninput="updateStudioState()" />
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: SIGNAL MODULATION MATRIX -->
+    <div class="card">
+      <div class="card-header">
+        <div class="flex items-center gap-2">
+          <span style="font-size:1.2rem">🎛️</span>
+          <h2 class="card-title">Signal Modulation Matrix</h2>
+        </div>
+        <span class="badge badge-cyan">Step 2</span>
+      </div>
+      <div class="card-body">
+        <p class="text-xs text-secondary mb-3">
+          Applies subtle visual scaling and audio shifts to Slot 2 (Main Media) to prevent exact bitstream matches.
+        </p>
+
+        <!-- VISUAL TRANSFORMS -->
+        <div class="card p-3 mb-3" style="background:var(--bg-input);border:1px solid var(--border)">
+          <div class="font-bold text-xs text-bright mb-2">👁️ Visual Signal Transforms</div>
+
+          <!-- ZOOM / CROP -->
+          <div class="mb-3">
+            <div class="flex justify-between items-center mb-1">
+              <label class="form-label text-xs mb-0">Centered Digital Crop & Zoom</label>
+              <span class="badge badge-cyan text-xs" id="zoomValBadge">2.0%</span>
+            </div>
+            <input type="range" id="studioZoomRange" min="0" max="5.0" step="0.5" value="2.0" class="w-100" oninput="updateStudioZoom(this.value)" />
+            <div class="flex justify-between text-xs text-muted">
+              <span>0% (Raw)</span>
+              <span>2.0% (Recommended)</span>
+              <span>5.0% (Max)</span>
+            </div>
+          </div>
+
+          <!-- FRAME RATE & CANVAS -->
+          <div class="grid-split-2 mb-2">
+            <div>
+              <label class="form-label text-xs">Target Frame Rate (FPS)</label>
+              <select id="studioTargetFps" class="select-field text-xs" onchange="updateStudioState()">
+                <option value="keep">Keep Source FPS</option>
+                <option value="23.976">23.976 fps (Film)</option>
+                <option value="24">24 fps (Cinema)</option>
+                <option value="25">25 fps (PAL Standard)</option>
+                <option value="29.97">29.97 fps (NTSC)</option>
+                <option value="30" selected>30 fps (Web Normalized)</option>
+                <option value="60">60 fps (Smooth Motion)</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label text-xs">Output Canvas Resolution</label>
+              <select id="studioResolution" class="select-field text-xs" onchange="updateStudioState()">
+                <option value="1920x1080" selected>1080p FHD (1920x1080)</option>
+                <option value="1280x720">720p HD (1280x720)</option>
+                <option value="3840x2160">4K UHD (3840x2160)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- RESAMPLING FILTER & MIRROR -->
+          <div class="flex justify-between items-center pt-2" style="border-top:1px solid var(--border)">
+            <div>
+              <label class="form-label text-xs mb-0">Interpolation Scaling</label>
+              <select id="studioScaleFilter" class="select-field text-xs mt-1" onchange="updateStudioState()">
+                <option value="lanczos" selected>Lanczos (Sharp Edge Preserve)</option>
+                <option value="bicubic">Bicubic</option>
+                <option value="bilinear">Bilinear (Fast)</option>
+              </select>
+            </div>
+            <div class="text-right">
+              <label class="form-label text-xs mb-1">Horizontal Mirror</label>
+              <div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="studioMirrorToggle" onchange="updateStudioState()" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AUDIO TRANSFORMS -->
+        <div class="card p-3 mb-3" style="background:var(--bg-input);border:1px solid var(--border)">
+          <div class="font-bold text-xs text-bright mb-2">🔊 Audio Signal Modulation</div>
+
+          <!-- PITCH SHIFT -->
+          <div class="mb-3">
+            <div class="flex justify-between items-center mb-1">
+              <label class="form-label text-xs mb-0">Pitch Offset (Acoustic Multiplier)</label>
+              <span class="badge badge-primary text-xs" id="pitchValBadge">+1.02x (~1.2 semitones)</span>
+            </div>
+            <input type="range" id="studioPitchRange" min="0.96" max="1.06" step="0.01" value="1.02" class="w-100" oninput="updateStudioPitch(this.value)" />
+            <div class="flex justify-between text-xs text-muted">
+              <span>0.96x (Lower)</span>
+              <span>1.00x (Neutral)</span>
+              <span>1.02x (Sweet Spot)</span>
+              <span>1.06x (Chipmunk)</span>
+            </div>
+          </div>
+
+          <!-- AUDIO ACOUSTIC MASKING -->
+          <div class="flex justify-between items-center pt-2" style="border-top:1px solid var(--border)">
+            <div>
+              <div class="font-bold text-xs">Acoustic Room Ambience Injection</div>
+              <div class="text-xs text-muted">Injects -24dB background noise to disrupt spectrogram peaks</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="studioAmbientMasking" checked onchange="updateStudioState()" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <!-- VOICE DIALOGUE ISOLATOR / MUSIC ATTENUATOR -->
+          <div class="flex justify-between items-center pt-2 mt-2" style="border-top:1px solid var(--border)">
+            <div>
+              <div class="font-bold text-xs">Voice Dialogue Isolator & Music Attenuation</div>
+              <div class="text-xs text-muted">Bandpass filter (220Hz - 3400Hz) attenuates background music tracks</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="studioVoiceFilter" onchange="updateStudioState()" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLIANCE & SAFETY RADAR -->
+  <div class="card mb-4" style="background:linear-gradient(135deg,rgba(17,29,51,0.9),rgba(245,158,11,0.06));border:1px solid rgba(245,158,11,0.25)">
+    <div class="card-header">
+      <div class="flex items-center gap-2">
+        <span style="font-size:1.2rem">🛡️</span>
+        <h2 class="card-title">Compliance & Staging Protocol Radar</h2>
+      </div>
+      <span class="badge badge-amber">Pre-Flight Safety</span>
+    </div>
+    <div class="card-body">
+      <div class="grid-split-2">
+        <div>
+          <div class="font-bold text-sm text-bright mb-2">Risk Evaluation Factors:</div>
+          <div class="flex flex-col gap-2 text-xs">
+            <div class="flex items-center justify-between p-2 card" style="background:var(--bg-input)">
+              <span>Duration Dilution Ratio:</span>
+              <strong id="radarDilutionText" class="text-bright">~47% Filler (Effective Ingest Buffer)</strong>
+            </div>
+            <div class="flex items-center justify-between p-2 card" style="background:var(--bg-input)">
+              <span>Head/Tail Stripping:</span>
+              <strong class="text-green">✓ Titles & Credits Truncated</strong>
+            </div>
+            <div class="flex items-center justify-between p-2 card" style="background:var(--bg-input)">
+              <span>Long-Term Manual Claim Vulnerability:</span>
+              <strong class="text-amber">⚠️ High (Distributors search titles manually)</strong>
+            </div>
+            <div class="flex items-center justify-between p-2 card" style="background:var(--bg-input)">
+              <span>YPP Monetization Compatibility:</span>
+              <strong class="text-red">❌ Low (Reused Content review risk)</strong>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="font-bold text-sm text-bright mb-2">Mandatory Zero-Strike Staging Protocol:</div>
+          <div class="p-3 card text-xs" style="background:var(--bg-input);line-height:1.7">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge badge-green text-xs">1</span>
+              <span><strong>Upload as Unlisted:</strong> Never set newly assembled files directly to Public.</span>
+            </div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge badge-cyan text-xs">2</span>
+              <span><strong>48-Hour Quarantine:</strong> Let YouTube complete asynchronous HD/4K batch fingerprinting.</span>
+            </div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="badge badge-primary text-xs">3</span>
+              <span><strong>Verify Checks:</strong> Inspect "Checks: No issues found" green tick in YouTube Studio.</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="badge badge-amber text-xs">4</span>
+              <span><strong>Instant Clean Abort:</strong> If claimed in Unlisted mode, delete immediately with 0 channel strikes.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FFMPEG EXPORT & COMMAND CENTER -->
+  <div class="card">
+    <div class="card-header">
+      <div class="flex items-center gap-2">
+        <span style="font-size:1.2rem">💻</span>
+        <h2 class="card-title">FFmpeg Batch Engine & Export Console</h2>
+      </div>
+      <div class="flex gap-2">
+        <button class="btn-xs btn-outline" onclick="copyStudioFFmpeg()">📋 Copy Command</button>
+        <button class="btn-xs btn-primary" onclick="exportStudioBatch()">💾 Download .BAT Script</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="studio-console mb-3">
+        <pre><code id="studioFFmpegOutput"># Press 'Compile FFmpeg' or adjust any slider above to generate production-ready FFmpeg command...</code></pre>
+      </div>
+      <div class="flex justify-between items-center text-xs text-muted">
+        <span>💡 Run this command directly in Windows PowerShell, CMD, or click 'Download .BAT Script' to execute on your machine.</span>
+        <span id="studioCmdStats">Command length: ~480 chars</span>
       </div>
     </div>
   </div>

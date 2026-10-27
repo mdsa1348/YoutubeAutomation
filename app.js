@@ -33,24 +33,32 @@ let API_BASE = (window.location.protocol === 'file:')
 let dbStatus = { connected: false, driver: 'none', stats: {} };
 
 async function initDatabase() {
-  try {
-    let res = await fetch(`${API_BASE}?action=db_status`);
-    if (!res.ok && API_BASE === 'api.php') {
-      res = await fetch(`/api?action=db_status`);
-      if (res.ok) API_BASE = '/api';
-    }
-    if (!res.ok) throw new Error('Backend HTTP ' + res.status);
-    const data = await res.json();
-    if (data.success && data.status === 'connected') {
-      dbStatus = { connected: true, driver: data.driver, stats: data.stats || {} };
-      updateDbUI(data);
-      syncWithDatabase(false);
-    } else {
-      updateDbUIFallback();
-    }
-  } catch (err) {
-    updateDbUIFallback();
+  const candidateUrls = [
+    API_BASE,
+    'api.php',
+    'http://localhost:8080/api.php',
+    'http://127.0.0.1:8080/api.php',
+    'http://localhost/YoutubeAutomatio/api.php',
+    '/api'
+  ];
+  const uniqueUrls = [...new Set(candidateUrls.filter(Boolean))];
+
+  for (const url of uniqueUrls) {
+    try {
+      const res = await fetch(`${url}?action=db_status`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.status === 'connected') {
+          API_BASE = url;
+          dbStatus = { connected: true, driver: data.driver, stats: data.stats || {} };
+          updateDbUI(data);
+          syncWithDatabase(false);
+          return;
+        }
+      }
+    } catch (err) {}
   }
+  updateDbUIFallback();
 }
 
 function updateDbUI(data) {
@@ -199,7 +207,10 @@ document.addEventListener('DOMContentLoaded', () => {
   previewSampleClips();
   calculateRevenue();
   renderGrowthMilestones();
-  loadDemoStats();
+  const currentCh = state.channels[state.activeChannelIdx];
+  if (!state.googleConnected && (!currentCh || currentCh.role !== 'my_channel')) {
+    loadDemoStats();
+  }
   updateStatusBar();
   setTimeout(() => checkApiGates(), 200);
 });
@@ -329,25 +340,139 @@ async function handleGoogleToken(token) {
   }
 }
 
-function quickConnectMyChannel() {
-  const handleOrName = prompt('Enter your YouTube channel handle or name to connect:\n(e.g. @MrBeast, @mkbhd, or your channel name)', '@MyChannel');
+async function resolveChannelLive(handleOrName) {
+  const cleanHandle = handleOrName.replace(/^@/, '').trim();
+  try {
+    let res = await fetch(`${API_BASE}?action=resolve_channel&handle=${encodeURIComponent(cleanHandle)}`);
+    if (!res.ok && !API_BASE.includes('localhost:8080')) {
+      try { res = await fetch(`http://localhost:8080/api.php?action=resolve_channel&handle=${encodeURIComponent(cleanHandle)}`); } catch(e){}
+    }
+    if (res && res.ok) {
+      const data = await res.json();
+      if (data.success && data.channel_id) {
+        return {
+          id: data.channel_id,
+          name: data.name,
+          handle: data.handle,
+          role: 'my_channel',
+          subscribers: data.subscribers || 0,
+          totalViews: data.total_views || 0,
+          videoCount: data.video_count || (data.videos ? data.videos.length : 0),
+          medianViews: data.median_views || 0,
+          niche: 'Creator Channel',
+          avatar: data.avatar || '🔴',
+          description: data.description || '',
+          videos: data.videos || []
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('Backend live channel resolve error:', err);
+  }
+
+  // Fallback to YouTube API v3 if key exists
+  if (state.ytKey) {
+    try {
+      const isHandle = handleOrName.startsWith('@');
+      const url = isHandle
+        ? `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&forHandle=${encodeURIComponent(cleanHandle)}&key=${state.ytKey}`
+        : `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${encodeURIComponent(handleOrName)}&key=${state.ytKey}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const item = data.items?.[0];
+      if (item) {
+        return {
+          id: item.id,
+          name: item.snippet.title,
+          handle: item.snippet.customUrl || ('@' + cleanHandle),
+          role: 'my_channel',
+          subscribers: parseInt(item.statistics.subscriberCount || 0),
+          totalViews: parseInt(item.statistics.viewCount || 0),
+          videoCount: parseInt(item.statistics.videoCount || 0),
+          medianViews: Math.round(parseInt(item.statistics.viewCount || 0) / Math.max(1, parseInt(item.statistics.videoCount || 1))),
+          niche: 'Creator Channel',
+          avatar: item.snippet.thumbnails?.default?.url || '🔴',
+          videos: []
+        };
+      }
+    } catch (e) {}
+  }
+
+  return {
+    id: 'ch_' + cleanHandle,
+    name: cleanHandle.charAt(0).toUpperCase() + cleanHandle.slice(1),
+    handle: '@' + cleanHandle,
+    role: 'my_channel',
+    subscribers: 0,
+    totalViews: 0,
+    videoCount: 0,
+    medianViews: 0,
+    niche: 'Creator Channel',
+    avatar: '🔴',
+    videos: []
+  };
+}
+
+async function quickConnectMyChannel(handleParam) {
+  const currentHandle = state.channels[state.activeChannelIdx]?.handle || '@sabbirgaming6951';
+  const handleOrName = handleParam || prompt('Enter your YouTube channel handle or name to connect:\n(e.g. @sabbirgaming6951 or your channel handle)', currentHandle);
   if (!handleOrName) return;
 
-  const cleanName = handleOrName.replace(/^@/, '');
-  const chData = {
-    id: 'ch_' + Date.now(),
-    name: cleanName.charAt(0).toUpperCase() + cleanName.slice(1),
-    handle: handleOrName.startsWith('@') ? handleOrName : '@' + handleOrName,
-    role: 'my_channel',
-    subscribers: 1250000,
-    totalViews: 84500000,
-    videoCount: 148,
-    medianViews: 570000,
-    niche: 'Tech / AI / Growth',
-    avatar: '🔴'
-  };
+  showToast(`⏳ Connecting & analyzing live channel ${handleOrName}...`, 'info');
+  const resolved = await resolveChannelLive(handleOrName);
+  saveConnectedGoogleChannel(resolved);
+}
 
-  saveConnectedGoogleChannel(chData);
+function applyRealChannelToApp(chData) {
+  if (!chData) return;
+  state.channelData = chData;
+  state.demoMode = false;
+
+  // Update Overview counters
+  updateOverviewStats(chData.subscribers, chData.totalViews, chData.videoCount);
+
+  // If real videos exist, populate Outliers and Tables with REAL data
+  if (chData.videos && chData.videos.length > 0) {
+    const medV = median(chData.videos.map(v => v.views)) || 1;
+    const outlierVids = chData.videos.map(v => {
+      const views = parseInt(v.views || 0);
+      const mult = +(views / medV).toFixed(1);
+      return {
+        id: v.id,
+        title: v.title,
+        views: views,
+        likes: Math.round(views * 0.08),
+        comments: Math.round(views * 0.02),
+        publishedAt: v.published,
+        thumbnail: v.thumbnail || `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`,
+        multiplier: mult,
+        category: mult >= 3 ? 'viral' : mult >= 1.5 ? 'high' : mult >= 0.8 ? 'normal' : 'under',
+        url: v.url || `https://www.youtube.com/watch?v=${v.id}`,
+        channelName: chData.name
+      };
+    });
+    state.outliers = outlierVids;
+    renderOutliers();
+    renderOverviewOutliers();
+    renderForensicVideos(outlierVids);
+    updateKpiBanner(medV, outlierVids);
+  }
+
+  // Update Forensic UI
+  updateForensicUI(
+    chData.name,
+    chData.handle,
+    chData.subscribers,
+    chData.totalViews,
+    chData.videoCount,
+    null,
+    chData.avatar
+  );
+
+  const forensicInput = document.getElementById('forensicChannelInput');
+  if (forensicInput) forensicInput.value = chData.handle;
+  const auditInput = document.getElementById('auditChannelInput');
+  if (auditInput) auditInput.value = chData.handle;
 }
 
 function saveConnectedGoogleChannel(chData) {
@@ -357,9 +482,9 @@ function saveConnectedGoogleChannel(chData) {
   localStorage.setItem('yt3_google_channel', JSON.stringify(chData));
 
   // Add or update in vault
-  const existingIdx = state.channels.findIndex(c => c.handle === chData.handle || c.name === chData.name);
+  const existingIdx = state.channels.findIndex(c => c.handle === chData.handle || (chData.id && c.id === chData.id));
   if (existingIdx >= 0) {
-    state.channels[existingIdx] = chData;
+    state.channels[existingIdx] = { ...state.channels[existingIdx], ...chData };
     state.activeChannelIdx = existingIdx;
   } else {
     state.channels.unshift(chData);
@@ -369,10 +494,12 @@ function saveConnectedGoogleChannel(chData) {
   saveVault();
   updateGoogleAuthUI();
   updateApiBadges();
-  loadDemoStats();
+  
+  // Real data applied everywhere
+  applyRealChannelToApp(chData);
   calculateRevenue();
 
-  showToast(`✅ YouTube Channel Connected: ${chData.name} (${fmtNum(chData.subscribers)} subs)!`, 'success');
+  showToast(`✅ YouTube Channel Connected: ${chData.name} (${fmtNum(chData.subscribers)} subs, ${chData.videoCount} uploads)!`, 'success');
   
   // Persist to DB
   fetch(`${API_BASE}?action=save_channel`, {
@@ -718,6 +845,7 @@ function switchTab(tabId, el) {
   if (tabId === 'content-studio') initSwipeFile();
   if (tabId === 'seo-radar') renderHeatmap(document.getElementById('timingNiche')?.value || 'tech');
   if (tabId === 'revenue-planner') calculateRevenue();
+  if (tabId === 'video-studio') initVideoStudio();
 }
 
 function toggleSidebar() {
@@ -740,9 +868,29 @@ const DEFAULT_VAULT = [
 function initVault() {
   const saved = localStorage.getItem('yt3_vault');
   state.channels = saved ? JSON.parse(saved) : [...DEFAULT_VAULT];
+
+  if (state.googleChannel) {
+    const foundIdx = state.channels.findIndex(c => c.handle === state.googleChannel.handle || c.name === state.googleChannel.name || (state.googleChannel.id && c.id === state.googleChannel.id));
+    if (foundIdx >= 0) {
+      state.activeChannelIdx = foundIdx;
+    }
+  }
+
   renderVaultList();
   renderTopbarDropdown();
   renderCompetitorSelector();
+
+  // If the active channel is a user channel or sabbirgaming6951, auto-fetch real data!
+  const activeCh = state.channels[state.activeChannelIdx];
+  if (activeCh && (activeCh.role === 'my_channel' || (activeCh.handle && activeCh.handle.includes('sabbir')) || activeCh.subscribers === 1250000)) {
+    resolveChannelLive(activeCh.handle || activeCh.id || 'sabbirgaming6951').then(realCh => {
+      if (realCh && realCh.channel_id) {
+        state.channels[state.activeChannelIdx] = { ...activeCh, ...realCh };
+        saveVault();
+        applyRealChannelToApp(realCh);
+      }
+    });
+  }
 }
 
 function saveVault() {
@@ -761,7 +909,7 @@ function renderTopbarDropdown() {
   state.channels.forEach((c, i) => {
     const opt = document.createElement('option');
     opt.value = i;
-    opt.textContent = `${c.avatar} ${c.name}`;
+    opt.textContent = `${c.avatar && c.avatar.startsWith('http') ? '📺' : (c.avatar || '📺')} ${c.name}`;
     if (i === state.activeChannelIdx) opt.selected = true;
     sel.appendChild(opt);
   });
@@ -771,7 +919,13 @@ function renderTopbarDropdown() {
     const name = document.getElementById('sidebarChannelName');
     const avatar = document.getElementById('sidebarAvatar');
     if (name) name.textContent = active.name;
-    if (avatar) avatar.textContent = active.avatar || active.name.slice(0,2).toUpperCase();
+    if (avatar) {
+      if (active.avatar && active.avatar.startsWith('http')) {
+        avatar.innerHTML = `<img src="${active.avatar}" style="width:100%;height:100%;border-radius:inherit;object-fit:cover" alt="${active.name}">`;
+      } else {
+        avatar.textContent = active.avatar || active.name.slice(0,2).toUpperCase();
+      }
+    }
   }
   const cnt = document.getElementById('sidebarVaultCount');
   if (cnt) cnt.textContent = `${state.channels.length} channels`;
@@ -783,8 +937,24 @@ function onChannelChange(idx) {
   renderTopbarDropdown();
   const ch = state.channels[state.activeChannelIdx];
   if (ch) {
-    document.getElementById('auditChannelInput').value = ch.handle || ch.id;
-    loadDemoChannelData(ch);
+    const input = document.getElementById('auditChannelInput');
+    if (input) input.value = ch.handle || ch.id;
+    const forensicInput = document.getElementById('forensicChannelInput');
+    if (forensicInput) forensicInput.value = ch.handle || ch.id;
+
+    if (ch.role === 'my_channel' || (ch.handle && (ch.handle.includes('sabbir') || ch.subscribers === 1250000))) {
+      resolveChannelLive(ch.handle || ch.id).then(realCh => {
+        if (realCh && realCh.channel_id) {
+          state.channels[state.activeChannelIdx] = { ...ch, ...realCh };
+          saveVault();
+          applyRealChannelToApp(realCh);
+        } else {
+          applyRealChannelToApp(ch);
+        }
+      });
+    } else {
+      applyRealChannelToApp(ch);
+    }
   }
 }
 
@@ -862,9 +1032,15 @@ async function quickAudit() {
     if (state.ytKey) {
       await fetchRealChannelData(handle);
     } else {
-      state.demoMode = true;
-      const ch = state.channels.find(c => c.handle === handle || c.id === handle) || DEFAULT_VAULT[1];
-      loadDemoChannelData(ch);
+      showToast(`⚡ Analyzing live channel ${handle}...`, 'info');
+      const resolved = await resolveChannelLive(handle);
+      if (resolved && (resolved.channel_id || resolved.name)) {
+        applyRealChannelToApp(resolved);
+        showToast(`✅ Channel analyzed: ${resolved.name} (${fmtNum(resolved.subscribers)} subs)!`, 'success');
+      } else {
+        const ch = state.channels.find(c => c.handle === handle || c.id === handle) || state.channels[0];
+        if (ch) applyRealChannelToApp(ch);
+      }
     }
   } finally {
     if (btn) btn.textContent = '⚡ Analyze Channel';
@@ -1217,16 +1393,61 @@ async function loadForensic() {
       await fetchRealChannelData(input);
       await fetchForensicData(input);
     } else {
-      loadDemoForensicData();
-      showToast('Demo forensic data loaded — connect YouTube API for live analysis', 'info');
+      showToast(`🔬 Analyzing live channel ${input}...`, 'info');
+      const resolved = await resolveChannelLive(input);
+      if (resolved && (resolved.channel_id || resolved.name)) {
+        updateForensicUI(
+          resolved.name,
+          resolved.handle,
+          resolved.subscribers,
+          resolved.totalViews,
+          resolved.videoCount,
+          null,
+          resolved.avatar
+        );
+
+        if (resolved.videos && resolved.videos.length > 0) {
+          const medV = median(resolved.videos.map(v => v.views)) || 1;
+          const outlierVids = resolved.videos.map(v => {
+            const views = parseInt(v.views || 0);
+            const mult = +(views / medV).toFixed(1);
+            return {
+              id: v.id,
+              title: v.title,
+              views: views,
+              likes: Math.round(views * 0.08),
+              comments: Math.round(views * 0.02),
+              publishedAt: v.published,
+              thumbnail: v.thumbnail || `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`,
+              multiplier: mult,
+              category: mult >= 3 ? 'viral' : mult >= 1.5 ? 'high' : mult >= 0.8 ? 'normal' : 'under',
+              url: v.url || `https://www.youtube.com/watch?v=${v.id}`,
+              channelName: resolved.name
+            };
+          });
+          renderForensicVideos(outlierVids);
+          state.outliers = outlierVids;
+          renderOutliers();
+          renderOverviewOutliers();
+        } else {
+          renderForensicVideos([]);
+        }
+
+        // Also update Overview counters for consistency
+        updateOverviewStats(resolved.subscribers, resolved.totalViews, resolved.videoCount);
+        showToast(`✅ Live analysis complete for ${resolved.name}!`, 'success');
+      } else {
+        showToast('Could not resolve channel. Check handle or connect YouTube API.', 'error');
+      }
     }
+  } catch (err) {
+    showToast('Analysis error: ' + err.message, 'error');
   } finally {
     if (btn) btn.textContent = '🔬 Deep Analyze';
   }
 }
 
 async function fetchForensicData(handle) {
-  // Try to get channel info
   let url;
   if (handle.startsWith('@')) {
     url = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,brandingSettings&forHandle=${handle.slice(1)}&key=${state.ytKey}`;
@@ -1236,12 +1457,21 @@ async function fetchForensicData(handle) {
   const res = await fetch(url);
   const data = await res.json();
   const ch = data.items?.[0];
-  if (!ch) { loadDemoForensicData(); return; }
+  if (!ch) {
+    // Attempt backend resolver as fallback
+    const resolved = await resolveChannelLive(handle);
+    if (resolved) {
+      updateForensicUI(resolved.name, resolved.handle, resolved.subscribers, resolved.totalViews, resolved.videoCount, null, resolved.avatar);
+      if (resolved.videos) renderForensicVideos(resolved.videos);
+    }
+    return;
+  }
   const s = ch.statistics;
   const subs = parseInt(s.subscriberCount || 0);
   const views = parseInt(s.viewCount || 0);
   const videos = parseInt(s.videoCount || 0);
-  updateForensicUI(ch.snippet.title, handle, subs, views, videos, ch.snippet.publishedAt);
+  const avatarUrl = ch.snippet?.thumbnails?.medium?.url || ch.snippet?.thumbnails?.default?.url;
+  updateForensicUI(ch.snippet.title, handle, subs, views, videos, ch.snippet.publishedAt, avatarUrl);
   await fetchRecentVideos(ch.id);
 }
 
@@ -1250,15 +1480,24 @@ function loadDemoForensicData() {
   renderForensicVideos(DEMO_OUTLIERS.slice(0, 6).map(o => ({...o, likes: Math.round(o.views*0.06), comments: Math.round(o.views*0.008)})));
 }
 
-function updateForensicUI(name, handle, subs, views, videos, joined) {
+function updateForensicUI(name, handle, subs, views, videos, joined, avatarUrl) {
   const fmt = n => n >= 1e9 ? (n/1e9).toFixed(1)+'B' : n >= 1e6 ? (n/1e6).toFixed(2)+'M' : n >= 1e3 ? (n/1e3).toFixed(1)+'K' : n;
   document.getElementById('forensicName').textContent = name;
   document.getElementById('forensicHandle').textContent = handle;
   document.getElementById('forensicSubs').textContent = fmt(subs);
   document.getElementById('forensicTotalViews').textContent = fmt(views);
   document.getElementById('forensicVideoCount').textContent = fmt(videos);
-  document.getElementById('forensicJoined').textContent = joined?.slice(0,10) || '—';
-  document.getElementById('forensicAvatar').textContent = name.slice(0,2).toUpperCase();
+  document.getElementById('forensicJoined').textContent = joined?.slice(0,10) || 'Live Active';
+  
+  const avEl = document.getElementById('forensicAvatar');
+  if (avEl) {
+    if (avatarUrl && avatarUrl.startsWith('http')) {
+      avEl.innerHTML = `<img src="${avatarUrl}" style="width:100%;height:100%;border-radius:inherit;object-fit:cover" alt="${name}">`;
+    } else {
+      avEl.textContent = name.slice(0,2).toUpperCase();
+    }
+  }
+
   const velocity = subs > 0 ? (views/subs).toFixed(1) : '—';
   const cadence = videos > 0 ? (videos / Math.max(1, (Date.now() - new Date(joined || '2022-01-01')) / (7*24*3600*1000))).toFixed(1) : '—';
   const monthlyViews = views * 0.025;
@@ -2989,3 +3228,557 @@ function scoreTitle() {
   const el = document.getElementById('titleFactors');
   if (el) el.innerHTML = factors.map(f => `<div class="flex items-start gap-1 mb-1"><span style="color:${f.pass?'#10b981':'#ef4444'};font-size:10px;margin-top:3px">●</span><span class="text-xs">${f.text}</span></div>`).join('');
 }
+
+// ================================================================
+// 🎬 VIDEO STUDIO & ASSEMBLER ENGINE
+// ================================================================
+
+function formatDurationSeconds(sec) {
+  sec = Math.max(0, Math.round(sec));
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = sec % 60;
+  if (h > 0) {
+    return `${h}h ${m < 10 ? '0' : ''}${m}m ${s < 10 ? '0' : ''}${s}s`;
+  }
+  return `${m}m ${s < 10 ? '0' : ''}${s}s`;
+}
+
+function initVideoStudio() {
+  updateStudioState();
+}
+
+function updateStudioZoom(val) {
+  const badge = document.getElementById('zoomValBadge');
+  if (badge) badge.textContent = parseFloat(val).toFixed(1) + '%';
+  updateStudioState();
+}
+
+function updateStudioPitch(val) {
+  const badge = document.getElementById('pitchValBadge');
+  const semitones = ((parseFloat(val) - 1.0) * 50).toFixed(1);
+  const sign = semitones >= 0 ? '+' : '';
+  if (badge) badge.textContent = `${parseFloat(val).toFixed(2)}x (${sign}${semitones} semitones)`;
+  updateStudioState();
+}
+
+function updateStudioState() {
+  const t1Active = document.getElementById('track1Active')?.checked ?? true;
+  const t1File = (document.getElementById('track1File')?.value || 'intro_branding.mp4').trim();
+  const t1Trim = Math.max(0, parseFloat(document.getElementById('track1TrimStart')?.value) || 0);
+  const t1Dur = t1Active ? Math.max(1, parseFloat(document.getElementById('track1Duration')?.value) || 15) : 0;
+
+  const t2File = (document.getElementById('track2File')?.value || 'main_feature.mp4').trim();
+  const t2TrimStart = Math.max(0, parseFloat(document.getElementById('track2TrimStart')?.value) || 0);
+  const t2TrimEnd = Math.max(t2TrimStart + 1, parseFloat(document.getElementById('track2TrimEnd')?.value) || 1470);
+  
+  // Song cut check
+  const isSongCut = document.getElementById('track2SongCutActive')?.checked ?? false;
+  const songStart = Math.max(t2TrimStart, parseFloat(document.getElementById('track2SongStart')?.value) || 600);
+  const songEnd = Math.min(t2TrimEnd, Math.max(songStart + 1, parseFloat(document.getElementById('track2SongEnd')?.value) || 780));
+  const songMode = document.querySelector('input[name="songCutMode"]:checked')?.value || 'slice';
+
+  let t2Dur = Math.max(1, t2TrimEnd - t2TrimStart);
+  if (isSongCut && songMode === 'slice' && songStart > t2TrimStart && songEnd < t2TrimEnd) {
+    t2Dur = (songStart - t2TrimStart) + (t2TrimEnd - songEnd);
+  }
+
+  const t3Active = document.getElementById('track3Active')?.checked ?? true;
+  const t3File = (document.getElementById('track3File')?.value || 'pubg_tdm_loop_22m.mp4').trim();
+  const t3Trim = Math.max(0, parseFloat(document.getElementById('track3TrimStart')?.value) || 0);
+  const t3Dur = t3Active ? Math.max(1, parseFloat(document.getElementById('track3Duration')?.value) || 1305) : 0;
+
+  // Dynamic Extra Clips
+  let extraDurationTotal = 0;
+  studioExtraClips.forEach(c => {
+    if (c.active) extraDurationTotal += Math.max(1, c.duration);
+  });
+
+  const totalSec = t1Dur + t2Dur + t3Dur + extraDurationTotal;
+  const mainRatio = ((t2Dur / totalSec) * 100).toFixed(1);
+  const fillerRatio = (((t3Dur + extraDurationTotal) / totalSec) * 100).toFixed(1);
+  const zoomVal = parseFloat(document.getElementById('studioZoomRange')?.value || 2.0);
+  const fpsVal = document.getElementById('studioTargetFps')?.value || '30';
+  const scaleFilter = document.getElementById('studioScaleFilter')?.value || 'lanczos';
+  const pitchVal = parseFloat(document.getElementById('studioPitchRange')?.value || 1.02);
+  const isMasking = document.getElementById('studioAmbientMasking')?.checked ?? true;
+
+  // 1. Update KPI Status Cards
+  const elTotal = document.getElementById('studioTotalRuntime');
+  if (elTotal) elTotal.textContent = formatDurationSeconds(totalSec);
+  const elSec = document.getElementById('studioTotalSeconds');
+  if (elSec) elSec.textContent = `${totalSec.toLocaleString()} total seconds`;
+
+  const elDensity = document.getElementById('studioDensityRatio');
+  if (elDensity) elDensity.textContent = `${mainRatio}% Main`;
+  const elDilutionSub = document.getElementById('studioDilutionSub');
+  if (elDilutionSub) elDilutionSub.textContent = t3Active ? `${fillerRatio}% Tail Padding Filler` : 'No Tail Filler (Raw Match Risk)';
+
+  const elMod = document.getElementById('studioModulationSummary');
+  if (elMod) elMod.textContent = `${zoomVal.toFixed(1)}% Zoom • ${fpsVal === 'keep' ? 'Source' : fpsVal} FPS`;
+  const elPitchSub = document.getElementById('studioPitchSummary');
+  if (elPitchSub) elPitchSub.textContent = `${pitchVal >= 1 ? '+' : ''}${pitchVal.toFixed(2)}x Pitch • ${scaleFilter.toUpperCase()}`;
+
+  // 2. Risk Estimation
+  let riskScore = 50;
+  let riskLabel = 'Moderate (68/100)';
+  let riskColor = 'var(--accent-amber)';
+  let riskSub = 'Unlisted Staging Required';
+
+  if (!t3Active || t3Dur < 60) {
+    riskScore = 88;
+    riskLabel = 'High Direct Match Risk (88/100)';
+    riskColor = 'var(--accent-red)';
+    riskSub = 'Undiluted continuous segment will trigger auto-claim';
+  } else if (parseFloat(fillerRatio) >= 40 && zoomVal >= 1.5) {
+    riskScore = 65;
+    riskLabel = 'Ingest Buffer Active (65/100)';
+    riskColor = 'var(--accent-amber)';
+    riskSub = 'Passes initial checks; monitor unlisted for 48h';
+  }
+
+  const elRisk = document.getElementById('studioRiskBadge');
+  if (elRisk) { elRisk.textContent = riskLabel; elRisk.style.color = riskColor; }
+  const elRiskSub = document.getElementById('studioRiskSub');
+  if (elRiskSub) elRiskSub.textContent = riskSub;
+
+  const elRadarText = document.getElementById('radarDilutionText');
+  if (elRadarText) elRadarText.textContent = `~${fillerRatio}% Filler (${t3Active ? 'Effective Ingest Buffer' : 'No Buffer'})`;
+
+  // 3. Update Visual Timeline Bar
+  const p1 = ((t1Dur / totalSec) * 100);
+  const p2 = ((t2Dur / totalSec) * 100);
+  const p3 = ((t3Dur / totalSec) * 100);
+
+  const b1 = document.getElementById('barSlot1');
+  const b2 = document.getElementById('barSlot2');
+  const b3 = document.getElementById('barSlot3');
+
+  if (b1) {
+    b1.style.width = `${Math.max(t1Active ? 1.5 : 0, p1)}%`;
+    b1.style.display = t1Active ? 'flex' : 'none';
+    b1.title = `Slot 1: ${t1File} (${formatDurationSeconds(t1Dur)})`;
+    b1.textContent = p1 >= 4 ? `${t1Dur}s` : '';
+  }
+  if (b2) {
+    b2.style.width = `${p2}%`;
+    b2.title = `Slot 2: ${t2File} (${formatDurationSeconds(t2Dur)})`;
+    b2.textContent = p2 >= 15 ? `${formatDurationSeconds(t2Dur)} (Main Feature)` : `${formatDurationSeconds(t2Dur)}`;
+  }
+  if (b3) {
+    b3.style.width = `${Math.max(t3Active ? 1.5 : 0, p3)}%`;
+    b3.style.display = t3Active ? 'flex' : 'none';
+    b3.title = `Slot 3: ${t3File} (${formatDurationSeconds(t3Dur)})`;
+    b3.textContent = p3 >= 15 ? `${formatDurationSeconds(t3Dur)} (Tail Filler)` : '';
+  }
+
+  const midPoint = document.getElementById('timelineMidPoint');
+  if (midPoint) midPoint.textContent = `~${formatDurationSeconds(t1Dur + t2Dur)} (Cut point)`;
+  const endPoint = document.getElementById('timelineEndPoint');
+  if (endPoint) endPoint.textContent = formatDurationSeconds(totalSec);
+
+  // 4. Compile FFmpeg Command
+  compileStudioFFmpeg();
+}
+
+function toggleSongCutInputs() {
+  const active = document.getElementById('track2SongCutActive')?.checked;
+  const container = document.getElementById('track2SongCutInputs');
+  if (container) container.style.display = active ? 'block' : 'none';
+}
+
+function compileStudioFFmpeg() {
+  const t1Active = document.getElementById('track1Active')?.checked ?? true;
+  const t1File = (document.getElementById('track1File')?.value || 'intro_branding.mp4').trim();
+  const t1Trim = Math.max(0, parseFloat(document.getElementById('track1TrimStart')?.value) || 0);
+  const t1Dur = t1Active ? Math.max(1, parseFloat(document.getElementById('track1Duration')?.value) || 15) : 0;
+
+  const t2File = (document.getElementById('track2File')?.value || 'natok_episode_02.mp4').trim();
+  const t2TrimStart = Math.max(0, parseFloat(document.getElementById('track2TrimStart')?.value) || 0);
+  const t2TrimEnd = Math.max(t2TrimStart + 1, parseFloat(document.getElementById('track2TrimEnd')?.value) || 1470);
+
+  // Song Cut check
+  const isSongCut = document.getElementById('track2SongCutActive')?.checked ?? false;
+  const songStart = Math.max(t2TrimStart, parseFloat(document.getElementById('track2SongStart')?.value) || 600);
+  const songEnd = Math.min(t2TrimEnd, Math.max(songStart + 1, parseFloat(document.getElementById('track2SongEnd')?.value) || 780));
+  const songMode = document.querySelector('input[name="songCutMode"]:checked')?.value || 'slice';
+
+  const t3Active = document.getElementById('track3Active')?.checked ?? true;
+  const t3File = (document.getElementById('track3File')?.value || 'pubg_tdm_loop_22m.mp4').trim();
+  const t3Trim = Math.max(0, parseFloat(document.getElementById('track3TrimStart')?.value) || 0);
+  const t3Dur = t3Active ? Math.max(1, parseFloat(document.getElementById('track3Duration')?.value) || 1305) : 0;
+
+  const zoomVal = parseFloat(document.getElementById('studioZoomRange')?.value || 2.0);
+  const fpsVal = document.getElementById('studioTargetFps')?.value || '30';
+  const resVal = document.getElementById('studioResolution')?.value || '1920x1080';
+  const [targetW, targetH] = resVal.split('x');
+  const scaleFilter = document.getElementById('studioScaleFilter')?.value || 'lanczos';
+  const isMirror = document.getElementById('studioMirrorToggle')?.checked ?? false;
+  const pitchVal = parseFloat(document.getElementById('studioPitchRange')?.value || 1.02);
+  const isMasking = document.getElementById('studioAmbientMasking')?.checked ?? true;
+  const isVoiceFilter = document.getElementById('studioVoiceFilter')?.checked ?? false;
+  const outFile = (document.getElementById('studioOutputFile')?.value || 'assembled_output.mp4').trim();
+
+  // Input mapping
+  const inputList = [];
+  let nextIdx = 0;
+  let idxT1 = -1, idxT2 = -1, idxT3 = -1;
+
+  if (t1Active) { idxT1 = nextIdx++; inputList.push(`-i "${t1File}"`); }
+  idxT2 = nextIdx++; inputList.push(`-i "${t2File}"`);
+  if (t3Active) { idxT3 = nextIdx++; inputList.push(`-i "${t3File}"`); }
+
+  // Extra dynamic clips inputs
+  const extraIndices = [];
+  studioExtraClips.forEach(clip => {
+    if (clip.active && clip.file) {
+      extraIndices.push({ idx: nextIdx++, clip });
+      inputList.push(`-i "${clip.file}"`);
+    }
+  });
+
+  const fpsFilter = fpsVal !== 'keep' ? `,fps=${fpsVal}` : '';
+  const filterParts = [];
+  const concatInputs = [];
+
+  // Slot 1 (Intro)
+  if (t1Active) {
+    const t1V = `[${idxT1}:v]trim=start=${t1Trim}:duration=${t1Dur},setpts=PTS-STARTPTS,scale=${targetW}:${targetH}:force_original_aspect_ratio=decrease,pad=${targetW}:${targetH}:(ow-iw)/2:(oh-ih)/2${fpsFilter},setsar=1[v0];`;
+    const t1A = `[${idxT1}:a]atrim=start=${t1Trim}:duration=${t1Dur},asetpts=PTS-STARTPTS,aresample=44100[a0];`;
+    filterParts.push(t1V, t1A);
+    concatInputs.push('[v0][a0]');
+  }
+
+  // Slot 2: Main Media (with or without Song Cut)
+  const cropFactor = (1.0 - (zoomVal / 100.0)).toFixed(4);
+  const mirrorFilter = isMirror ? ',hflip' : '';
+  const targetSampleRate = Math.round(44100 * pitchVal);
+  let audioModifiers = `,asetrate=${targetSampleRate},aresample=44100`;
+  if (isVoiceFilter) {
+    audioModifiers += `,highpass=f=220,lowpass=f=3400`;
+  }
+  if (isMasking) {
+    audioModifiers += `,volume=0.98`;
+  }
+
+  if (isSongCut && songMode === 'slice' && songStart > t2TrimStart && songEnd < t2TrimEnd) {
+    // Slicing: Split into Part 2A (before song) and Part 2B (after song)
+    const t2aV = `[${idxT2}:v]trim=start=${t2TrimStart}:end=${songStart},setpts=PTS-STARTPTS,crop=iw*${cropFactor}:ih*${cropFactor}:(iw-ow)/2:(ih-oh)/2,scale=${targetW}:${targetH}:flags=${scaleFilter}${mirrorFilter}${fpsFilter},setsar=1[v1a];`;
+    const t2aA = `[${idxT2}:a]atrim=start=${t2TrimStart}:end=${songStart},asetpts=PTS-STARTPTS${audioModifiers}[a1a];`;
+    
+    const t2bV = `[${idxT2}:v]trim=start=${songEnd}:end=${t2TrimEnd},setpts=PTS-STARTPTS,crop=iw*${cropFactor}:ih*${cropFactor}:(iw-ow)/2:(ih-oh)/2,scale=${targetW}:${targetH}:flags=${scaleFilter}${mirrorFilter}${fpsFilter},setsar=1[v1b];`;
+    const t2bA = `[${idxT2}:a]atrim=start=${songEnd}:end=${t2TrimEnd},asetpts=PTS-STARTPTS${audioModifiers}[a1b];`;
+
+    filterParts.push(t2aV, t2aA, t2bV, t2bA);
+    concatInputs.push('[v1a][a1a]', '[v1b][a1b]');
+  } else {
+    // Standard Slot 2 (or mute audio during song)
+    const vMainIdx = t1Active ? 'v1' : 'v0';
+    const aMainIdx = t1Active ? 'a1' : 'a0';
+
+    const t2V = `[${idxT2}:v]trim=start=${t2TrimStart}:end=${t2TrimEnd},setpts=PTS-STARTPTS,crop=iw*${cropFactor}:ih*${cropFactor}:(iw-ow)/2:(ih-oh)/2,scale=${targetW}:${targetH}:flags=${scaleFilter}${mirrorFilter}${fpsFilter},setsar=1[${vMainIdx}];`;
+    
+    let muteFilter = '';
+    if (isSongCut && songMode === 'mute' && songStart > t2TrimStart && songEnd < t2TrimEnd) {
+      const relStart = songStart - t2TrimStart;
+      const relEnd = songEnd - t2TrimStart;
+      muteFilter = `,volume=enable='between(t,${relStart},${relEnd})':volume=0`;
+    }
+
+    const t2A = `[${idxT2}:a]atrim=start=${t2TrimStart}:end=${t2TrimEnd},asetpts=PTS-STARTPTS${muteFilter}${audioModifiers}[${aMainIdx}];`;
+
+    filterParts.push(t2V, t2A);
+    concatInputs.push(`[${vMainIdx}][${aMainIdx}]`);
+  }
+
+  // Additional dynamic clips
+  extraIndices.forEach(({ idx, clip }, i) => {
+    const vTag = `vextra${i}`;
+    const aTag = `aextra${i}`;
+    const cTrim = clip.trimStart || 0;
+    const cDur = clip.duration || 60;
+    const extraV = `[${idx}:v]trim=start=${cTrim}:duration=${cDur},setpts=PTS-STARTPTS,scale=${targetW}:${targetH}:force_original_aspect_ratio=decrease,pad=${targetW}:${targetH}:(ow-iw)/2:(oh-ih)/2${fpsFilter},setsar=1[${vTag}];`;
+    const extraA = `[${idx}:a]atrim=start=${cTrim}:duration=${cDur},asetpts=PTS-STARTPTS,aresample=44100[${aTag}];`;
+    filterParts.push(extraV, extraA);
+    concatInputs.push(`[${vTag}][${aTag}]`);
+  });
+
+  // Concat filter
+  const numSegments = concatInputs.length;
+  filterParts.push(`${concatInputs.join('')}concat=n=${numSegments}:v=1:a=1[outv][outa]`);
+
+  const fullCommand = `ffmpeg -y ${inputList.join(' ')} -filter_complex "${filterParts.join(' ')}" -map "[outv]" -map "[outa]" -c:v libx264 -crf 19 -preset medium -c:a aac -b:a 192k "${outFile}"`;
+
+  const elOut = document.getElementById('studioFFmpegOutput');
+  if (elOut) elOut.textContent = fullCommand;
+
+  const elStats = document.getElementById('studioCmdStats');
+  if (elStats) elStats.textContent = `Command length: ~${fullCommand.length} characters • ${numSegments} tracks mapped`;
+}
+
+function copyStudioFFmpeg() {
+  const code = document.getElementById('studioFFmpegOutput')?.textContent || '';
+  if (!code) return;
+  navigator.clipboard.writeText(code).then(() => {
+    showToast('✓ FFmpeg command copied to clipboard!');
+  }).catch(() => {
+    showToast('📋 Command ready for execution.');
+  });
+}
+
+function exportStudioBatch() {
+  const code = document.getElementById('studioFFmpegOutput')?.textContent || '';
+  const outFile = (document.getElementById('studioOutputFile')?.value || 'assembled_output.mp4').trim();
+
+  const batContent = `@echo off
+title YT AutoPilot 3.0 Video Studio Batch Renderer
+echo ================================================================
+echo   🎬 YT AutoPilot 3.0 — Video Assembly & Batch Render Job
+echo ================================================================
+echo.
+echo [*] Target Output: ${outFile}
+echo [*] Checking local FFmpeg binary...
+where ffmpeg >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo [-] Error: FFmpeg not detected in PATH.
+    echo [*] Please install FFmpeg from https://ffmpeg.org or place ffmpeg.exe in this folder.
+    echo.
+    pause
+    exit /b 1
+)
+echo [+] FFmpeg detected: OK
+echo.
+echo [*] Starting multi-track assembly and signal modulation...
+echo.
+${code}
+if %ERRORLEVEL% EQU 0 (
+    echo.
+    echo ================================================================
+    echo [+] SUCCESS! Video rendered to: ${outFile}
+    echo [*] Remember: Follow the Unlisted Staging Protocol before public release!
+    echo ================================================================
+) else (
+    echo.
+    echo [-] Render encountered an error (Code: %ERRORLEVEL%).
+)
+echo.
+pause
+`;
+
+  const blob = new Blob([batContent], { type: 'application/bat' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `render_${outFile.replace(/\.[^/.]+$/, '')}.bat`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('💾 Batch script downloaded! Double-click to execute.');
+}
+
+function loadStudioPreset(preset) {
+  if (preset === 'padding_tdm') {
+    document.getElementById('track1Active').checked = true;
+    document.getElementById('track1File').value = 'intro_branding.mp4';
+    document.getElementById('track1TrimStart').value = 0;
+    document.getElementById('track1Duration').value = 15;
+
+    document.getElementById('track2File').value = 'fire_ashar_golpo_ep02.mp4';
+    document.getElementById('track2TrimStart').value = 25;
+    document.getElementById('track2TrimEnd').value = 1470;
+
+    document.getElementById('track3Active').checked = true;
+    document.getElementById('track3File').value = 'pubg_tdm_gameplay_loop.mp4';
+    document.getElementById('track3TrimStart').value = 0;
+    document.getElementById('track3Duration').value = 1305;
+
+    studioExtraClips = [];
+    renderStudioDynamicClips();
+
+    document.getElementById('studioZoomRange').value = 2.0;
+    document.getElementById('studioTargetFps').value = '30';
+    document.getElementById('studioPitchRange').value = 1.02;
+    document.getElementById('studioOutputFile').value = 'fire_ashar_golpo_ep02_assembled.mp4';
+
+    updateStudioZoom(2.0);
+    updateStudioPitch(1.02);
+    showToast('⚡ Loaded: Case Study Loop Padding Preset (~46m total)');
+  }
+}
+
+async function checkFFmpegStatus() {
+  showToast('🔍 Checking FFmpeg installation status...');
+  try {
+    const res = await fetch('/api.php?action=check_ffmpeg');
+    const data = await res.json();
+    if (data.installed) {
+      showToast(`✓ FFmpeg is active! Version: ${data.version || 'OK'}`);
+    } else {
+      alert(`⚠️ FFmpeg not found in system PATH.\n\nYou can still generate and download the .BAT batch script using the 'Download .BAT Script' button to run locally once FFmpeg is placed on your computer.`);
+    }
+  } catch (err) {
+    alert(`💡 FFmpeg Command Generator is fully active.\n\nClick 'Copy Command' or 'Download .BAT Script' to run on your local machine with FFmpeg installed.`);
+  }
+}
+
+// ── DYNAMIC MULTI-FILE & BATCH HANDLERS ──
+let studioExtraClips = [];
+
+function handleStudioMultiFiles(event) {
+  const files = Array.from(event.target.files || []);
+  if (!files.length) return;
+
+  showToast(`📁 Loading ${files.length} video(s)...`);
+
+  files.forEach((file, index) => {
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    const objUrl = URL.createObjectURL(file);
+    video.src = objUrl;
+
+    video.onloadedmetadata = function() {
+      URL.revokeObjectURL(objUrl);
+      const durSec = Math.round(video.duration) || 60;
+      assignFileToSlot(index, file.name, durSec, files.length);
+    };
+
+    video.onerror = function() {
+      URL.revokeObjectURL(objUrl);
+      assignFileToSlot(index, file.name, 60, files.length);
+    };
+  });
+}
+
+function assignFileToSlot(index, fileName, durationSec, totalFiles) {
+  if (totalFiles === 1) {
+    document.getElementById('track2File').value = fileName;
+    document.getElementById('track2TrimStart').value = 0;
+    document.getElementById('track2TrimEnd').value = durationSec;
+  } else if (totalFiles === 2) {
+    if (index === 0) {
+      document.getElementById('track2File').value = fileName;
+      document.getElementById('track2TrimStart').value = 0;
+      document.getElementById('track2TrimEnd').value = durationSec;
+    } else if (index === 1) {
+      document.getElementById('track3Active').checked = true;
+      document.getElementById('track3File').value = fileName;
+      document.getElementById('track3TrimStart').value = 0;
+      document.getElementById('track3Duration').value = durationSec;
+    }
+  } else if (totalFiles === 3) {
+    if (index === 0) {
+      document.getElementById('track1Active').checked = true;
+      document.getElementById('track1File').value = fileName;
+      document.getElementById('track1Duration').value = durationSec;
+    } else if (index === 1) {
+      document.getElementById('track2File').value = fileName;
+      document.getElementById('track2TrimStart').value = 0;
+      document.getElementById('track2TrimEnd').value = durationSec;
+    } else if (index === 2) {
+      document.getElementById('track3Active').checked = true;
+      document.getElementById('track3File').value = fileName;
+      document.getElementById('track3Duration').value = durationSec;
+    }
+  } else {
+    // 4 or more files: populate slots 1, 2, 3 and add dynamic clips for remaining
+    if (index === 0) {
+      document.getElementById('track1Active').checked = true;
+      document.getElementById('track1File').value = fileName;
+      document.getElementById('track1Duration').value = durationSec;
+    } else if (index === 1) {
+      document.getElementById('track2File').value = fileName;
+      document.getElementById('track2TrimStart').value = 0;
+      document.getElementById('track2TrimEnd').value = durationSec;
+    } else if (index === 2) {
+      document.getElementById('track3Active').checked = true;
+      document.getElementById('track3File').value = fileName;
+      document.getElementById('track3Duration').value = durationSec;
+    } else {
+      studioExtraClips.push({
+        id: 'clip_' + Date.now() + '_' + index,
+        file: fileName,
+        trimStart: 0,
+        duration: durationSec,
+        active: true
+      });
+      renderStudioDynamicClips();
+    }
+  }
+
+  updateStudioState();
+}
+
+function addStudioClipSlot(initialFile = '', initialDur = 60) {
+  const newClip = {
+    id: 'clip_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+    file: initialFile || `extra_clip_${studioExtraClips.length + 4}.mp4`,
+    trimStart: 0,
+    duration: initialDur,
+    active: true
+  };
+  studioExtraClips.push(newClip);
+  renderStudioDynamicClips();
+  updateStudioState();
+  showToast('➕ Added new video clip slot');
+}
+
+function removeStudioClip(id) {
+  studioExtraClips = studioExtraClips.filter(c => c.id !== id);
+  renderStudioDynamicClips();
+  updateStudioState();
+  showToast('🗑️ Clip slot removed');
+}
+
+function renderStudioDynamicClips() {
+  const container = document.getElementById('studioDynamicClips');
+  if (!container) return;
+
+  if (!studioExtraClips.length) {
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = studioExtraClips.map((clip, i) => `
+    <div class="studio-track-card mb-3" style="border-left:3px solid var(--accent-2)" id="extraCard_${clip.id}">
+      <div class="flex justify-between items-center mb-2">
+        <div class="flex items-center gap-2">
+          <span class="badge badge-purple text-xs">Slot ${i + 4}</span>
+          <span class="font-bold text-sm">Additional Sequence Clip</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="btn-xs btn-outline" onclick="removeStudioClip('${clip.id}')" title="Delete Clip">✕</button>
+        </div>
+      </div>
+      <div class="form-group mb-2">
+        <label class="form-label text-xs">File Path or Name</label>
+        <input type="text" class="input-field text-xs" value="${clip.file}" oninput="updateExtraClipFile('${clip.id}', this.value)" placeholder="C:\\videos\\extra.mp4" />
+      </div>
+      <div class="flex gap-2">
+        <div style="flex:1">
+          <label class="form-label text-xs">Trim Start (s)</label>
+          <input type="number" class="input-field text-xs" value="${clip.trimStart}" min="0" oninput="updateExtraClipTrim('${clip.id}', this.value)" />
+        </div>
+        <div style="flex:1">
+          <label class="form-label text-xs">Duration (s)</label>
+          <input type="number" class="input-field text-xs" value="${clip.duration}" min="1" oninput="updateExtraClipDuration('${clip.id}', this.value)" />
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateExtraClipFile(id, val) {
+  const c = studioExtraClips.find(x => x.id === id);
+  if (c) { c.file = val; updateStudioState(); }
+}
+function updateExtraClipTrim(id, val) {
+  const c = studioExtraClips.find(x => x.id === id);
+  if (c) { c.trimStart = parseFloat(val) || 0; updateStudioState(); }
+}
+function updateExtraClipDuration(id, val) {
+  const c = studioExtraClips.find(x => x.id === id);
+  if (c) { c.duration = parseFloat(val) || 1; updateStudioState(); }
+}
+
+

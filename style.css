@@ -1344,3 +1344,93 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-primary); }
   display: inline-block;
 }
 
+/* ================================================================
+   VIDEO STUDIO & ASSEMBLER STYLES
+   ================================================================ */
+.studio-track-card {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  transition: var(--trans);
+}
+.studio-track-card:hover {
+  border-color: rgba(99,102,241,0.3);
+  background: rgba(10,17,32,0.85);
+}
+
+.studio-dropzone {
+  border: 2px dashed rgba(99,102,241,0.4);
+  background: rgba(99,102,241,0.05);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--trans);
+}
+.studio-dropzone:hover {
+  border-color: var(--accent);
+  background: rgba(99,102,241,0.1);
+  transform: translateY(-1px);
+}
+.studio-dropzone.dragover {
+  border-color: #10b981;
+  background: rgba(16,185,129,0.15);
+}
+
+.studio-timeline-bar {
+  display: flex;
+  height: 28px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.timeline-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 6px;
+  transition: width 0.3s ease;
+  user-select: none;
+}
+.seg-slot1 {
+  background: linear-gradient(90deg, #6366f1, #4f46e5);
+  min-width: 8px;
+}
+.seg-slot2 {
+  background: linear-gradient(90deg, #10b981, #059669);
+  min-width: 40px;
+}
+.seg-slot3 {
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+  min-width: 30px;
+}
+
+.studio-console {
+  background: #050811;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  max-height: 260px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+}
+.studio-console pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.studio-console code {
+  color: #38bdf8;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+

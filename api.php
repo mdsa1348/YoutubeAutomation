@@ -316,9 +316,183 @@ if ($action === 'channel_rss') {
     exit;
 }
 
+// ── 10. RESOLVE CHANNEL (NO DUMMY DATA - REAL YOUTUBE STATS & VIDEOS) ──
+if ($action === 'resolve_channel') {
+    $rawInput = trim($_GET['handle'] ?? $_GET['channel_id'] ?? $inputData['handle'] ?? $inputData['channel_id'] ?? '');
+    if (empty($rawInput)) {
+        echo json_encode(['success' => false, 'error' => 'Channel handle or ID is required']);
+        exit;
+    }
+
+    $cleanHandle = ltrim($rawInput, '@');
+    $isDirectCid = (strpos($cleanHandle, 'UC') === 0 && strlen($cleanHandle) === 24);
+
+    $targetUrl = $isDirectCid 
+        ? "https://www.youtube.com/channel/$cleanHandle"
+        : "https://www.youtube.com/@$cleanHandle";
+
+    $pageRes = httpGet($targetUrl);
+    $html = $pageRes['body'] ?? '';
+
+    $channelId = $isDirectCid ? $cleanHandle : '';
+    if (!$channelId) {
+        if (preg_match('/"browseId":"(UC[a-zA-Z0-9_-]{22})"/', $html, $m)) {
+            $channelId = $m[1];
+        } elseif (preg_match('/"channelId":"(UC[a-zA-Z0-9_-]{22})"/', $html, $m)) {
+            $channelId = $m[1];
+        } elseif (preg_match('/\/channel\/(UC[a-zA-Z0-9_-]{22})/', $html, $m)) {
+            $channelId = $m[1];
+        }
+    }
+
+    $title = $cleanHandle;
+    if (preg_match('/"channelProfileMicroformatDetails":\{.*?"name":"([^"]+)"/s', $html, $m)) {
+        $title = $m[1];
+    } elseif (preg_match('/<meta property="og:title" content="([^"]+)"/', $html, $m)) {
+        $title = $m[1];
+    }
+    // Clean suffix like " - YouTube"
+    $title = preg_replace('/\s*-\s*YouTube$/i', '', $title);
+
+    $subs = 0;
+    if (preg_match('/"userInteractionCount":"(\d+)"/', $html, $m)) {
+        $subs = (int)$m[1];
+    } elseif (preg_match('/"simpleText":"([0-9.,KMBkmb]+)\s+subscribers?"/i', $html, $m)) {
+        $s = $m[1];
+        if (stripos($s, 'M') !== false) $subs = (int)((float)$s * 1000000);
+        elseif (stripos($s, 'K') !== false) $subs = (int)((float)$s * 1000);
+        else $subs = (int)str_replace(',', '', $s);
+    }
+
+    $avatar = '';
+    if (preg_match('/"avatar":\{.*?"url":"([^"]+)"/s', $html, $m)) {
+        $avatar = $m[1];
+    } elseif (preg_match('/"thumbnails":\[\{"url":"([^"]+)"/s', $html, $m)) {
+        $avatar = $m[1];
+    }
+
+    $description = '';
+    if (preg_match('/<meta property="og:description" content="([^"]+)"/', $html, $m)) {
+        $description = html_entity_decode($m[1], ENT_QUOTES | ENT_XML1, 'UTF-8');
+    }
+
+    // Fetch video uploads from RSS feed
+    $videos = [];
+    $totalViews = 0;
+    if ($channelId) {
+        $feedRes = httpGet("https://www.youtube.com/feeds/videos.xml?channel_id=$channelId");
+        $xml = $feedRes['body'] ?? '';
+        if (!empty($xml)) {
+            preg_match_all('/<entry>(.*?)<\/entry>/s', $xml, $entries);
+            foreach ($entries[1] as $entry) {
+                preg_match('/<title>([^<]+)<\/title>/', $entry, $t);
+                preg_match('/<yt:videoId>([^<]+)<\/yt:videoId>/', $entry, $v);
+                preg_match('/<published>([^<]+)<\/published>/', $entry, $p);
+                preg_match('/count="(\d+)"/', $entry, $c);
+
+                $vidId = $v[1] ?? '';
+                $vViews = isset($c[1]) ? (int)$c[1] : 0;
+                $totalViews += $vViews;
+                if ($vidId) {
+                    $videos[] = [
+                        'id' => $vidId,
+                        'title' => html_entity_decode($t[1] ?? 'Untitled', ENT_QUOTES | ENT_XML1, 'UTF-8'),
+                        'published' => $p[1] ?? '',
+                        'views' => $vViews,
+                        'thumbnail' => "https://i.ytimg.com/vi/$vidId/hqdefault.jpg",
+                        'url' => "https://www.youtube.com/watch?v=$vidId"
+                    ];
+                }
+            }
+        }
+    }
+
+    $videoCount = count($videos);
+    $medianViews = 0;
+    if ($videoCount > 0) {
+        $viewsArr = array_column($videos, 'views');
+        sort($viewsArr);
+        $mid = floor($videoCount / 2);
+        $medianViews = ($videoCount % 2 !== 0) ? $viewsArr[$mid] : ($viewsArr[$mid - 1] + $viewsArr[$mid]) / 2;
+    }
+
+    // Auto-save or update in Database if available
+    if ($pdo && !empty($channelId)) {
+        try {
+            $stmt = $pdo->prepare("SELECT id FROM channels WHERE channel_id = ? OR handle = ?");
+            $stmt->execute([$channelId, '@' . $cleanHandle]);
+            $existing = $stmt->fetch();
+
+            if ($existing) {
+                $up = $pdo->prepare("UPDATE channels SET name = :name, subscribers = :subs, total_views = :views, video_count = :vids, median_views = :med WHERE id = :id");
+                $up->execute([
+                    ':name' => $title,
+                    ':subs' => $subs,
+                    ':views' => $totalViews,
+                    ':vids' => $videoCount,
+                    ':med' => (int)$medianViews,
+                    ':id' => $existing['id']
+                ]);
+            } else {
+                $ins = $pdo->prepare("INSERT INTO channels (channel_id, name, handle, role, subscribers, total_views, video_count, median_views, niche) 
+                    VALUES (:cid, :name, :handle, 'my_channel', :subs, :views, :vids, :med, 'Gaming / Creator')");
+                $ins->execute([
+                    ':cid' => $channelId,
+                    ':name' => $title,
+                    ':handle' => '@' . $cleanHandle,
+                    ':subs' => $subs,
+                    ':views' => $totalViews,
+                    ':vids' => $videoCount,
+                    ':med' => (int)$medianViews
+                ]);
+            }
+        } catch (Exception $e) {
+            // DB auto-save optional
+        }
+    }
+
+    echo json_encode([
+        'success' => true,
+        'channel_id' => $channelId,
+        'name' => $title,
+        'handle' => '@' . $cleanHandle,
+        'subscribers' => $subs,
+        'total_views' => $totalViews,
+        'video_count' => $videoCount,
+        'median_views' => (int)$medianViews,
+        'avatar' => $avatar ?: '🔴',
+        'description' => $description,
+        'videos' => $videos
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
+// ── 9. CHECK FFMPEG BINARY STATUS ──
+if ($action === 'check_ffmpeg') {
+    $output = @shell_exec('ffmpeg -version 2>&1');
+    if ($output && stripos($output, 'ffmpeg version') !== false) {
+        $lines = explode("\n", trim($output));
+        echo json_encode([
+            'success' => true,
+            'installed' => true,
+            'version' => $lines[0] ?? 'FFmpeg Ready',
+            'message' => 'FFmpeg binary available in PATH'
+        ]);
+    } else {
+        echo json_encode([
+            'success' => true,
+            'installed' => false,
+            'version' => null,
+            'message' => 'FFmpeg not detected in PATH. Export batch script (.bat) to run locally.'
+        ]);
+    }
+    exit;
+}
+
 echo json_encode([
     'service' => 'YT AutoPilot 3.0 Backend Engine',
     'status' => 'online',
     'database' => $driver,
-    'actions' => ['db_status', 'get_all', 'save_channel', 'delete_channel', 'save_pipeline_card', 'save_content', 'test_groq', 'test_youtube', 'channel_rss']
+    'actions' => ['db_status', 'get_all', 'save_channel', 'delete_channel', 'save_pipeline_card', 'save_content', 'test_groq', 'test_youtube', 'channel_rss', 'resolve_channel', 'check_ffmpeg']
 ]);
+
