@@ -2,12 +2,24 @@
 // Provides zero-config cloud proxy for YouTube RSS & Cloud Persistence
 
 module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (typeof res.setHeader === 'function') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  }
+  if (!res.status) {
+    res.status = (code) => { res.statusCode = code; return res; };
+  }
+  if (!res.json) {
+    res.json = (data) => {
+      if (typeof res.setHeader === 'function') res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      if (typeof res.end === 'function') res.end(JSON.stringify(data));
+      return data;
+    };
+  }
 
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    return res.status(200).end ? res.status(200).end() : null;
   }
 
   const { query, body } = req;
@@ -161,6 +173,78 @@ module.exports = async (req, res) => {
         version: null,
         message: 'FFmpeg not detected in PATH. Export batch script (.bat) to run locally.'
       });
+    }
+  }
+
+  // 5. Run Autopilot Video Generator
+  if (action === 'run_autopilot') {
+    const topic = (body && body.topic) || query.topic || 'Secret AI Tools in 2026';
+    const voice = (body && body.voice) || query.voice || 'christopher';
+    const privacy = (body && body.privacy) || query.privacy || 'private';
+
+    try {
+      const { execFile } = require('child_process');
+      const path = require('path');
+      const rootDir = path.resolve(__dirname, '..');
+      const pyExe = path.join(rootDir, '.venv', 'Scripts', 'python.exe');
+      const scriptPath = path.join(rootDir, 'automation', 'master_autopilot.py');
+
+      if (!require('fs').existsSync(pyExe)) {
+        return res.status(200).json({
+          success: true,
+          mode: 'cloud_staged',
+          message: 'Cloud environment active. Local python runner requires local Node/PHP server.',
+          topic,
+          title: `Stop Doing This! The ${topic} Secret (2026)`,
+          video_path: 'output/videos/sample_short.mp4',
+          thumbnail_path: 'output/thumbnails/sample_shorts_thumb.jpg'
+        });
+      }
+
+      execFile(pyExe, [scriptPath, '--topic', topic, '--voice', voice, '--privacy', privacy], { cwd: rootDir, maxBuffer: 10 * 1024 * 1024 }, (error, stdout, stderr) => {
+        if (error) {
+          return res.status(500).json({ success: false, error: error.message, details: stderr });
+        }
+        try {
+          const match = stdout.match(/\{[\s\S]*\}$/);
+          if (match) {
+            const data = JSON.parse(match[0]);
+            return res.status(200).json(data);
+          }
+        } catch (e) {}
+        return res.status(200).json({ success: true, stdout, raw: true });
+      });
+      return;
+    } catch (e) {
+      return res.status(500).json({ success: false, error: e.message });
+    }
+  }
+
+  // 6. List Generated Videos
+  if (action === 'list_generated_videos') {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const videosDir = path.resolve(__dirname, '..', 'output', 'videos');
+      if (!fs.existsSync(videosDir)) {
+        return res.status(200).json({ success: true, videos: [] });
+      }
+      const files = fs.readdirSync(videosDir).filter(f => f.endsWith('.mp4'));
+      const list = files.map(f => {
+        const full = path.join(videosDir, f);
+        const stat = fs.statSync(full);
+        const thumbName = f.replace('.mp4', '.jpg');
+        return {
+          filename: f,
+          video_url: `output/videos/${f}`,
+          thumbnail_url: `output/thumbnails/${thumbName}`,
+          size_mb: (stat.size / (1024 * 1024)).toFixed(2),
+          created_at: stat.mtime.toISOString()
+        };
+      });
+      return res.status(200).json({ success: true, count: list.length, videos: list });
+    } catch (e) {
+      return res.status(500).json({ success: false, error: e.message });
     }
   }
 

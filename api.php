@@ -489,10 +489,75 @@ if ($action === 'check_ffmpeg') {
     exit;
 }
 
+// ── 11. RUN AUTOPILOT VIDEO GENERATOR ──
+if ($action === 'run_autopilot') {
+    $topic = $inputData['topic'] ?? $_GET['topic'] ?? 'Secret AI Tools in 2026';
+    $voice = $inputData['voice'] ?? $_GET['voice'] ?? 'christopher';
+    $privacy = $inputData['privacy'] ?? $_GET['privacy'] ?? 'private';
+
+    $rootDir = __DIR__;
+    $pyExe = $rootDir . '/.venv/Scripts/python.exe';
+    $script = $rootDir . '/automation/master_autopilot.py';
+
+    if (!file_exists($pyExe)) {
+        echo json_encode([
+            'success' => false,
+            'error' => 'Python venv not found at ' . $pyExe
+        ]);
+        exit;
+    }
+
+    $safeTopic = escapeshellarg($topic);
+    $safeVoice = escapeshellarg($voice);
+    $safePrivacy = escapeshellarg($privacy);
+    $cmd = "\"$pyExe\" \"$script\" --topic $safeTopic --voice $safeVoice --privacy $safePrivacy 2>&1";
+
+    $output = shell_exec($cmd);
+
+    // Try to extract JSON from python output
+    if (preg_match('/\{[\s\S]*\}$/', trim($output), $m)) {
+        $json = json_decode($m[0], true);
+        if ($json) {
+            echo json_encode($json);
+            exit;
+        }
+    }
+
+    echo json_encode(['success' => true, 'output' => $output]);
+    exit;
+}
+
+// ── 12. LIST GENERATED VIDEOS ──
+if ($action === 'list_generated_videos') {
+    $videosDir = __DIR__ . '/output/videos';
+    if (!is_dir($videosDir)) {
+        echo json_encode(['success' => true, 'count' => 0, 'videos' => []]);
+        exit;
+    }
+
+    $files = scandir($videosDir);
+    $list = [];
+    foreach ($files as $f) {
+        if (substr($f, -4) === '.mp4') {
+            $full = $videosDir . '/' . $f;
+            $thumb = str_replace('.mp4', '.jpg', $f);
+            $list[] = [
+                'filename' => $f,
+                'video_url' => 'output/videos/' . $f,
+                'thumbnail_url' => 'output/thumbnails/' . $thumb,
+                'size_mb' => round(filesize($full) / (1024 * 1024), 2),
+                'created_at' => date('c', filemtime($full))
+            ];
+        }
+    }
+
+    echo json_encode(['success' => true, 'count' => count($list), 'videos' => array_reverse($list)]);
+    exit;
+}
+
 echo json_encode([
     'service' => 'YT AutoPilot 3.0 Backend Engine',
     'status' => 'online',
     'database' => $driver,
-    'actions' => ['db_status', 'get_all', 'save_channel', 'delete_channel', 'save_pipeline_card', 'save_content', 'test_groq', 'test_youtube', 'channel_rss', 'resolve_channel', 'check_ffmpeg']
+    'actions' => ['db_status', 'get_all', 'save_channel', 'delete_channel', 'save_pipeline_card', 'save_content', 'test_groq', 'test_youtube', 'channel_rss', 'resolve_channel', 'check_ffmpeg', 'run_autopilot', 'list_generated_videos']
 ]);
-
