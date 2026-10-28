@@ -1,0 +1,104 @@
+{
+  "active_channel_id": "UCV4Xv8gNl6XkC7o3zU1Gv4g",
+  "channels": [
+    {
+      "id": "UCV4Xv8gNl6XkC7o3zU1Gv4g",
+      "channel_id": "UCV4Xv8gNl6XkC7o3zU1Gv4g",
+      "name": "My Tech Channel",
+      "handle": "@mychannel",
+      "role": "my_channel",
+      "subscribers": 142000,
+      "total_views": 12400000,
+      "video_count": 88,
+      "median_views": 48000,
+      "niche": "YouTube Automation",
+      "avatar": "🔴",
+      "is_active": 1
+    },
+    {
+      "id": "UCX6OQ3DkcsbYNE6H8uQQuVA",
+      "channel_id": "UCX6OQ3DkcsbYNE6H8uQQuVA",
+      "name": "MrBeast",
+      "handle": "@MrBeast",
+      "role": "niche_leader",
+      "subscribers": 342000000,
+      "total_views": 68000000000,
+      "video_count": 840,
+      "median_views": 142000000,
+      "niche": "Entertainment",
+      "avatar": "🦁",
+      "is_active": 0
+    },
+    {
+      "id": "UCsBjURrPoezykLs9EqgamOA",
+      "channel_id": "UCsBjURrPoezykLs9EqgamOA",
+      "name": "Fireship",
+      "handle": "@Fireship",
+      "role": "top_competitor",
+      "subscribers": 3400000,
+      "total_views": 420000000,
+      "video_count": 640,
+      "median_views": 380000,
+      "niche": "Tech & AI",
+      "avatar": "🔥",
+      "is_active": 0
+    }
+  ],
+  "pipeline": [
+    {
+      "id": 1,
+      "title": "I Automated My YouTube Channel with Claude MCP",
+      "format": "long",
+      "keyword": "claude mcp",
+      "priority": "high",
+      "status": "scripting",
+      "views": 0,
+      "ctr": 0
+    },
+    {
+      "id": 2,
+      "title": "5 AI Tools That Feel Illegal to Know in 2026",
+      "format": "shorts",
+      "keyword": "ai tools",
+      "priority": "high",
+      "status": "ideas",
+      "views": 0,
+      "ctr": 0
+    },
+    {
+      "id": 3,
+      "title": "n8n Full Automation Tutorial (Zero to Hero)",
+      "format": "tutorial",
+      "keyword": "n8n automation",
+      "priority": "medium",
+      "status": "ideas",
+      "views": 0,
+      "ctr": 0
+    },
+    {
+      "id": 4,
+      "title": "How to Make $10K/mo with Faceless Channels",
+      "format": "long",
+      "keyword": "faceless youtube",
+      "priority": "high",
+      "status": "production",
+      "views": 0,
+      "ctr": 0
+    },
+    {
+      "id": 5,
+      "title": "Claude 3.7 vs GPT-4.5 for Coding",
+      "format": "long",
+      "keyword": "claude 3.7",
+      "priority": "low",
+      "status": "published",
+      "views": 84200,
+      "ctr": 8.4
+    }
+  ],
+  "content_library": [],
+  "calendar": [],
+  "settings": {
+    "active_channel_id": "UCV4Xv8gNl6XkC7o3zU1Gv4g"
+  }
+}

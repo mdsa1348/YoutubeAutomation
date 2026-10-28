@@ -450,6 +450,149 @@
 </div>
 
 <!-- ============================================================ -->
+<!-- LONG VIDEO TO CLIPS: DIRECT YOUTUBE SHORTS UPLOAD MODAL -->
+<!-- ============================================================ -->
+<div id="lvcUploadModal" class="modal-overlay" onclick="closeModalOnBg(event,'lvcUploadModal')">
+  <div class="modal-card" style="max-width:740px">
+    <div class="modal-header">
+      <div class="flex items-center gap-2">
+        <span style="font-size:1.5rem">🚀</span>
+        <div>
+          <div class="modal-title">Direct Upload to YouTube Shorts</div>
+          <div class="modal-sub">Publish generated viral clip directly to your connected YouTube channel</div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal('lvcUploadModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="lvc-upload-dialog">
+        <!-- Vertical Video Preview -->
+        <div>
+          <div class="lvc-vertical-player-wrap" style="max-height:280px;border-radius:var(--radius-sm)">
+            <canvas id="lvcUploadCanvasPreview" class="lvc-vertical-canvas" width="270" height="480"></canvas>
+            <div style="position:absolute;bottom:8px;left:8px;right:8px;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);padding:4px 8px;border-radius:4px;font-size:0.7rem;font-weight:700;color:#fff;text-align:center" id="lvcUploadDurationBadge">⏱️ 36s • 9:16 Vertical</div>
+          </div>
+        </div>
+
+        <!-- Form fields -->
+        <div>
+          <div class="form-group mb-2">
+            <label class="form-label">Video Title (Auto-includes #Shorts)</label>
+            <input type="text" id="lvcUploadTitle" class="input-field" placeholder="Catchy title under 100 characters #Shorts" />
+          </div>
+          <div class="form-group mb-2">
+            <label class="form-label">Description & Timestamps</label>
+            <textarea id="lvcUploadDesc" class="textarea-field" rows="3" placeholder="Description with hashtags and hooks..."></textarea>
+          </div>
+          <div class="form-group mb-2">
+            <label class="form-label">Tags (comma separated)</label>
+            <input type="text" id="lvcUploadTags" class="input-field" placeholder="shorts, viral, podcast, ai, clips" />
+          </div>
+          <div class="grid-2 gap-2 mb-2">
+            <div>
+              <label class="form-label">Visibility / Privacy</label>
+              <select id="lvcUploadPrivacy" class="input-field">
+                <option value="public" selected>🌐 Public (Instant Viral Reach)</option>
+                <option value="unlisted">🔗 Unlisted (Staging / Review)</option>
+                <option value="private">🔒 Private (Vault Archive)</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Category</label>
+              <select id="lvcUploadCategory" class="input-field">
+                <option value="28" selected>Science & Technology</option>
+                <option value="24">Entertainment</option>
+                <option value="27">Education</option>
+                <option value="22">People & Blogs</option>
+                <option value="20">Gaming</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live upload progress bar -->
+      <div id="lvcUploadProgressWrap" style="display:none;margin-top:16px;background:var(--bg-surface);padding:14px;border-radius:var(--radius-sm);border:1px solid rgba(239,68,68,0.3)">
+        <div class="flex justify-between items-center mb-1">
+          <span class="text-xs font-bold text-red" id="lvcUploadStatusText">⏳ Preparing video stream & OAuth payload...</span>
+          <span class="text-xs font-mono font-bold" id="lvcUploadPercent">0%</span>
+        </div>
+        <div class="lvc-progress-bar-wrap" style="margin:6px 0 10px">
+          <div class="lvc-progress-bar-fill" id="lvcUploadBarFill" style="background:linear-gradient(90deg,#ef4444,#f97316,#10b981)"></div>
+        </div>
+        <div class="text-xs text-muted" id="lvcUploadSubText">Streaming to YouTube Data API v3...</div>
+      </div>
+
+      <!-- Upload Success Card -->
+      <div id="lvcUploadSuccessBox" style="display:none;margin-top:16px" class="card p-3 glow-green">
+        <div class="flex items-center gap-2 mb-2">
+          <span style="font-size:24px">🎉</span>
+          <div>
+            <div class="font-bold text-green" id="lvcSuccessTitle">Published to YouTube Shorts!</div>
+            <div class="text-xs text-muted">Video is successfully live on YouTube servers.</div>
+          </div>
+        </div>
+        <div class="flex gap-2 mt-2">
+          <a id="lvcSuccessLink" href="#" target="_blank" class="btn-primary btn-sm flex-1 text-center">📺 Watch on YouTube Shorts</a>
+          <button class="btn-outline btn-sm" onclick="openModal('channelVaultModal')">📁 View in Channel Vault</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModal('lvcUploadModal')">Cancel</button>
+      <button class="btn-red" id="lvcExecuteUploadBtn" onclick="lvcExecuteDirectUpload()"><span id="lvcUploadBtnText">🚀 Confirm & Direct Upload to YouTube</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- LONG VIDEO TO CLIPS: BATCH EXPORT MODAL -->
+<!-- ============================================================ -->
+<div id="lvcBatchModal" class="modal-overlay" onclick="closeModalOnBg(event,'lvcBatchModal')">
+  <div class="modal-card" style="max-width:680px">
+    <div class="modal-header">
+      <div class="flex items-center gap-2">
+        <span style="font-size:1.5rem">📥</span>
+        <div>
+          <div class="modal-title">Batch Export All Viral Clips</div>
+          <div class="modal-sub">Download high-definition MP4s, subtitle bundles, and GPU batch rendering scripts</div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal('lvcBatchModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="grid-2 gap-3 mb-3">
+        <div class="card p-3" style="background:rgba(16,185,129,0.06);border-color:rgba(16,185,129,0.3)">
+          <div style="font-size:28px;margin-bottom:6px">⚡</div>
+          <div class="font-bold text-bright mb-1">Instant Browser MP4 Download</div>
+          <div class="text-xs text-muted mb-3">Sequentially triggers rendering and download of all 5 clips directly to your Downloads folder.</div>
+          <button class="btn-green btn-sm w-100" onclick="lvcDownloadAllClips()">📥 Download All 5 MP4s</button>
+        </div>
+        <div class="card p-3" style="background:rgba(99,102,241,0.06);border-color:rgba(99,102,241,0.3)">
+          <div style="font-size:28px;margin-bottom:6px">⚙️</div>
+          <div class="font-bold text-bright mb-1">GPU Accelerated .BAT Script</div>
+          <div class="text-xs text-muted mb-3">Export a 1-click Windows batch script with NVENC/QSV FFmpeg commands for ultra-fast 4K 60FPS rendering.</div>
+          <button class="btn-primary btn-sm w-100" onclick="lvcExportBatchScript()">💾 Download .BAT Render Script</button>
+        </div>
+      </div>
+
+      <div class="card p-3">
+        <div class="flex justify-between items-center mb-2">
+          <div class="text-xs font-bold text-muted">FFMPEG BATCH COMMAND PREVIEW</div>
+          <button class="btn-xs btn-outline" onclick="lvcCopyFFmpegCommands()">📋 Copy Command</button>
+        </div>
+        <div class="studio-console">
+          <pre><code id="lvcFFmpegPreview"># Initializing FFmpeg Batch Commands...</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModal('lvcBatchModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
 <!-- SIDEBAR -->
 <!-- ============================================================ -->
 <nav class="sidebar" id="sidebar">
@@ -496,6 +639,9 @@
       </li>
       <li class="nav-item" data-tab="thumbnail-lab" onclick="switchTab('thumbnail-lab',this)">
         <span class="nav-icon">🖼️</span><span class="nav-label">Thumbnail Lab</span><span class="nav-badge new">A/B</span>
+      </li>
+      <li class="nav-item" data-tab="long-video-clipper" onclick="switchTab('long-video-clipper',this)">
+        <span class="nav-icon">✂️</span><span class="nav-label">Long Video to Clips</span><span class="nav-badge hot">Auto</span>
       </li>
       <li class="nav-item" data-tab="clip-generator" onclick="switchTab('clip-generator',this)">
         <span class="nav-icon">📱</span><span class="nav-label">Auto Clip Generator</span><span class="nav-badge hot">Shorts</span>
@@ -1647,6 +1793,451 @@
             <div class="insight-text">Describe your thumbnail layout above to get color theory, contrast analysis, and specific improvement suggestions from AI.</div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- TAB: LONG VIDEO TO CLIPS AUTO-CLIPPER -->
+<!-- ========================================================= -->
+<section class="tab-content" id="tab-long-video-clipper">
+  <!-- STUDIO HERO HEADER -->
+  <div class="lvc-hero-banner mb-4">
+    <div class="flex items-center justify-between wrap gap-3">
+      <div>
+        <div class="flex items-center gap-2 mb-2 wrap">
+          <span class="lvc-studio-pill"><span class="status-dot pulse" style="background:#ec4899"></span> AI VIRAL SHORTS WORKBENCH</span>
+          <span class="badge badge-cyan font-mono text-xs">4K AUTO-REFRAME</span>
+          <span class="badge badge-green font-mono text-xs">60 FPS CANVAS</span>
+        </div>
+        <h1 class="page-title text-2xl font-black mb-1">
+          ✂️ Long Video to Clips <span class="gradient-text">Studio Pro</span>
+        </h1>
+        <p class="text-sm text-secondary" style="max-width:720px;line-height:1.6">
+          Convert podcasts, long-form YouTube videos, streams & recordings into high-retention 9:16 vertical Shorts, Reels & TikToks. Auto-detects 0:00 retention hooks, centers speakers, renders kinetic karaoke subtitles, and enables 1-click batch download or direct YouTube Shorts publishing.
+        </p>
+      </div>
+      <div class="header-actions flex gap-2 wrap">
+        <button class="btn-primary" onclick="lvcStartAutoClip()">
+          <span>⚡</span> Auto-Generate Clips
+        </button>
+        <button class="btn-outline" onclick="lvcOpenBatchModal()">
+          <span>💾</span> Batch Export (.BAT)
+        </button>
+        <button class="btn-green" onclick="lvcAutoUploadAllClips()">
+          <span>🚀</span> Auto-Upload All Best Moments
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STUDIO KPI METRICS ROW -->
+  <div class="lvc-kpi-row mb-4">
+    <div class="lvc-kpi-box">
+      <div class="lvc-kpi-icon-wrap" style="background:rgba(99,102,241,0.12);color:var(--accent)">
+        <span>⏱️</span>
+      </div>
+      <div>
+        <div class="lvc-kpi-sub">SOURCE DURATION</div>
+        <div class="lvc-kpi-num text-bright" id="lvcKpiRuntime">42m 18s</div>
+        <div class="lvc-kpi-footer font-mono" id="lvcKpiSeconds">2,538 total seconds</div>
+      </div>
+    </div>
+    <div class="lvc-kpi-box">
+      <div class="lvc-kpi-icon-wrap" style="background:rgba(6,182,212,0.12);color:var(--accent-cyan)">
+        <span>🔥</span>
+      </div>
+      <div>
+        <div class="lvc-kpi-sub">RETENTION PEAKS</div>
+        <div class="lvc-kpi-num text-cyan" id="lvcKpiPeaks">5 Viral Highlights</div>
+        <div class="lvc-kpi-footer font-mono">90+ Virality Score Threshold</div>
+      </div>
+    </div>
+    <div class="lvc-kpi-box">
+      <div class="lvc-kpi-icon-wrap" style="background:rgba(236,72,153,0.12);color:var(--accent-pink)">
+        <span>📱</span>
+      </div>
+      <div>
+        <div class="lvc-kpi-sub">REFRAME MODE</div>
+        <div class="lvc-kpi-num text-pink" id="lvcKpiRatio">9:16 Vertical</div>
+        <div class="lvc-kpi-footer font-mono">Smart Speaker Face Tracker</div>
+      </div>
+    </div>
+    <div class="lvc-kpi-box">
+      <div class="lvc-kpi-icon-wrap" style="background:rgba(16,185,129,0.12);color:var(--accent-green)">
+        <span>✨</span>
+      </div>
+      <div>
+        <div class="lvc-kpi-sub">KINETIC SUBTITLES</div>
+        <div class="lvc-kpi-num text-green" id="lvcKpiCaptions">Hormozi Bold</div>
+        <div class="lvc-kpi-footer font-mono">Active Word Pop • 60 FPS</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN 2-COLUMN STUDIO WORKBENCH -->
+  <div class="grid-split-2 mb-4" style="align-items:start">
+    <!-- COLUMN 1: SOURCE INGEST & MASTER TIMELINE PLAYER -->
+    <div class="card lvc-studio-card">
+      <div class="card-header flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <span style="font-size:1.25rem">🎬</span>
+          <div>
+            <h2 class="card-title text-base font-bold">1. Source Video Ingest & Master Timeline</h2>
+            <div class="card-sub text-xs text-muted">Upload raw footage, fetch YouTube URL with captions, or test curated presets</div>
+          </div>
+        </div>
+        <span class="badge badge-cyan font-mono font-bold">STEP 1</span>
+      </div>
+      <div class="card-body">
+        <!-- Modern Segmented Source Tab Control -->
+        <div class="lvc-segmented-tabs mb-3" id="lvcSourceTabs">
+          <button class="lvc-segment-btn active" onclick="switchLvcSource('file',this)">
+            <span>📁</span> Local Video File
+          </button>
+          <button class="lvc-segment-btn" onclick="switchLvcSource('url',this)">
+            <span>🔗</span> YouTube Video URL
+          </button>
+          <button class="lvc-segment-btn" onclick="switchLvcSource('preset',this)">
+            <span>⚡</span> Showcase Demos
+          </button>
+        </div>
+
+        <!-- 1. FILE UPLOAD DROPZONE -->
+        <div id="lvcSourceFile">
+          <input type="file" id="lvcFileInput" accept="video/mp4,video/webm,video/quicktime,video/x-matroska" style="display:none" onchange="lvcHandleFileUpload(event)" />
+          <div class="lvc-dropzone" id="lvcDropzone" onclick="document.getElementById('lvcFileInput').click()" ondragover="lvcDragOver(event)" ondragleave="lvcDragLeave(event)" ondrop="lvcDrop(event)">
+            <div class="lvc-dropzone-icon">📥</div>
+            <div class="font-bold text-bright mb-1" style="font-size:0.95rem">Click to Browse Video or Drag & Drop Here</div>
+            <div class="text-xs text-muted mb-2">Processed locally in browser with instant zero-upload preview</div>
+            <div class="flex justify-center gap-2 wrap">
+              <span class="badge font-mono" style="background:rgba(255,255,255,0.06);font-size:0.68rem">MP4</span>
+              <span class="badge font-mono" style="background:rgba(255,255,255,0.06);font-size:0.68rem">MOV</span>
+              <span class="badge font-mono" style="background:rgba(255,255,255,0.06);font-size:0.68rem">WEBM</span>
+              <span class="badge font-mono" style="background:rgba(255,255,255,0.06);font-size:0.68rem">MKV (Up to 4K)</span>
+            </div>
+          </div>
+          <div id="lvcLoadedFileBar" class="lvc-loaded-file-bar" style="display:none">
+            <div class="flex items-center gap-2">
+              <span style="font-size:22px">🎥</span>
+              <div>
+                <div class="font-bold text-bright text-xs" id="lvcLoadedFileName">video.mp4</div>
+                <div class="text-xs text-muted" id="lvcLoadedFileMeta">1080p • 42m 18s • 348 MB</div>
+              </div>
+            </div>
+            <button class="btn-xs btn-outline" onclick="document.getElementById('lvcFileInput').click()">Change Video</button>
+          </div>
+        </div>
+
+        <!-- 2. YOUTUBE URL INPUT -->
+        <div id="lvcSourceUrl" style="display:none">
+          <div class="form-group mb-2">
+            <label class="form-label text-xs font-bold text-secondary">Paste Any YouTube Video URL</label>
+            <div class="flex gap-2">
+              <input type="text" id="lvcYoutubeUrl" class="input-field" placeholder="https://www.youtube.com/watch?v=..." value="https://www.youtube.com/watch?v=dQw4w9WgXcQ" />
+              <button class="btn-primary btn-sm flex-shrink-0" onclick="lvcFetchYoutubeUrl()">
+                <span>🔍</span> Fetch & Analyze
+              </button>
+            </div>
+            <p class="form-hint mt-1 text-xs text-muted">Auto-extracts timed caption tracks, detects spoken retention hooks, and sets cut boundaries.</p>
+          </div>
+        </div>
+
+        <!-- 3. PRESET SHOWCASE VIDEOS -->
+        <div id="lvcSourcePreset" style="display:none">
+          <div class="text-xs text-muted mb-2">Select a high-retention long-form master video to test the AI clipper:</div>
+          <div class="lvc-preset-grid">
+            <div class="lvc-preset-btn" onclick="lvcLoadPreset('podcast')">
+              <span class="lvc-preset-icon">🎙️</span>
+              <div>
+                <div class="font-bold text-xs text-bright">AI Podcast Episode</div>
+                <div class="text-xs text-muted">42m • Tech Masterclass</div>
+              </div>
+            </div>
+            <div class="lvc-preset-btn" onclick="lvcLoadPreset('mkbhd')">
+              <span class="lvc-preset-icon">🚀</span>
+              <div>
+                <div class="font-bold text-xs text-bright">Tech Review & Showcase</div>
+                <div class="text-xs text-muted">28m • Fast Cuts & B-Roll</div>
+              </div>
+            </div>
+            <div class="lvc-preset-btn" onclick="lvcLoadPreset('gaming')">
+              <span class="lvc-preset-icon">🎮</span>
+              <div>
+                <div class="font-bold text-xs text-bright">Gaming 1v4 Clutch Stream</div>
+                <div class="text-xs text-muted">35m • High-Energy Screams</div>
+              </div>
+            </div>
+            <div class="lvc-preset-btn" onclick="lvcLoadPreset('hormozi')">
+              <span class="lvc-preset-icon">💰</span>
+              <div>
+                <div class="font-bold text-xs text-bright">$100M Masterclass</div>
+                <div class="text-xs text-muted">54m • Alex Hormozi Nuggets</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MASTER VIDEO PLAYER -->
+        <div class="mt-3">
+          <div class="lvc-player-container">
+            <div class="lvc-player-header-bar">
+              <span class="badge badge-red font-mono font-bold" style="font-size:0.65rem">16:9 MASTER FEED</span>
+              <span class="text-xs text-muted font-mono" id="lvcMasterVideoStatus">Ready for Reframe</span>
+            </div>
+            <video id="lvcMasterVideo" class="lvc-master-video" playsinline controls preload="auto"></video>
+          </div>
+
+          <!-- INTERACTIVE MASTER TIMELINE STRIP -->
+          <div class="lvc-timeline-strip-wrap">
+            <div class="flex justify-between items-center mb-1 text-xs">
+              <span class="font-bold text-muted flex items-center gap-1">
+                <span>📊</span> AUDIO FREQUENCY HEATMAP & VIRAL HOOK PINS:
+              </span>
+              <span class="font-mono text-cyan font-bold" id="lvcTimelineCurrentTime">00:00 / 42:18</span>
+            </div>
+            <div class="lvc-timeline-track" id="lvcTimelineTrack" onclick="lvcSeekTimeline(event)">
+              <div class="lvc-timeline-waveform" id="lvcWaveformBars">
+                <!-- Injected waveform bars -->
+              </div>
+              <div class="lvc-timeline-progress" id="lvcTimelineProgress"></div>
+              <div id="lvcTimelineMarkers">
+                <!-- Highlight pin badges -->
+              </div>
+            </div>
+            <div class="flex justify-between items-center mt-2 text-xs text-muted">
+              <span>00:00</span>
+              <span class="text-pink font-semibold">💡 Click any pink marker #1–#5 above to seek to that viral hook</span>
+              <span id="lvcTimelineTotalLabel" class="font-mono">42:18</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLUMN 2: AI REFRAME, HOOK SETTINGS & AUTO-UPLOAD -->
+    <div class="card lvc-studio-card">
+      <div class="card-header flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <span style="font-size:1.25rem">⚙️</span>
+          <div>
+            <h2 class="card-title text-base font-bold">2. Reframe, Captions & Auto-Upload</h2>
+            <div class="card-sub text-xs text-muted">Configure vertical cropping, kinetic subtitles, and hook scoring</div>
+          </div>
+        </div>
+        <span class="badge badge-pink font-mono font-bold">STEP 2</span>
+      </div>
+      <div class="card-body">
+        <!-- REFRAME & ASPECT RATIO -->
+        <div class="form-group mb-3">
+          <label class="form-label text-xs font-bold text-secondary flex items-center justify-between">
+            <span>Aspect Ratio & Reframe Mode</span>
+            <span class="text-muted text-xs">Target Platform: YouTube Shorts / TikTok</span>
+          </label>
+          <div class="lvc-ratio-grid" id="lvcRatioGrid">
+            <div class="lvc-ratio-card active" onclick="lvcSetRatio('9:16',this)">
+              <div class="lvc-ratio-preview-box">
+                <div class="lvc-mini-phone">
+                  <div class="lvc-mini-speaker-dot"></div>
+                </div>
+              </div>
+              <div class="font-bold text-xs text-bright">9:16 Vertical</div>
+              <div class="text-xs text-muted">Smart Center Speaker</div>
+            </div>
+            <div class="lvc-ratio-card" onclick="lvcSetRatio('split',this)">
+              <div class="lvc-ratio-preview-box">
+                <div class="lvc-mini-split">
+                  <div class="lvc-mini-split-top"></div>
+                  <div class="lvc-mini-split-bot"></div>
+                </div>
+              </div>
+              <div class="font-bold text-xs text-bright">9:16 Split Screen</div>
+              <div class="text-xs text-muted">Speaker + B-Roll</div>
+            </div>
+            <div class="lvc-ratio-card" onclick="lvcSetRatio('1:1',this)">
+              <div class="lvc-ratio-preview-box">
+                <div class="lvc-mini-square"></div>
+              </div>
+              <div class="font-bold text-xs text-bright">1:1 Square</div>
+              <div class="text-xs text-muted">Feed / LinkedIn</div>
+            </div>
+            <div class="lvc-ratio-card" onclick="lvcSetRatio('16:9',this)">
+              <div class="lvc-ratio-preview-box">
+                <div class="lvc-mini-landscape"></div>
+              </div>
+              <div class="font-bold text-xs text-bright">16:9 Cinema</div>
+              <div class="text-xs text-muted">Standard Highlights</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KINETIC SUBTITLE STYLE -->
+        <div class="form-group mb-3">
+          <label class="form-label text-xs font-bold text-secondary flex items-center justify-between">
+            <span>Kinetic Subtitles & Word Pops</span>
+            <span class="text-muted text-xs">Rendered at 60 FPS</span>
+          </label>
+          <div class="lvc-sub-style-grid" id="lvcSubGrid">
+            <div class="lvc-sub-style-btn active" onclick="lvcSetSubStyle('hormozi',this)">
+              <div class="lvc-sub-sample hormozi">STOP PAYING!</div>
+              <div class="font-bold text-xs text-bright mt-1">⚡ Hormozi Bold</div>
+              <div class="text-xs text-muted">Yellow / Green Word Pop</div>
+            </div>
+            <div class="lvc-sub-style-btn" onclick="lvcSetSubStyle('mrbeast',this)">
+              <div class="lvc-sub-sample mrbeast">🔥 INSANE HACK!</div>
+              <div class="font-bold text-xs text-bright mt-1">🔥 Beast Dynamic</div>
+              <div class="text-xs text-muted">Bouncy Font + Emojis</div>
+            </div>
+            <div class="lvc-sub-style-btn" onclick="lvcSetSubStyle('clean',this)">
+              <div class="lvc-sub-sample clean">Minimalist Elegance</div>
+              <div class="font-bold text-xs text-bright mt-1">✨ Clean Glass</div>
+              <div class="text-xs text-muted">Frosted Blur Pill</div>
+            </div>
+            <div class="lvc-sub-style-btn" onclick="lvcSetSubStyle('none',this)">
+              <div class="lvc-sub-sample none">No Subtitles</div>
+              <div class="font-bold text-xs text-bright mt-1">🚫 Raw Video</div>
+              <div class="text-xs text-muted">No Burnt Captions</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CLIP QUANTITY & HOOK STRATEGY -->
+        <div class="grid-2 gap-3 mb-3">
+          <div class="form-group mb-0">
+            <label class="form-label text-xs font-bold text-secondary">Number of Viral Clips</label>
+            <select id="lvcClipCount" class="input-field" onchange="lvcUpdateConfig()">
+              <option value="3">3 Clips (Top Highlights)</option>
+              <option value="5" selected>5 Clips (Standard Batch)</option>
+              <option value="8">8 Clips (Full Syndication)</option>
+              <option value="10">10 Clips (Maximum Volume)</option>
+            </select>
+          </div>
+          <div class="form-group mb-0">
+            <label class="form-label text-xs font-bold text-secondary">Target Clip Duration</label>
+            <select id="lvcClipDuration" class="input-field" onchange="lvcUpdateConfig()">
+              <option value="15-30">15–30s (Ultra Viral / TikTok)</option>
+              <option value="30-60" selected>30–60s (Standard Shorts / Reels)</option>
+              <option value="60-90">60–90s (Extended Deep Dives)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group mb-3">
+          <label class="form-label text-xs font-bold text-secondary flex items-center justify-between">
+            <span>Hook Detection & Cut Strategy</span>
+            <span class="text-pink text-xs font-mono font-bold">Anchored -0.4s to spoken opener</span>
+          </label>
+          <select id="lvcHookSensitivity" class="input-field" onchange="lvcUpdateConfig()">
+            <option value="viral_outlier" selected>🔥 Highest Virality Outliers (95+ Hook Score)</option>
+            <option value="pattern_interrupt">⚡ 0:00 Pattern Interrupts & Controversies</option>
+            <option value="value_breakthrough">💡 Pure Actionable Breakthroughs & Hacks</option>
+            <option value="story_climax">🎭 Emotional Climax & High Energy Moments</option>
+            <option value="balanced">⚖️ Balanced Mix (5 Best Diverse Moments)</option>
+          </select>
+        </div>
+
+        <!-- AUTO-UPLOAD TO YOUTUBE SHORTS STATION -->
+        <div class="lvc-upload-station-card mb-3">
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center gap-2">
+              <span class="lvc-yt-icon">▶</span>
+              <div>
+                <span class="text-xs font-bold text-bright block">AUTO-UPLOAD TO YOUTUBE SHORTS</span>
+                <span class="text-xs text-muted" style="font-size:0.68rem">Direct publishing with high-CTR tags, description & schedule</span>
+              </div>
+            </div>
+            <label class="lvc-switch-label">
+              <input type="checkbox" id="lvcAutoUploadToggle" checked />
+              <span class="lvc-switch-slider"></span>
+            </label>
+          </div>
+          <div class="grid-2 gap-2 text-xs">
+            <div>
+              <label class="form-label text-muted" style="font-size:0.7rem;margin-bottom:3px">Publish Cadence</label>
+              <select id="lvcAutoUploadCadence" class="input-field" style="padding:6px 10px;font-size:0.76rem">
+                <option value="schedule_daily" selected>📅 Smart Daily 6:00 PM (1 Short/Day)</option>
+                <option value="immediate">⚡ Immediate Live Publish (Public)</option>
+                <option value="unlisted">🔗 Immediate Staged (Unlisted Review)</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label text-muted" style="font-size:0.7rem;margin-bottom:3px">Destination</label>
+              <select id="lvcAutoUploadChannel" class="input-field" style="padding:6px 10px;font-size:0.76rem">
+                <option value="connected" selected>Connected YouTube Channel</option>
+                <option value="vault">Staging Queue / Vault</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- BIG MASTER ACTION CTA BUTTON -->
+        <button class="lvc-master-cta-btn" id="lvcGenBtn" onclick="lvcStartAutoClip()">
+          <span style="font-size:1.25rem">⚡</span>
+          <span>Find Viral Hooks, Auto-Cut & Auto-Upload Best Moments</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REAL-TIME GENERATION PROGRESS BOX -->
+  <div id="lvcProgressBox" class="lvc-progress-box" style="display:none">
+    <div class="flex justify-between items-center mb-2">
+      <div class="flex items-center gap-2">
+        <span class="status-dot pulse" style="background:#ec4899"></span>
+        <span class="font-bold text-bright" id="lvcProgressStepTitle">Analyzing Audio Spectrum & Speech Peaks...</span>
+      </div>
+      <span class="font-mono text-xs font-bold text-pink" id="lvcProgressPercent">0%</span>
+    </div>
+    <div class="lvc-progress-bar-wrap">
+      <div class="lvc-progress-bar-fill" id="lvcProgressBarFill"></div>
+    </div>
+    <div class="flex gap-2 wrap mt-3">
+      <span class="lvc-step-pill active" id="lvcStep1">1. Audio Analysis</span>
+      <span class="lvc-step-pill" id="lvcStep2">2. Viral Hook Detection</span>
+      <span class="lvc-step-pill" id="lvcStep3">3. 9:16 Vertical Reframe</span>
+      <span class="lvc-step-pill" id="lvcStep4">4. Kinetic Subtitles</span>
+      <span class="lvc-step-pill" id="lvcStep5">5. Assembly & Ready</span>
+    </div>
+  </div>
+
+  <!-- GENERATED CLIPS DASHBOARD -->
+  <div id="lvcClipsContainer" style="display:none">
+    <div class="lvc-results-bar mb-4">
+      <div class="flex items-center gap-3">
+        <div class="lvc-results-badge">
+          <span>🎉</span>
+        </div>
+        <div>
+          <div class="font-bold text-bright text-base" id="lvcReadyCountText">5 High-Retention Clips Ready for Export & Direct Upload</div>
+          <div class="text-xs text-muted">Cut on 0:00 hooks • 60 FPS kinetic subtitles • Instant MP4 download & 1-click YouTube publish</div>
+        </div>
+      </div>
+      <div class="flex gap-2 wrap">
+        <button class="btn-xs btn-outline" onclick="lvcCopyAllClipsVoiceover()">🎙️ Copy Scripts</button>
+        <button class="btn-xs btn-outline" onclick="lvcExportBatchScript()">💾 .BAT Script</button>
+        <button class="btn-xs btn-primary" onclick="lvcDownloadAllClips()">📥 Batch Download All MP4</button>
+        <button class="btn-xs btn-green" onclick="lvcAutoUploadAllClips()">🚀 Auto-Upload All Best Moments</button>
+      </div>
+    </div>
+
+    <!-- CLIPS GRID INJECTED BY JS -->
+    <div class="lvc-clips-grid" id="lvcClipsGrid">
+      <!-- Generated cards injected dynamically -->
+    </div>
+  </div>
+
+  <!-- PLACEHOLDER WHEN EMPTY -->
+  <div id="lvcPlaceholder" class="lvc-empty-hero">
+    <div class="lvc-empty-card">
+      <div class="lvc-empty-icon">✂️</div>
+      <h3 class="font-black text-xl text-bright mb-2">Ready to Turn Long Videos into Viral Vertical Clips</h3>
+      <p class="text-sm text-secondary mb-4" style="max-width:540px;margin:0 auto 20px;line-height:1.6">
+        Upload an MP4, paste a YouTube link, or test with our curated showcase presets. The AI isolates high-retention moments, reformats to 9:16 vertical, and allows instant MP4 download or direct YouTube Shorts upload.
+      </p>
+      <div class="flex gap-3 justify-center items-center wrap">
+        <button class="btn-primary" onclick="lvcLoadPreset('podcast')">🎙️ Try with AI Podcast Sample</button>
+        <button class="btn-outline" onclick="document.getElementById('lvcFileInput').click()">📁 Upload Local Video</button>
       </div>
     </div>
   </div>
